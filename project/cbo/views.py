@@ -36,7 +36,7 @@ import json
 from django.conf import settings
 
 
-# @method_decorator(login_required(login_url='/login'), name='dispatch')
+@method_decorator(login_required(login_url='/login'), name='dispatch')
 class UploadFilesView(View):
     template_name = 'create/send_files.html'
 
@@ -120,9 +120,9 @@ class SearchView(View):
             user_occupations = request.user.occupations.all()
 
             procedures_list = Procedure.objects.filter(
-                Q(name__icontains=query) &
-                Q(procedures_has_occupation__occupation__in=user_occupations)
-            ).select_related()
+                (Q(name__icontains=query) | Q(procedure_code__icontains=query))
+                & Q(procedures_has_occupation__occupation__in=user_occupations)
+            )
 
             if record_name and record_name != 'all':
                 procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
@@ -232,9 +232,9 @@ class ProcedureListView(ListView):
         record_name = request.GET.get('record_name', '')
 
         procedures_list = Procedure.objects.filter(
-                Q(name__icontains=query) &
-                Q(procedures_has_occupation__occupation__in=user_occupations)
-            ).select_related()
+            (Q(name__icontains=query) | Q(procedure_code__icontains=query))
+            & Q(procedures_has_occupation__occupation__in=user_occupations)
+        )
 
         if record_name != 'all' and record_name:
             procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
@@ -338,9 +338,9 @@ class ProcedureLoadMoreView(View):
 
         if query:
             procedures_list = Procedure.objects.filter(
-                Q(name__icontains=query) &
-                Q(procedures_has_occupation__occupation__in=user_occupations)
-            ).select_related().order_by('name')
+                (Q(name__icontains=query) | Q(procedure_code__icontains=query))
+                & Q(procedures_has_occupation__occupation__in=user_occupations)
+            ).order_by('name')
 
             if record_name != 'all':
                 procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
@@ -526,7 +526,9 @@ class FavoriteProcedureListView(View):
 
         query = request.GET.get('q')
         if query:
-            procedures_list = procedures_list.filter(name__icontains=query)
+            procedures_list = procedures_list.filter(
+                (Q(name__icontains=query) | Q(procedure_code__icontains=query))
+            )
 
         page = request.GET.get('page', 1)
         paginator = Paginator(procedures_list, self.procedures_per_page)
