@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block title %}
+
+Sem B.O
+
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'front/medical_record_style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap">
+
+{% endblock %}
+
+{% block content %}
+
+<section class="content-page">
+    {% include 'parciais/menu.html' %}
+
+    <div class="container-medical-record">
+        <h1>Sistema de Prontuários</h1>
+        <div class="buttons">
+            <div class="w-full focus:outline-none bg-gray-100" id="createNewRecordBtn">
+                <h4>Criar <b>Novo Prontuário</b></h4>
+            </div>
+            <div class="w-full focus:outline-none bg-gray-100" id="savedRecordsBtn">
+                <h4>Prontuários <b>Salvos</b></h4>
+            </div>
+        </div>
+    </div>
+    
+    {% include 'parciais/menu_inferior.html' %}
+</section>
+
+<div class="content-principal folder-modal">
+    <div id="formModal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6">
+            <div class="sup-folder flex justify-between items-center mb-4">
+                <h2 class="text-xl ml-2 title-modal-folders">Escolha um formulário</h2>
+                <span class="close text-gray-600 cursor-pointer">&times;</span>
+            </div>
+            <form id="formSelection" method="post" action="/submit">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="patientName" class="block text-gray-700">Nome do Paciente:</label>
+                    <input type="text" id="patientName" name="patientName" required class="mt-1 p-2 w-full border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="formType" class="block text-gray-700">Tipo de Formulário:</label>
+                    <select id="formType" name="formType" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none filter-results">
+                        <option value="resumo_alta">Resumo de Alta</option>
+                        <option value="laudo_medico_procedimento_hospitalar">Laudo Médico para realização de procedimento hospitalar</option>
+                        <!-- Adicione mais opções conforme necessário -->
+                    </select>
+                </div>
+                <button type="button" id="chooseFormBtn" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Enviar</button>
+            </form>
+        </div>
+    </div>
+    <div class="blur hidden"></div>
+</div>
+
+<div id="specificFormModal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="modal-content-form w-11/12 md:w-2/3 mx-auto rounded-lg p-6">
+        <div class="sup-folder flex justify-between items-center mb-4">
+            <div></div>
+            <img src="{% static 'assets/logo.png' %}" alt="" class="title_logo">
+            <span class="close text-gray-600 cursor-pointer">&times;</span>
+        </div>
+        <form id="specificForm" method="post" action="/submit">
+            {% csrf_token %}
+            <input type="hidden" id="hiddenPatientName" name="patientName">
+            <input type="hidden" id="hiddenFormType" name="formType">
+            <div id="formFields"></div>
+            <button type="button" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Enviar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById("createNewRecordBtn").onclick = function() {
+        document.getElementById("formModal").classList.remove("hidden");
+    }
+    
+    document.getElementsByClassName("close")[0].onclick = function() {
+        document.getElementById("formModal").classList.add("hidden");
+    }
+
+    document.getElementsByClassName("close")[1].onclick = function() {
+        document.getElementById("specificFormModal").classList.add("hidden");
+        document.getElementById("formModal").classList.add("hidden");
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == document.getElementById("formModal")) {
+            document.getElementById("formModal").classList.add("hidden");
+        }
+    }
+
+    document.getElementById("chooseFormBtn").onclick = function() {
+        const patientName = document.getElementById("patientName").value;
+        const formType = document.getElementById("formType").value;
+
+        document.getElementById("hiddenPatientName").value = patientName;
+        document.getElementById("hiddenFormType").value = formType;
+
+        const formFields = document.getElementById("formFields");
+        formFields.innerHTML = "";
+        if (formType === "resumo_alta") {
+            formFields.innerHTML = `
+                <div class="mb-4">
+                    <label for="clinica" class="block text-gray-700">Clínica:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="clinica" name="clinica" placeholder="Digite e Clínica" required>
+                </div>
+                <div class="mb-4">
+                    <label for="nome" class="block text-gray-700">Nome:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="nome" name="nome" value="${patientName}" placeholder="Digite o nome do paciente" required>
+                </div>
+                <div class="mb-4">
+                    <label for="prontuario" class="block text-gray-700">Prontuário:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="prontuario" name="prontuario" placeholder="Digite o Prontuário" required>
+                </div>
+                <div class="mb-4">
+                    <label for="idade" class="block text-gray-700">Idade:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="number" id="idade" name="idade" placeholder="Digite a idade do paciente" required>
+                </div>
+                <div class="mb-4">
+                    <label for="motivo_internacao" class="block text-gray-700">Motivo da Internação:</label>
+                    <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="motivo_internacao" name="motivo_internacao" placeholder="Digite o motivo de internação" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="resumo_internacao" class="block text-gray-700">Resumo da Internação:</label>
+                    <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="resumo_internacao" name="resumo_internacao" placeholder="Digite o resumo de internação" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="cirurgia" class="block text-gray-700">Cirurgia:</label>
+                    <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="cirurgia" name="cirurgia" placeholder="Digite a cirurgia" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="resultados_exames" class="block text-gray-700">Resultados dos Principais Exames:</label>
+                    <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="resultados_exames" name="resultados_exames" placeholder="Digite os resultados dos exames" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="medicacoes_recomendacoes" class="block text-gray-700">Medicações e Recomendações:</label>
+                    <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="medicacoes_recomendacoes" name="medicacoes_recomendacoes" placeholder="Digite as medicações e recomendações " required></textarea>
+                    <select id="condicao_alta" name="condicao_alta" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" required>
+                        <option value="Tomografia">Tomografia</option>
+                        <option value="Hemodiálise">Hemodiálise</option>
+                        <option value="Diálise_Peritoneal">Diálise Peritoneal</option>
+                        <option value="Estudos_Hemodinâmicos">Estudos Hemodinâmicos</option>
+                        <option value="Quimioterapia">Quimioterapia</option>
+                        <option value="Colonoscopia">Colonoscopia</option>
+                        <option value="Angiografia">Angiografia</option>
+                        <option value="Nutrição_Parenteral">Nutrição Parenteral</option>
+                        <option value="Sangue_e_Hemoderivados">Sangue e Hemoderivados</option>
+                        <option value="Albumina">Albumina</option>
+                        <option value="Ciclosporina">Ciclosporina</option>
+                        <option value="Estreptoquinase">Estreptoquinase</option>
+                        <option value="Fatores_de_coagulacão">Fatores de coagulação</option>
+                        <option value="Monitorizacão_de_Pressao_Intracraniana">Monitorização de Pressão Intracraniana</option>
+                        <option value="Cirurgia_Multipla">Cirurgia Múltipla</option>
+                        <option value="UTI">UTI</option>
+                        <option value="ortese/_e_Protese">Órtese e Prótese</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="diagnostico_alta" class="block text-gray-700">Diagnóstico da Alta:</label>
+                    <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="diagnostico_alta" name="diagnostico_alta" placeholder="Digite o diagnóstico da alta" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="cid10" class="block text-gray-700">CID-10:</label>
+                    {{ form.cid_10 }}
+                </div>
+                <div class="mb-4">
+                    <label for="procedimento" class="block text-gray-700">Procedimento:</label>
+                    {{ form.procedure }}
+                </div>
+                <div class="mb-4">
+                    <label for="condicao_alta" class="block text-gray-700">Condição da Alta:</label>
+                    <select id="condicao_alta" name="condicao_alta" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" required>
+                        <option value="Curado">Curado</option>
+                        <option value="Melhorado">Melhorado</option>
+                        <option value="Inalterado">Inalterado</option>
+                        <option value="Óbito">Óbito</option>
+                        <option value="Outra">Outra</option>
+                        <option value="A Pedido">A Pedido</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="encaminhamento" class="block text-gray-700">Encaminhado ao Ambulatório:</label>
+                    <select id="encaminhamento" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" name="encaminhamento" required>
+                        <option value="Do Hospital Federal da Lagoa">Do Hospital Federal da Lagoa</option>
+                        <option value="De Outra Unidade do SUS">De Outra Unidade do SUS</option>
+                    </select>
+                </div>
+            `;
+        } else if (formType === "laudo_medico_procedimento_hospitalar") {
+            formFields.innerHTML = `
+                <div class="mb-4">
+                    <label for="unidade" class="block text-gray-700">Unidade:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="unidade" name="unidade" placeholder="Digite a Unidade" required>
+                </div>
+                <div class="mb-4">
+                    <label for="cnes" class="block text-gray-700">CNES:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="number" id="cnes" name="cnes" placeholder="Digite o CNES" required>
+                </div>
+                <div class="tabs_form"><h2>Identificação:</h2></div>
+                <div class="mb-4">
+                    <label for="nome" class="block text-gray-700">Nome:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="nome" value="${patientName}" name="nome" placeholder="Digite o Nome" required>
+                </div>
+                <div class="mb-4">
+                    <label for="prontuario" class="block text-gray-700">Prontuário:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="prontuario" name="prontuario" placeholder="Digite o Prontuário" required>
+                </div>
+                <div class="mb-4">
+                    <label for="cns" class="block text-gray-700">CNS:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="cns" name="cns" placeholder="Digite o CNS" required>
+                </div>
+                <div class="mb-4">
+                    <label for="endereco" class="block text-gray-700">Endereço:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="endereco" name="endereco" placeholder="Digite o Endereço" required>
+                </div>
+                <div class="mb-4">
+                    <label for="numero" class="block text-gray-700">Número:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="numero" name="numero" placeholder="Digite o Número" required>
+                </div>
+                <div class="mb-4">
+                    <label for="complemento" class="block text-gray-700">Complemento:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="complemento" name="complemento" placeholder="Digite o complemento" required>
+                </div>
+                <div class="mb-4">
+                    <label for="bairro" class="block text-gray-700">Bairro:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="bairro" name="bairro" placeholder="Digite o Bairro" required>
+                </div>
+                <div class="mb-4">
+                    <label for="municipio" class="block text-gray-700">Município:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="municipio" name="municipio" placeholder="Digite o Município" required>
+                </div>
+                <div class="mb-4">
+                    <label for="uf" class="block text-gray-700">UF:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="uf" name="uf" placeholder="Digite o UF" required>
+                </div>
+                <div class="mb-4">
+                    <label for="cep" class="block text-gray-700">CEP:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="cep" name="cep" placeholder="Digite o CEP" required>
+                </div>
+                <div class="mb-4">
+                    <label for="telefone" class="block text-gray-700">Telefone (com DDD):</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="telefone" name="telefone" placeholder="Digite o Telefone com DDD" required>
+                </div>
+                <div class="mb-4">
+                    <label for="responsavel" class="block text-gray-700">Nome do Responsável (para menores de idade):</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="responsavel" name="responsavel" placeholder="Digite o Nome do Responsável" required>
+                </div>
+                <div class="mb-4">
+                    <label for="parentesco" class="block text-gray-700">Parentesco:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="parentesco" name="parentesco" placeholder="Digite o Parentesco" required>
+                </div>
+                <div class="tabs_form"><h2>Origem do Paciente:</h2></div>
+                <div class="mb-4">
+                    <label for="origem" class="block text-gray-700">Origem do Paciente:</label>
+                    <select id="origem" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" name="origem" placeholder="Digite os resultados dos exames" required>
+                        <option value="ambulatorio_externa">Ambulatório Externa</option>
+                        <option value="transferido">Transferido</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="numero_autorizacao" class="block text-gray-700">Número de autorização da regulação:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="numero_autorizacao" name="numero_autorizacao" placeholder="Digite o Número de Autorização da Regulação" required>
+                </div>
+                <div class="mb-4">
+                    <label for="unidade_origem" class="block text-gray-700">Unidade de Origem:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="unidade_origem" name="unidade_origem" placeholder="Digite a Unidade de Origem" required>
+                </div>
+                <div class="tabs_form"><h2>Laudo Técnico:</h2></div>
+                <div class="mb-4">
+                    <label for="condicoes" class="block text-gray-700">Condições que justifiquem a internação:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="tel" id="condicoes" name="condicoes" placeholder="Digite as condições que justifiquem a internação" required>
+                </div>
+                <div class="mb-4">
+                    <label for="diagnostico" class="block text-gray-700">Diagnóstico(s) clínico(s):</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="diagnostico" name="diagnostico" placeholder="Digite os Diagnóstico(s) Clínico(s)" required>
+                </div>
+                <div class="mb-4">
+                    <label for="exames" class="block text-gray-700">Principais exames realizados que justifiquem a internação:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="exames" name="exames" placeholder="Digite os principais exames realizados que justifiquem a internação" required>
+                </div>
+                <div class="mb-4">
+                    <label for="regime_internacao" class="block text-gray-700">Regime de Internação</label>
+                    <select id="regime_internacao" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" name="regime_internacao" placeholder="Digite os resultados dos exames" required>
+                        <option value="ambulatorio_externa">Hospitalar</option>
+                        <option value="transferido">Hospital Dia</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="procedimento_internacao" class="block text-gray-700">Procedimento</label>
+                    <select id="procedimento_internacao" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" name="procedimento_internacao" placeholder="Digite os resultados dos exames" required>
+                        <option value="ambulatorio_externa">Cirúrgico</option>
+                        <option value="transferido">Clínico</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="prev_alta" class="block text-gray-700">Prev. Alta:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="date" id="prev_alta" name="prev_alta" placeholder="Digite a Prev. Alta" required>
+                </div>
+                <div class="mb-4">
+                    <label for="clinica_solicitante" class="block text-gray-700">Clínica Solicitante:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="clinica_solicitante" name="clinica_solicitante" placeholder="Digite a Clínica Solicitante" required>
+                </div>
+                <div class="mb-4">
+                    <label for="leito" class="block text-gray-700">Leito:</label>
+                    <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="text" id="leito" name="leito" placeholder="Digite o Leito" required>
+                </div>
+                <div class="mb-4">
+                    <label for="cid_inicial" class="block text-gray-700">CID do diagnóstico inicial:</label>
+                    {{ form.cid_initial }}
+                </div>
+                <div class="mb-4">
+                    <label for="cid_secundário" class="block text-gray-700">CID Secundário:</label>
+                    {{ form.cid_secundary }}
+                </div>
+                <div class="mb-4">
+                    <label for="procedimento_principal" class="block text-gray-700">Procedimento Principal:</label>
+                    {{ form.procedure_principal }}
+                </div>
+                <div class="mb-4">
+                    <label for="procedimento_secundario" class="block text-gray-700">Procedimento Secundário:</label>
+                    {{ form.procedure_secundary }}
+                </div>
+                <div class="mb-4">
+                    <label for="risco_morte" class="block text-gray-700">Risco de morte? (paciente sem documento):</label>
+                    <select id="risco_morte" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" name="risco_morte" required>
+                        <option value="sim">Sim</option>
+                        <option value="nao">Não</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        $('#cid_10').select2({
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#procedure').select2({
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#cid_initial').select2({
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#cid_secundary').select2({
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#procedure_principal').select2({
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#procedure_secundary').select2({
+            allowClear: true,
+            width: '100%'
+        });
+
+        flatpickr("#data_alta", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            placeholder: "Data de Alta",
+            onChange: function(selectedDates, dateStr, instance) {
+                instance.element.value = dateStr;
+            }
+        });
+
+        flatpickr("#internacao", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            placeholder: "Data de Internação",
+            onChange: function(selectedDates, dateStr, instance) {
+                instance.element.value = dateStr;
+            }
+        });
+
+        flatpickr("#prev_alta", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            placeholder: "Data de Prev. Alta",
+            onChange: function(selectedDates, dateStr, instance) {
+                instance.element.value = dateStr;
+            }
+        });
+
+        $(document).ready(function() {
+            $('.record-selects').select2({
+                ajax: {
+                    url: function () {
+                        return $(this).data('url');
+                    },
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        return {
+                            results: data.results,
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+        });
+        
+        const formModal = document.getElementById("formModal");
+        const specificFormModal = document.getElementById("specificFormModal");
+
+        if (formModal && specificFormModal) {
+            console.log('teste')
+            formModal.classList.add("hidden");
+            specificFormModal.classList.remove("hidden");
+        }
+    }
+</script>
+
+{% endblock %}

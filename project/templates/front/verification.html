@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col justify-center items-center">
+        <div class="bg-white p-8 rounded shadow-md max-w-md w-full">
+            <h1 class="text-2xl font-bold text-center mb-4">Verificação de E-mail Concluída</h1>
+            <p class="text-gray-700 text-center">O seu e-mail foi verificado com sucesso. Agora você pode fazer login na sua conta.</p>
+            <a href="{% url 'login' %}" class="block bg-blue-500 hover:bg-blue-600 text-white font-bold text-center mt-4 py-2 px-4 rounded">Fazer Login</a>
+        </div>
+    </div>
+</body>
+
+</html>

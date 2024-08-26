@@ -1,0 +1,309 @@
+{%  load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sem B.O</title>
+    <link rel="stylesheet" href="{% static 'front/register_style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+</head>
+
+<body>
+
+    <div class="loading-overlay" id="loadingOverlaySmart">
+        <div class="loading-content">
+            <div class="loading-spinner" style="margin-left: 60px !important;"></div>
+            <p>Processando o cadastro...</p>
+        </div>
+    </div>
+
+    <div class="login rounded">
+        <div class="logo flex justify-center">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'assets/logo.png' %}">
+            </a>
+        </div>
+        <!-- <h2 class="mb-2 text-left">Registre-se</h2> -->
+
+        <form class="form-register" method="post">
+            {% csrf_token %}
+            <div>
+                <label for="id_email" class="form-label">Seu Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_first_name" class="form-label">Nome</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.first_name.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_last_name" class="form-label">Sobrenome</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.last_name.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_password1" class="form-label">Senha</label>
+                <div class="relative">
+                    {{ form.password1 }}
+                    <span toggle="#id_password1" class="material-symbols-outlined toggle-password absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer eye-icon">
+                        visibility
+                    </span>
+                </div>
+                <div id="password1-requirements" class="password-requirements" style="display: none;">
+                    <p class="text-sm py-1 px-4 mb-2 mt-2 rounded bg-blue-100 text-blue-800">Sua senha precisa ter pelo menos 8 caracteres, sendo números e letras. Ela não deve ser muito semelhante ao seu nome.</p>
+                </div>
+                {% if form.password1.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.password1.errors }}</div>
+                {% endif %}              
+            </div>
+        
+            <div>
+                <label for="id_password2" class="form-label">Confirmar Senha</label>
+                <div class="relative">
+                    {{ form.password2 }}
+                    <span toggle="#id_password2" class="material-symbols-outlined toggle-password absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer eye-icon">
+                        visibility
+                    </span>
+                </div>
+                <div id="password2-error" class="ml-2 mt-1 text-sm text-red-600" style="display: none;"></div>
+                {% if form.password2.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_CPF" class="form-label">CPF</label>
+                {{ form.CPF }}
+                {% if form.CPF.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.CPF.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_telephone" class="form-label">Telefone</label>
+                {{ form.telephone }}
+                {% if form.telephone.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.telephone.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_date_of_birth" class="form-label">Data de Nascimento</label>
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.date_of_birth.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="id_occupational_registration" class="form-label">Registro Ocupacional</label>
+                {{ form.occupational_registration }}
+                {% if form.occupational_registration.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.occupational_registration.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <div>
+                <label for="occupation-select" class="form-label">Ocupação</label>
+                {{ form.occupation }}
+                {% if form.occupation.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.occupation.errors }}</div>
+                {% endif %}
+                <div id="occupation-error" class="ml-2 mt-1 text-sm text-red-600" style="display: none;"></div>
+            </div>
+
+            <div>
+                <label for="id_plan" class="form-label">Plano</label>
+                {{ form.plan }}
+                {% if form.plan.errors %}
+                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.plan.errors }}</div>
+                {% endif %}
+            </div>
+        
+            <button id="save-button" class="button_login w-full py-2 px-4 rounded-md">Registrar</button>
+        </form>
+        <div class="footer-register">
+            <div class="register flex justify-center">
+                <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="plans_info" hidden>{{ plans_json }}</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.plan-select').select2({
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('.occupation-select').select2({
+                allowClear: true,
+                width: '100%'
+            });
+
+            function validateOccupations() {
+                let selectedPlan = $('.plan-select option:selected').text();
+                let occupations = $('.occupation-select').val();
+                let OccupationError = $('#occupation-error');
+
+                let maxOccupations = 0;
+
+                if (selectedPlan === 'Plano Essencial') {
+                    maxOccupations = 1;
+                } else if (selectedPlan === 'Plano Essencial +') {
+                    maxOccupations = 3;
+                }
+
+                if (occupations && occupations.length > maxOccupations) {
+                    OccupationError.text(`O ${selectedPlan} permite selecionar até ${maxOccupations} ocupação(ões).`).fadeIn();
+                    return false;
+                } else {
+                    OccupationError.hide();
+                    return true;
+                }
+            }
+
+            validateOccupations();
+
+            $('.plan-select').on('change', function() {
+                validateOccupations();
+                $('.occupation-select').val(null).trigger('change');
+            });
+
+            $('.occupation-select').on('select2:select select2:unselect', function() {
+                validateOccupations();
+            });
+
+            $('.occupation-select').on('change', function() {
+                validateOccupations();
+            });
+
+            $('form').on('submit', function(e) {
+                if (!validateOccupations()) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function(){
+            $('#id_telephone').mask('(00) 00000-0000');
+            $('#id_CPF').mask('000.000.000-00', {reverse: true});
+        });
+    </script>    
+
+    <script>
+        flatpickr("#id_date_of_birth", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            placeholder: "Data de nascimento",
+            onChange: function(selectedDates, dateStr, instance) {
+                instance.element.value = dateStr;
+            }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#loadingOverlaySmart').hide();
+
+            $('#save-button').on('submit', function () {
+                $('#loadingOverlaySmart').show();
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#id_password2').on('change', function () {
+                let password1 = $('#id_password1').val();
+                let password2 = $(this).val();
+                let firstName = $('#id_first_name').val();
+                let password2Error = $('#password2-error');
+
+                let errors = [];
+
+                if (password1 !== password2) {
+                    errors.push('As senhas não correspondem.');
+                }
+
+                if (firstName !== '') {
+                    if (password2.toLowerCase().includes(firstName.toLowerCase())) {
+                        errors.push('A senha não deve ser muito semelhante ao seu nome.');
+                    }
+                }
+
+                if (password2.length < 8) {
+                    errors.push('A senha precisa ter pelo menos 8 caracteres.');
+                } else if (/^\d+$/.test(password2)) {
+                    errors.push('A senha não pode ser inteiramente numérica.');
+                }
+
+                if (errors.length > 0) {
+                    password2Error.text(errors.join(' ')).fadeIn();
+                } else {
+                    password2Error.hide();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#id_password1').on('focus', function() {
+                $('#password1-requirements').fadeIn();
+            });
+
+            $('#id_password1').on('focusout', function() {
+                $('#password1-requirements').fadeOut();
+            });
+        });
+    </script>
+
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(item => {
+            item.addEventListener('click', function() {
+                let input = document.querySelector(this.getAttribute('toggle'));
+                if (input.getAttribute('type') === 'password') {
+                    input.setAttribute('type', 'text');
+                    this.textContent = 'visibility_off';
+                } else {
+                    input.setAttribute('type', 'password');
+                    this.textContent = 'visibility';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

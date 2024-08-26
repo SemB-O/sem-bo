@@ -1,0 +1,2 @@
+from .s3_midia_storage import S3MediaStorage
+from .s3_static_storage import S3StaticStorage

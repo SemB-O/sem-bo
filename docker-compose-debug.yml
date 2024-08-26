@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  sem-bo-database: 
+    image: postgres:latest 
+    container_name: sem-bo-database 
+    ports:
+      - "5432:${DB_PORT}"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    restart: always
+    networks:
+      - sem-bo-network
+
+  web-project:
+    hostname: "${HOSTNAME}"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /usr/src/project
+    command: [
+        "sh",
+        "-c", 
+        "pip install debugpy -t /tmp && 
+        python /tmp/debugpy --wait-for-client --listen 0.0.0.0:3000
+        ./manage.py runserver ${HOSTNAME}:${PORT}"
+    ]
+    volumes:
+      - ./project/:/usr/src/project
+    ports:
+      - "${PORT}:${PORT}"
+      - "3000:3000"
+    environment:
+      - PYTHONUNBUFFERED=True
+      - OAUTHLIB_INSECURE_TRANSPORT=False
+      - DEBUG=true
+    env_file:
+      .env
+    depends_on:
+      - sem-bo-database
+    networks:
+      - sem-bo-network
+
+networks:
+    sem-bo-network:
+        external: true

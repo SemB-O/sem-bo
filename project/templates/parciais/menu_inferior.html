@@ -1,0 +1,70 @@
+{%  load static %}
+
+{% url 'home' as home_url %}
+{% url 'procedure_list' as procedure_list_url %}
+{% url 'procedure_favorite' as procedure_favorite_url %}
+{% url 'profile' as profile_url %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'front/menu_inferior_style.css' %}">
+
+<div class="devices items-center">
+    <div class="title text-xl font-semibold mt-6 text-center">
+        Mais <b> Informações</b>
+    </div>
+    <div class="list"> 
+        <a href="{% url 'home' %}"><div class="item rounded-md bg-white shadow-md text-center">
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined {% if request.path == home_url %}checked-page{% endif %}">
+                home
+            </span>
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2 {% if request.path == home_url %}checked-page{% endif %}">Home</span>
+        </div></a>
+        <a href="{% url 'procedure_list' %}"><div class="item rounded-md bg-white shadow-md text-center">
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined {% if request.path == procedure_list_url %}checked-page{% endif %}">
+                medical_services
+            </span>
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2 {% if request.path == procedure_list_url %}checked-page{% endif %}">Procedimentos</span>
+        </div></a>
+        <a href="{% url 'medical_record' %}"><div class="item rounded-md bg-white shadow-md text-center">
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined">
+                list_alt
+            </span>
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2">Prontuários</span>
+        </div></a>
+        <a href="{% url 'procedure_favorite' %}">
+            <div class="item rounded-md bg-white shadow-md text-center">
+                <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined {% if request.path == procedure_favorite_url %}checked-page{% endif %}">
+                    star
+                </span>
+                <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2 {% if request.path == procedure_favorite_url %}checked-page{% endif %}">Favoritos</span>
+            </div>
+        </a>
+        <a href="{% url 'profile' %}"><div class="item rounded-md bg-white shadow-md text-center">
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined {% if request.path == profile_url %}checked-page{% endif %}">
+                person
+            </span>
+            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2 {% if request.path == profile_url %}checked-page{% endif %}">Meu Perfil</span> 
+        </div></a> 
+    </div>
+</div>
+
+<script>
+    function hoverEffect(element) {
+        var item = element.parentElement;
+        var spans = item.getElementsByTagName("span");
+
+        for (var i = 0; i < spans.length; i++) {
+            spans[i].style.color = "#2c3031";
+            spans[i].style.transition = "0.3s";
+        }
+    }
+
+    function restoreColor(element) {
+        var item = element.parentElement;
+        var spans = item.getElementsByTagName("span");
+
+        for (var i = 0; i < spans.length; i++) {
+            spans[i].style.color = "";
+            spans[i].style.transition = "0.3s";
+        }
+    }
+</script>

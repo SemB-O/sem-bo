@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block title %}
+
+Sem B.O
+
+{% endblock %}
+
+
+{% block head %}
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+
+    <div id="chat-container" class="w-full mx-auto bg-white p-6 rounded-md">
+        <div id="chat-log" class="mb-4 h-40 overflow-y-auto"></div>
+        <div class="flex">
+            <input type="text" id="user-input" class="flex-1 px-2 py-1 rounded-l-md border-t border-b border-l border-gray-300 focus:outline-none w-full p-2.5 opacity-90" placeholder="Digite sua mensagem">
+            <button onclick="sendMessage()" class="px-4 py-1 bg-blue-500 text-white rounded-r-md hover:bg-blue-600">Enviar</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        const apiKey = 'sua_chave_de_api_aqui';
+        const apiUrl = 'https://chatgpt-api.shn.hk/v1';
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            
+            const data = {
+                messages: [{ role: 'system', content: 'user' }, { role: 'user', content: userInput }],
+            };
+
+        $.ajax({
+                type: 'POST',
+                url: apiUrl,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+                data: JSON.stringify(data),
+                success: function(response) {
+                    displayMessage(response.choices[0].message.content, 'bot');
+                },
+                error: function(error) {
+                    console.error('Erro na solicitação:', error);
+                }
+            });
+        }
+
+        function displayMessage(message, role) {
+            const chatLog = document.getElementById('chat-log');
+            chatLog.innerHTML += `<div class="${role}-message">${message}</div>`;
+        }
+
+    </script>
+
+{% endblock %}

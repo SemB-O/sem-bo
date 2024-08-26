@@ -1,0 +1,154 @@
+.content-profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+.profile {
+    width: 65%;
+    align-self: center;
+}
+
+.profile div {
+    display: flex;
+}
+
+.profile div div {
+    border-radius: 0.5rem;
+    height: 3.5rem;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.profile-tabs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-top a {
+    display: flex;
+    align-items: center;
+}
+
+.menu-top a img {
+    width: 11rem;
+}
+
+.grid {
+    display: block !important;
+}
+
+.profile-form {
+    display: none;
+}
+
+.profile-form form {
+    margin: 2rem 0;
+}
+
+.profile-form input {
+    background-color: #F2F2F7;
+}
+
+.info_person h4:first-child {
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+.info_person h4:last-child {
+    font-size: 0.9rem;
+    color: #888e97;
+}
+
+.logout {
+    background-color: rgb(71, 71, 71);
+    color: white;
+}
+
+.logout:hover {
+    background-color: rgb(109, 109, 109) !important; 
+}
+
+.chosen-container {
+    width: 100% !important;
+}
+
+.chosen-container-single .chosen-single{
+    height: 40px !important;
+    border-radius: 0.375rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: none !important;
+    background-color: #F2F2F7 !important;
+}
+
+.chosen-container .chosen-results {
+    max-height: 200px !important;
+    background-color: white;
+    z-index: 999 !important;
+    margin: 0 !important;
+}
+
+.chosen-single span {
+    display: flex;
+    align-items: center;
+    padding-top: 0.5rem;
+    padding-left: 0.2rem;
+    color: #161616;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    margin-left: 0.2rem;
+}
+
+.chosen-single div {
+    padding-top: 0.5rem;
+    padding-right: 0.2rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #9CA4B1;
+}
+
+.fields_edit {
+    margin: 2.5rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.save-edit {
+    margin-top: 1.2rem;
+}
+
+.photo_profile {
+    width: 13rem;
+}
+
+.photo_profile img {
+    border-radius: 50%;
+}
+
+.info_profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #F4F4F8 50%, #FFFFFF 50%);
+    height: 22rem;
+}
+
+.info_person {
+    text-align: center;
+}
+
+.details_profile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}

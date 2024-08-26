@@ -1,0 +1,331 @@
+.detail-section {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    gap: 0.8rem;
+}
+
+.super {
+    background-color: #F4F4F8;
+    height: 7rem;
+}
+
+::-webkit-scrollbar {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(224, 224, 224);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-corner {
+    background: rgb(224, 224, 224);
+    border-radius: 10px;
+}
+
+.procedure-occupation {
+    background-color: #2b2c2c !important;
+    color: white !important;
+}
+
+section {
+    width: 100vw;
+}
+
+ion-icon {
+    color: black;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.menu-super {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+.save {
+    justify-items: right;
+    justify-self: right;
+    z-index: 999;
+}
+
+.back {
+    z-index: 999;
+}
+
+.info {
+    position: relative;
+    bottom: 5rem;
+}
+
+.procedure-img {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.procedure-img img{
+    width: 11rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 1.5rem;
+}
+
+.title {
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+.tabs {
+    padding: 0.4rem;
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.7rem;
+}
+
+.tabs div:first-child {
+    margin-bottom: 0.5rem;
+}
+
+.tabs div:last-child {
+    background-color: #F4F4F8;
+    width: 100%;
+    transition: 0.7s;
+    padding: 0.7rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 1.2rem;
+    margin: 0 !important;
+}
+
+.records_tags {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.records_tags a {
+    background-color: #f3f3f899;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    color: black;
+    margin-right: 0.5rem;
+}
+
+.title-description h4 {
+    font-size: 1.6rem;
+}
+
+.devices {
+    position: relative;
+    bottom: 6.5rem;
+}
+
+.description {
+    position: relative;
+    bottom: 6rem;
+    padding: 1rem 2.5rem;
+    min-height: 31vh;
+    overflow: overlay;
+    max-height: 40vh;
+}
+
+.content-principal {
+    display: flex;
+    max-height: 100%;
+    max-width: 100%;
+    justify-content: center;
+}
+
+.titleRegister {
+    background-color: #f4f4f8bd;
+    padding: 1rem;
+    display: inline-block;
+    border-radius: 0.7rem;
+    margin-bottom: 1rem;
+}
+
+.subTitle {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.span {
+    font-size: 1rem;
+}
+
+.descriptionRegister {
+    padding: 0.5rem;
+    word-wrap: break-word;
+}
+
+.code {
+    cursor: pointer;
+    background-color: #050505;
+    padding: 0.7rem;
+    border-radius: 0.5rem;
+    color: white;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.modal-content {
+    position: absolute;
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
+    bottom: 40vh;
+}
+
+.modal-content-folder {
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
+    bottom: 40vh;
+}
+
+.modal {
+    z-index: 10;
+}
+
+.title-modal-folders {
+    color: #343a42;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.5rem;
+}
+
+.list-folders{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-folders label {
+    font-size: 1rem;
+}
+
+
+.folder {
+    background-color: #e2e2e999;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.label-folder {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #343a42;
+}
+
+.checkbox-custom {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 2rem;
+    width: 2rem;
+    background-color: #d5d5d5;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+.checkbox-custom::after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f00c";
+    font-size: 1rem;
+    color: white;
+}
+
+.checkbox-custom:hover {
+    background-color: #a5a5a5;
+}
+
+.checkbox-custom:checked {
+    background-color: #5bcd3e;
+}
+
+.checkbox-custom:checked::after {
+    display: block;
+}
+
+.close {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.sup-folder {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.blur {
+    position: absolute;
+    top: 0;
+    backdrop-filter: blur(1px);
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 9;
+}
+
+@media (max-width: 687px) {
+    ::-webkit-scrollbar {
+        background: transparent !important;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: transparent !important;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-corner {
+        background: transparent !important;
+        border-radius: 10px;
+    }
+
+    .records_tags a {
+        padding: 4px;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 360px) and (max-width: 374px) {
+
+}
+
+@media (min-width: 1024px) and (max-width: 1100px) {
+
+}
+
+@media (min-width: 688px) and (max-width: 1023px) {
+
+}
+
+
+@media (min-width: 413px) and (max-width: 500px) {
+
+}
+
+@media (min-width: 375px) and (max-width: 392px) {
+
+}
+
+@media (min-width: 394px) and (max-width: 412px) {
+
+}

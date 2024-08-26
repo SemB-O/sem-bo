@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo de Alta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 1rem 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            border: 0.1rem dotted #000;
+            padding: 1rem 0;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .identification {
+            border: 0.13rem solid black;
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            padding: 1rem;
+            width: 40%;
+        }
+
+        .identification p {
+            font-size: 1.3rem;
+        }
+
+        .clinica {
+            border: 0.13rem solid black;
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            padding: 1rem;
+        }
+
+        .clinica p {
+            font-size: 1.4rem;
+        }
+
+        .identification h2 {
+            text-align: center;
+        }
+
+        .resumo_alta {
+            width: 45%;
+        }
+
+        .resumo_alta h1{
+            text-align: center;
+            text-decoration: underline;
+            font-size: 2rem;
+        }
+
+        .first_section {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+        }
+
+        .tabs {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background-color: rgb(218, 218, 218);
+            padding: 0.5rem;
+            border-top: 0.1rem dotted black;
+            border-bottom: 0.1rem dotted black
+        }
+
+        .response {
+            border-bottom: 0.1rem dotted black;
+            height: 2.8rem;
+        }
+
+        .checkbox-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            font-size: 1.4rem;
+        }
+
+        .checkbox-group h4 {
+            padding-left: 0.7rem;
+            margin: 0.2rem 0 !important;
+        }
+
+        .checkbox-group div {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4rem;
+            padding: 0.5rem;
+        }
+
+        .diagnostico {
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-top: 0.15rem solid black;
+            border-bottom: 0.15rem solid black;
+            padding-bottom: 3rem;
+            padding-left: 0.8rem;
+        }
+
+        .ambulatorio {
+            justify-content: left !important;
+            gap: 2rem;
+        }
+
+        .footer {
+            border-top: 0.1rem dotted black;
+            display: flex;
+            font-size: 1.5rem;
+            font-weight: bold;
+            justify-content: space-around;
+            padding-top: 2rem;
+        }
+
+        .procedimento_code {
+            padding-left: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 0.15rem solid #000;
+            gap: 0.5rem;
+            width: 50%;
+            align-items: center;
+        }
+
+        .procedimento_code:first-child .cid {
+            justify-content: left;
+        }
+
+        .procedimento_code .cid {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .cid h5 {
+            font-size: 1.2rem;
+        }
+
+        .procedimento_code section {
+            display: flex;
+            gap: 0.1rem;
+        }
+
+        .procedimento_code section div {
+            border: 0.15rem solid #000;
+            width: 2.5rem;
+            height: 3rem;
+        }
+
+        .codes {
+            display: flex;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <img src="{% static 'assets/logo_sus.png' %}" alt="">
+            <img src="{% static 'assets/logo_gov.png' %}" alt="">
+        </div>
+        <section class="first_section">
+            <div class="resumo_alta">
+                <h1>RESUMO DE ALTA</h1>
+                <div class="clinica">
+                    <p>Clínica:</p>
+                    <p>Data de Alta: ______/_____/_____</p>
+                </div>  
+            </div>
+            <div class="identification">
+                <h2>IDENTIFICAÇÃO (Etiqueta)</h2>
+                <p>NOME:___________________________________________</p>
+                <p>PRONTUÁRIO: ____________________________________</p>
+                <p>IDADE:___________________________________________</p>
+                <p>INTERNAÇÃO: ______/_____/___________</p>
+            </div>    
+        </section>    
+
+        <div class="tabs">MOTIVO DA INTERNAÇÃO</div>
+        <div class="response"></div>
+        <div class="response"></div>
+        <div class="tabs">RESUMO DA INTERNAÇÃO</div>
+        <div class="response"></div>
+        <div class="response"></div>        
+        <div class="tabs">CIRURGIA</div>
+        <div class="response"></div>
+        <div class="tabs">RESULTADOS DOS PRINCIPAIS EXAMES</div>
+        <div class="response"></div>
+        <div class="response"></div>
+        <div class="tabs">MEDICAÇÕES E RECOMENDAÇÕES</div>
+        <div class="response"></div>
+        <div class="response"></div>
+        <div class="checkbox-group">
+            <div>
+                <div>(  ) Tomografia</div>
+                <div>(  ) Hemodiálise</div>
+                <div>(  ) Diálise Peritoneal</div>
+                <div>(  ) Estudos Hemodinâmicos</div>
+                <div>(  ) Quimioterapia</div>
+            </div>
+            <div>
+                <div>(  ) Colonoscopia</div>
+                <div>(  ) Angiografia</div>
+                <div>(  ) Nutrição Parenteral</div>
+                <div>(  ) Sangue e Hemoderivados</div>
+                <div>(  ) Albumina</div>
+            </div>
+            <div>
+                <div>(  ) Ciclosporina</div>
+                <div>(  ) Estreptoquinase</div>
+                <div>(  ) Fatores de Coagulação</div>
+                <div>(  ) Monitorização de Pressão Intracraniana</div>
+            </div>
+            <div>
+                <div>(  ) Cirurgia Múltipla</div>
+                <div>
+                    (  ) UTI              
+                    <input type="text" name="dias" placeholder="_____ dias">
+                </div>
+                <div>
+                    (  ) Órtese e Prótese. Qual:
+                    <input type="text" name="ortese-protese-qual">
+                </div>
+            </div>
+        </div>
+        
+        <div class="diagnostico">DIAGNÓSTICO DA ALTA:</div>
+
+        <div class="codes">
+            <div class="procedimento_code">
+                <h4>CID-10</h4>
+                <div class="cid">
+                    <h5>1)</h5>
+                    <section>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                    </section>
+                </div>
+                <div class="cid">
+                    <h5>2)</h5>
+                    <section>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                    </section>
+                </div>
+                <div class="cid">
+                    <h5>3)</h5>
+                    <section>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                    </section>
+                </div>       
+            </div>
+            <div class="procedimento_code">
+                <h4>Procedimento:</h4>
+                <div class="cid">
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </section>
+                </div>
+                <div class="cid">
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </section>
+                </div>
+                <div class="cid">
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                    </section>
+                    <section>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </section>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="checkbox-group">
+            <h4>CONDIÇÃO DA ALTA</h4>
+            <div>
+                <div>(  ) Curado</div>
+                <div>(  ) Melhorado</div>
+                <div>(  ) Inalterado</div>
+                <div>(  ) Óbito</div>
+                <div>(  ) Outra ____________________________</div>
+            </div>
+            <div>
+                <p>( ) A Pedido (necessário preencher o formulário: HFL-MED-320- Desistência de Tratamento)</p>
+            </div>
+            <div class="ambulatorio">
+                <div>Encaminhado ao Ambulatório:</div>
+                <div>(  ) Do Hospital Federal da Lagoa</div>
+                <div>(  ) De Outra Unidade do SUS</div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Data: ______/_______/__________</p>
+            <p>Assinatura e Carimbo do Médico: _____________________________</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laudo Médico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background-color: white;
+            border: 0.1rem solid #000;
+            padding: 1rem;
+            margin: 2rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        .header h1 {
+            text-align: center;
+            margin: 0.5rem;
+        }
+        
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 100%;
+            border-bottom: 1px solid #000;
+            margin-bottom: 10px;
+        }
+        
+        .signature {
+            height: 50px;
+            border-bottom: 1px solid #000;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .input-field {
+            border-bottom: 1px solid #000;
+            padding: 2px;
+            margin-bottom: 10px;
+            display: inline-block;
+            width: calc(100% - 4px);
+        }
+        
+        .border-gray {
+            padding: 0.5rem;
+            background-color: rgb(209, 209, 209);
+            border: 0.13rem solid #000;
+        }
+
+        .unidade {
+            display: flex;
+            background-color: white;
+            height: 2.5rem;
+            border: 0.1rem solid #000;
+        }
+
+        .unidade div:first-child {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 70%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-right: 0.1rem solid #000;
+        }
+
+        .unidade div:last-child {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 30%;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .title_ident {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            border-top: 0.15rem solid #000;
+            padding-top: 1rem;
+        }
+
+        .title_origem {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+        }
+
+        .identificacao {
+            display: flex;
+            background-color: white;
+            flex-direction: column;
+        }
+
+        .identificacao div {
+            display: flex;
+            border: 0.1rem solid #000;
+            font-weight: bold;
+            border-bottom: 0;
+        }
+
+        .identificacao .lasts-divs {
+            border-bottom: 0.15rem solid #000 !important;
+        }
+
+        .identificacao div div {
+            padding: 1rem;
+        }
+
+        .ident_50 {
+            width: 50%;
+        }
+
+        .ident_25 {
+            width: 25%;
+        }
+
+        .ident_20 {
+            width: 20%;
+        }
+
+        .ident_15 {
+            width: 15%;
+        }
+
+        .ident_30 {
+            width: 30%;
+        }
+
+        .ident_40 {
+            width: 40%;
+        }
+
+        .ident_70 {
+            width: 70%;
+        }
+
+        .origem {
+            background-color: white;
+            border: 0.15rem solid #000;
+            display: flex;
+            height: 2.5rem;
+        }
+
+        .origem div {
+            display: flex;
+            align-items: center;
+            border-right: 0.1rem solid #000;
+            height: 100%;
+            padding-left: 0.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .first_origem_div {
+            justify-content: space-around;
+        }
+
+        .origem div div {
+            border: 0 !important;
+        }
+
+        .laudo {
+            background-color: white;
+            border: 0.15rem solid #000;
+        }
+
+        .internacao {
+            font-size: 1rem;
+            font-weight: bold;
+            border-bottom: 0.15rem solid #000;
+            padding: 0.5rem;            
+            height: 13rem;
+        }
+
+        .laudo_normal {
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.5rem;
+            height: 3rem;
+            border-bottom: 0.15rem solid #000;
+        }
+
+        .no-border-bottom {
+            border-bottom: 0 !important;
+        }
+
+        .regime_internacao {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 0.5rem;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .procedimento {
+            border: 0.15rem solid #000;
+            border-top: 0;
+            border-right: 0;
+            padding: 0.5rem;
+            width: 50%;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .regime_internacao_check {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding-left: 0.5rem;
+            align-items: center;
+        }
+
+        .prev_alta {
+            border: 0.15rem solid #000;
+            border-right: 0;
+            margin: 0.3rem 0;
+            width: 45%;
+            padding: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .obs_alta {
+            border-left: 0.15rem solid #000;
+            padding: 0.5rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .clinica {
+            display: flex;
+        }
+
+        .clinica div {
+            width: 50%;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 0.15rem solid #000;
+            border-left: 0;
+            padding: 0.5rem;
+            height: 2rem;
+            display: flex;
+        }
+
+        .clinica div:last-child {
+            border-right: 0 !important;
+        }
+
+        .cids {
+            display: flex;
+        }
+
+        .cids div {
+            border: 0.15rem solid #000;
+            border-left: 0;
+            border-top: 0;
+        }
+
+        .cid:first-child {
+            width: 55%;
+        }
+
+        .cid {
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.1rem;
+            align-items: center;
+        }
+
+        .cid h4 {
+            margin-right: 0.5rem;
+        }
+
+        .cid:last-child {
+            border-right: 0;
+            width: 45%;
+        }
+
+        .cid div {
+            border: 0.15rem solid #000;
+            width: 2.5rem;
+            height: 3rem;
+        }
+
+        .procedimento_code {
+            padding-left: 0.5rem;
+            display: flex;
+            border-bottom: 0.15rem solid #000;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .procedimento_code section {
+            display: flex;
+            gap: 0.1rem;
+        }
+
+        .procedimento_code section div {
+            border: 0.15rem solid #000;
+            width: 2.5rem;
+            height: 3rem;
+        }
+
+        .section_laudo {
+            display: flex;
+        }
+
+        .section_laudo .section {
+            width: 100%;
+        }
+
+        .etiqueta {
+            width: 100%;
+        }
+
+        .etiqueta div{
+            border-bottom: 0.15rem solid #000;
+            border-left: 0.15rem solid #000;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .etiqueta div:first-child {
+            height: 50%;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .etiqueta div:last-child {
+            height: 45.6%;
+            padding-left: 0.5rem;
+            padding-top: 0.75rem;
+        }
+
+        .section_assinatura {
+            display: flex;
+            border-bottom: 0.15rem solid #000;
+        }
+
+        .section_assinatura div:first-child {
+            width: 20%;
+        }
+
+        .section_assinatura div:last-child {
+            width: 80%;
+            padding-left: 0.5rem;
+            border-left: 0.15rem solid #000;
+        }
+
+        .section_assinatura div:last-child div{
+            border-left: 0;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 1rem 0 0 0.5rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .checkbox-group div {
+            width: 100%;
+            border-left: 0 !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .checkbox-group h4 {
+            margin: 1rem 0 0 0;
+        }
+
+        .checkbox-group div h4 {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .checkbox-group div div {
+            display: flex;
+            flex-direction: row;
+            padding: 0 !important;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .laudo_normal {
+            height: 5rem;
+        }
+
+        .section_finish {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .section_finish .assignature {
+            background-color: white;
+            height: 5rem;
+            border: 0.15rem solid #000;
+            font-weight: bold;
+            padding-left: 0.5rem;
+            padding-top: 0.5rem;
+        }
+
+        .section_finish .assignature:first-child {
+            width: 60%;
+        }
+
+        .section_finish .assignature:last-child {
+            width: 30%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LAUDO MÉDICO PARA REALIZAÇÃO DE PROCEDIMENTO HOSPITALAR</h1>
+        </div>
+        <div class="border-gray">
+            <div class="unidade">
+                <div>UNIDADE:</div>
+                <div>CNES:</div>
+            </div>
+        </div>
+
+        <div class="title_ident">IDENTIFICAÇÃO DO PACIENTE</div>
+        <div class="border-gray">
+            <div class="identificacao">
+                <div>
+                    <div class="ident_50">Nome:</div>
+                    <div class="ident_25">Prontuário:</div>
+                    <div class="ident_25">CNS:</div>
+                </div>
+                <div>
+                    <div class="ident_70">Endereço:</div>
+                    <div class="ident_15">N°:</div>
+                    <div class="ident_15">Complemento:</div>
+                </div>
+                <div>
+                    <div class="ident_20">Bairro:</div>
+                    <div class="ident_20">Município:</div>
+                    <div class="ident_15">UF:</div>
+                    <div class="ident_20">CEP:</div>
+                    <div class="ident_25">Tel (COM DDD):</div>
+                </div>            
+                <div>
+                    <div class="lasts-divs ident_70">Nome do Responsável (por menores de idade):</div>
+                    <div class="lasts-divs ident_30">Parentesco:</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="title_origem">ORIGEM DO PACIENTE</div>
+
+        <div class="border-gray">
+            <div class="origem">
+                <div class="first_origem_div ident_40">
+                    <div>
+                        <label for="ambulatorio">AMBULATÓRIO</label>
+                        <input type="checkbox" id="ambulatorio">
+                    </div>
+                    <div>
+                        <label for="transf-externa">TRANSF. EXTERNA</label>
+                        <input type="checkbox" id="transf-externa">
+                    </div>
+                </div>
+                <div class="ident_30">Nº AUTORIZAÇÃO DA REGULAÇÃO:</div>
+                <div class="ident_30">UNIDADE DE ORIGEM:</div>
+            </div>
+        </div>
+
+        <div class="title_origem">LAUDO TÉCNICO E JUSTIFICATIVA</div>
+
+        <div class="border-gray">
+            <div class="laudo">
+                <div class="internacao">CONDIÇÕES QUE JUSTIFIQUEM A INTERNAÇÃO:</div>
+                <div class="laudo_normal">DIAGNÓSTICO(S) CLÍNICO(S):</div>
+                <div class="laudo_normal">PRINCIPAIS EXAMES REALIZADOS QUE JUSTIFIQUEM A INTERNAÇÃO:</div>
+                <section class="section_laudo">
+                    <div class="section">
+                        <div class="regime_internacao">
+                            <div>REGIME DE INTERNAÇÃO</div>
+                            <div class="procedimento">
+                                <label>PROCEDIMENTO:</label>
+                                <label for="cirurgico">Cirúrgico</label>
+                                <input type="checkbox" id="cirurgico">
+                                <label for="clinico">Clínico</label>
+                                <input type="checkbox" id="clinico">
+                            </div>
+                        </div>
+                        
+                        <div class="regime_internacao_check">
+                            <div>
+                                <label for="hospitalar">HOSPITALAR</label>
+                                <input type="checkbox" id="hospitalar">
+                                <label for="hospital-dia">HOSPITAL DIA</label>
+                                <input type="checkbox" id="hospital-dia">
+                            </div>
+                            <div class="prev_alta">PREV. ALTA: ____/____/____ </div>
+                            <div class="obs_alta">Obs: Alta até 11h</div>
+                        </div>
+                        <div class="clinica">
+                            <div>CLÍNICA SOLICITANTE:</div>
+                            <div>LEITO:</div>
+                        </div>
+                        <div class="cids">
+                            <div class="cid">
+                                <h4>CID DO DIAGNÓSTICO INICIAL:</h4>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="cid">
+                                <h4>CID SECUNDÁRIO:</h4>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
+                        <div class="procedimento_code">
+                            <h4>PROCEDIMENTO PRINCIPAL:</h4>
+                            <section>
+                                <div></div>
+                                <div></div>
+                            </section>
+                            <section>
+                                <div></div>
+                                <div></div>
+                            </section>
+                            <section>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </section>
+                            <section>
+                                <div></div>
+                                <div></div>
+                            </section>                            
+                        </div>
+                        <div class="procedimento_code">
+                            <h4>PROCEDIMENTO SECUNDÁRIO:</h4>
+                            <section>
+                                <div></div>
+                                <div></div>
+                            </section>
+                            <section>
+                                <div></div>
+                                <div></div>
+                            </section>
+                            <section>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </section>
+                            <section>
+                                <div></div>
+                                <div></div>
+                            </section>                            
+                        </div>
+                    </div>
+                    <div class="etiqueta">
+                        <div>
+                            <p>Etiqueta</p>
+                            <p>Colar aqui</p>
+                        </div>
+                        <div>
+                            CARIMBO E VISTO DO SETOR DE ADMISSÃO:
+                        </div>
+                    </div>
+                </section>
+                <div class="section_assinatura">
+                    <div class="checkbox-group">
+                        <h4>PACIENTE SEM DOCUMENTO</h4>
+                        <div>
+                            <h4>RISCO DE MORTE?</h4>
+                            <div>
+                                <label for="risco-sim">SIM</label>
+                                <input type="checkbox" id="risco-sim">
+                                <label for="risco-nao">NÃO</label>
+                                <input type="checkbox" id="risco-nao">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="">
+                        <div>ASSINATURA E CARIMBO DO MÉDICO (ASSUMINDO A INTERNAÇÃO DE PACIENTE SEM DOCUMENTO DE IDENTIFICAÇÃO):</div>
+                    </div>
+                </div>
+              
+
+                <div class="laudo_normal no-border-bottom">
+                    <div>ASSINATURA E CARIMBO DO MÉDICO PLANTONISTA (AUTORIZAÇÃO DE INTERNAÇÃO EMERGENCIAL NOS LEITOS DO PLANTÃO INTERNO):</div>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="border-gray">
+            <div class="section_finish">
+                <div class="assignature">
+                    <div>ASSINATURA E CARIMBO DO MÉDICO SOLICITANTE:</div>
+                </div>
+                <div class="assignature">
+                    <div>DATA:</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

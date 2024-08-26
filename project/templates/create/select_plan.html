@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block title %}
+
+Sem B.O
+
+{% endblock %}
+
+{% block head %}
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'front/plan_style.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="plan-div container mx-auto py-8">
+        <h1 class="title mb-4">Escolha um Plano</h1>
+        <div class="plans_list">
+            {% for plan in plans %}
+                <div class="plan bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-2">{{ plan.name }}</h2>
+                    <p class="text-gray-600 mb-4">{{ plan.description }}</p>
+                    <ul class="text-sm text-gray-600 mb-4">
+                        {% for point in plan.all_points %}
+                            <li>
+                                <svg class="text-green-500 w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M14.293 5.293a1 1 0 00-1.414 0L8 10.586 6.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0L14 6.707a1 1 0 000-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ point.point_description }}
+                            </li>
+                        {% endfor %}
+                        <!-- {% for point in plan.unavailable_points %}
+                            <li>
+                                <svg class="text-red-500 w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                {{ point.point_description }}
+                            </li>
+                        {% endfor %} -->
+                </ul>
+                <form action="{% url 'select_plan' %}" method="post">
+                    {% csrf_token %}
+                    <div class="plan-id" hidden>{{ plan.id }}</div>
+                    <button onclick="submitRegister(this)" id="select-plan-button" type="button" class="select-button bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Selecionar</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function submitRegister(button) {
+        let selectedPlanId = $(button).closest('form').find('.plan-id').text().trim();
+        $.ajax({
+            type: 'POST',
+            url: '{% url "select_plan" %}',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                selected_plan_id: selectedPlanId
+            },
+            success: function(response) {
+                window.location.href = response.redirect_url;
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+</script>
+
+
+{% endblock %}

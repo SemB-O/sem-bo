@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block title %}
+
+Sem B.O
+
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'front/profile_style.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="content-profile">
+    <div class="info_profile">
+        <div class="details_profile">
+            <div class="photo_profile">
+                <img src="{% static 'assets/procedure.jpg' %}">
+            </div>
+            <div class="info_person">
+                <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
+                <h4>{{ request.user.email }}</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile p-8">
+        <div class="mb-4">
+            {% if messages %}
+                <div class="messages mt-4 mb-2">
+                    {% for message in messages %}
+                        <p class="text-sm py-2 px-4 rounded-md 
+                            {% if message.tags == 'error' %}
+                                bg-red-200 text-red-800
+                            {% elif message.tags == 'success' %}
+                                bg-green-200 text-green-800
+                            {% endif %}
+                        ">
+                            {{ message }}
+                        </p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="profile-tabs w-full px-4 py-2 focus:outline-none bg-gray-100" onclick="toggleForm()">
+                <h4>Edite seu Perfil</h4>
+            </div>
+            <div class="profile-form">
+                <form action="{% url 'profile' %}" method="post">
+                    {% csrf_token %}
+                    <div class="fields_edit">
+                        <label for="id_first_name" class="form-label">Nome</label>
+                        <input type="text" name="first_name" id="id_first_name" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Digite seu Nome" value="{{ request.user.first_name }}">
+                    </div>
+                
+                    <div class="fields_edit">
+                        <label for="id_last_name" class="form-label">Sobrenome</label>
+                        <input type="text" name="last_name" id="id_last_name" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Digite seu Sobrenome" value="{{ request.user.last_name }}">
+                    </div>
+    
+                    <div class="fields_edit">
+                        <label for="id_CPF" class="form-label">CPF</label>
+                        <input type="text" name="CPF" id="id_CPF" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="CPF" value="{{ request.user.CPF }}">
+                    </div>
+                    
+                    <div class="fields_edit">
+                        <label for="id_telephone" class="form-label">Telefone</label>
+                        <input type="text" name="telephone" id="id_telephone" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Telefone" value="{{ request.user.telephone }}">
+                    </div>
+                    
+                    <div class="fields_edit">
+                        <label for="id_date_of_birth" class="form-label">Data de Nascimento</label>
+                        <input type="date" name="date_of_birth" id="id_date_of_birth" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Data de nascimento" value="{{ request.user.date_of_birth }}">
+                    </div>
+                    
+                    <div class="fields_edit">
+                        <label for="id_occupational_registration" class="form-label">Registro Ocupacional</label>
+                        <input type="text" name="occupational_registration" id="id_occupational_registration" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Registro ocupacional" value="{{ request.user.occupational_registration }}">
+                    </div>
+                    
+                    <button type="submit" class="save-edit w-full py-2 px-4 rounded-md" style="background-color: #cfcfcf; color: rgb(0, 0, 0);">Confirmar alterações</button>
+                </form>
+                
+            </div>
+            <div class="profile-tabs w-full px-4 py-2 focus:outline-none bg-gray-100">
+                <h4>Minha assinatura</h4>
+            </div>
+            <a href="{% url 'logout' %}"><div class="profile-tabs w-full px-4 py-2 focus:outline-none logout">
+                <h4>Logout</h4>
+            </div></a>
+        </div>    
+    </div>
+    
+    {% include 'parciais/menu_inferior.html' %}   
+</div>
+
+<script>
+    
+    function toggleForm() {
+        var form = document.querySelector('.profile-form');
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'contents';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('#id_telephone').mask('(00) 00000-0000');
+        $('#id_CPF').mask('000.000.000-00', {reverse: true});
+    });
+</script>
+
+<script>
+    flatpickr("#id_date_of_birth", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        placeholder: "Data de nascimento",
+        onChange: function(selectedDates, dateStr, instance) {
+            instance.element.value = dateStr;
+        }
+    });
+</script>
+
+<script>
+    $(".chosen-select").chosen();
+</script>
+{% endblock %}

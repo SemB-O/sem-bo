@@ -1,0 +1,110 @@
+
+.devices {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.devices .list {
+    display: flex;
+    width: max-content;
+    justify-content: center;
+}
+
+.devices .list .item {
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    transition: .5s;
+    cursor: pointer;
+    margin: 0 0.5rem 1rem 0;
+    width: 10rem;
+    height: 9rem;
+}
+
+.devices .list .item span {
+    font-size: 14px;
+}
+
+.devices .list .item {
+    transition: 0.5s;
+}
+
+.devices .list .item:hover {
+    background-color: #f3f3f3;
+    z-index: 999;
+    transition: 0.5s;
+}
+
+.devices .list .item span:first-child {
+    font-size: 2.4em;
+}
+
+.title {
+    margin-bottom: 0.5rem;
+}
+
+
+@media (max-width: 800px) {
+    .devices {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: fixed;
+        border-radius: 1rem 1rem 0 0;
+        background: white;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 6rem !important;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        padding: 0 0.3rem;
+    }
+
+    .devices .list .item {
+        width: 100%;
+        height: 3rem;
+        margin: 0;
+    }
+
+    .devices .list .item span:first-child {
+        font-size: 1.4rem !important;
+    }
+
+    .devices .list .item span {
+        color: #919090;
+        transition: 0.3s;
+    }
+
+    .devices .list .item span {
+        font-size: 12px !important;
+    }
+
+    .title {
+        display: none;
+    }
+
+    .checked-page {
+        color: #2c3031 !important;
+        font-weight: 500;
+    }
+
+    .mt-2 {
+        margin-top: 0.1rem !important;
+    }
+
+    .shadow-md {
+        --tw-shadow: none !important;
+        --tw-shadow-colored: none !important;
+        box-shadow: none !important;
+    }
+
+    .list {
+        border-radius: 0.5rem 0.5rem 0 0;
+        width: 100% !important;
+        justify-content: space-evenly !important;
+    }
+}

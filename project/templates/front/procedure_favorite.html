@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block title %}
+
+Sem B.O
+
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'front/procedure_favorite_style.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+{% include 'parciais/menu.html' %}
+
+<form id="search-form" class="form-search" method="GET" action="{% url 'search_favorites' %}">
+    {% csrf_token %}
+    <div class="flex justify-center ml-4 mr-4">
+        <div class="search flex items-center bg-transparent p-2">
+            <input type="text" class="search bg-white focus:outline-none w-full p-2.5 opacity-90" placeholder="Digite o procedimento" name="q">
+            <ion-icon class="w-6 h-6 absolute text-gray-600 opacity-40" name="search-outline"></ion-icon>
+        </div>
+        <div id="filter" class="filter bg-F4F4F8 flex justify-center items-center">
+            <ion-icon name="add-outline"></ion-icon>
+        </div>
+        <div id="close-filter" class="filter bg-F4F4F8 flex justify-center items-center" style="display: none; background-color: rgb(243 106 106 / 85%)">
+            <ion-icon name="close-outline" style="color: white;" class="w-6 h-6"></ion-icon>
+        </div>
+    </div>
+</form>
+
+<div class="results_search"></div>
+
+<div class="results">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="text-sm py-1 px-4 rounded {% if message.tags == 'error' %} bg-red-200 text-red-800 {% elif message.tags == 'success' %} bg-green-200 text-green-800 {% endif %}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+  
+    <div class="favorite-folders">
+        {% for folder in favorite_folders %}
+            <section>
+                <div class="favorite-folder flex p-4 my-2 border rounded-lg">
+                    <div class="info-folder">
+                        <a class="title_folder">{{ folder.name}}</a>
+                        {% if folder.description %}
+                            <h5 class="description">{{ folder.description }}</h5>
+                        {% endif %}
+                    </div>
+                    <div class="options">
+                        <div class="edit" onclick="openEditModal('{{ folder.id }}', '{{ folder.name }}', '{{ folder.description }}')">
+                            <ion-icon name="create-outline"></ion-icon>
+                        </div>
+                        <div class="expand">
+                            <ion-icon name="caret-down-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                {% if folder.procedures %}
+                <div class="folder-procedures" id="folder-procedures-{{ folder.id }}" style="display: none;">
+                    {% for procedure in folder.procedures %}
+                        <div class="procedure p-4 my-2 border rounded-lg">
+                            <div class="title_tags">
+                                <a class="procedure_title">{{ procedure }}</a>
+                                <div class="records_tags">
+                                    {% for occupation in procedure.related_occupations_names %}
+                                        <a class="procedure-occupation">{{ occupation }}</a>
+                                    {% endfor %}
+                                    {% for record in procedure.get_records_names %}
+                                        <a>{{ record }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="right_info">
+                                <div class="procedure_code">{{ procedure.procedure_code }}</div>
+                                <a class="help-icon" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">
+                                    <div class="help">
+                                        <ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="folder-procedures" id="folder-procedures-{{ folder.id }}" style="display: none;">
+                    <p class="no-procedures">Não há procedimentos favoritados para essa pasta</p>
+                </div>
+                {% endif %}
+            </section>
+        {% endfor %}
+    </div>
+</div>
+
+{% include 'parciais/menu_inferior.html' %}
+
+<div class="content-principal">
+    <div class="modal-content bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 shadow-lg hidden">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-700">Nova Pasta de Favoritos</h2>
+            <span class="close text-2xl cursor-pointer" id="close-modal">&times;</span>
+        </div>
+    
+        <form id="favorite-folder-form" method="post" action="{% url 'procedure_favorite' %}">
+            {% csrf_token %}
+            <div class="mt-2">
+                <label for="id_name" class="text-gray-600">Nome</label>
+                <input type="text" id="id_name" name="name" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none" placeholder="Digite o nome">
+            </div>
+
+            <div class="mt-2">
+                <label for="id_description" class="text-gray-600">Descrição</label>
+                <textarea id="id_description" name="description" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none"  placeholder="Digite sua descrição"></textarea>
+            </div>
+        
+            <div class="mt-4">
+                <button type="submit" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Criar Pasta</button>
+            </div>
+        </form>
+    </div>
+    <div class="blur hidden"></div>
+</div>
+
+<div class="content-principal">
+    <div class="modal-content-edit bg-gray-100 bg-opacity-90 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 shadow-lg hidden" id="edit-folder-modal">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-700">Editar Pasta de Favoritos</h2>
+            <span class="close text-2xl cursor-pointer" id="close-modal" onclick="closeEditModal()">&times;</span>
+        </div>
+    
+        <form id="edit-folder-form" method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" id="folder-id" name="folder_id">
+            <div class="mt-2">
+                <label for="id_name_edit" class="text-gray-600">Nome</label>
+                <input type="text" id="id_name_edit" name="name" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none" placeholder="Digite o nome" value="{{ folder.name }}">
+            </div>
+
+            <div class="mt-2">
+                <label for="id_description_edit" class="text-gray-600">Descrição</label>
+                <textarea id="id_description_edit" name="description" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none" placeholder="Digite sua descrição">{{ folder.description }}</textarea>
+            </div>
+        
+            <div class="mt-4">
+                <button type="submit" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Salvar Alterações</button>
+            </div>
+        </form>
+
+        <div class="mt-4">
+            <button id="delete-folder-button" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg">Deletar Pasta</button>
+        </div>
+    </div>
+    <div class="blur_edit hidden"></div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const form = $('#search-form');
+        const searchResults = $('.search_results');
+        const resultsAll = $('.results_search')
+        const resultFolder = $('.results')
+        const banner = $('.banner');
+        const loadingIndicator = $('.loading');
+        const optionsIcon = $('.filter ion-icon[name="options-outline"]');
+        const closeIcon = $('.filter ion-icon[name="close-outline"]');
+        const filterIcon = $('.filter ion-icon');
+
+        let loading = false;
+        let page = 2;
+
+        function createProcedureHTML(procedure, procedure_url=null) {
+            const procedureDiv = $('<div class="procedure p-4 my-2 border rounded-lg"></div>');
+            const nameLink = $('<div class="title_tags"><a class="title" href="' + procedure_url + '">' + procedure.procedure_name + '</a></div>');
+            const records = $('<div class="records_tags"></div>')
+            const codeProcedure = $('<div class="procedure_code"></div>')
+            const rightInfo = $('<div class="right_info"></div>')
+
+            procedure.occupations_of_users.forEach(function (occupation) {
+                const occupation_link = $('<a class="procedure-occupation" href="#">' + occupation + '</a>');
+                records.append(occupation_link);
+                nameLink.append(records);
+            });
+            procedure.records_names.forEach(function (recordName) {
+                const recordLink = $('<a href="#">' + recordName + '</a>');
+                records.append(recordLink)
+                nameLink.append(records);
+            });
+
+            const baseUrl = "{% url 'procedure_detail' procedure_code='__PROCEDURE_CODE__' %}";
+            const helpUrl = baseUrl.replace("__PROCEDURE_CODE__", procedure.procedure_code);
+
+            const icon = $('<div class="folder_name">' + procedure.folder_name + '</div>');
+            const help = $('<a class="help-icon" href="' + helpUrl + '"><div class="help"><ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon></div></a>');
+            codeProcedure.append(procedure.procedure_code)
+
+            rightInfo.append(icon, codeProcedure, help)
+            procedureDiv.append(nameLink, rightInfo);
+            resultsAll.append(procedureDiv);
+
+            if($('#load-more')){
+                const loadMoreButton = $('#load-more');
+                procedureDiv.insertBefore(loadMoreButton);
+            }
+
+            return procedureDiv;
+        }
+
+        function toggleFilterVisibility() {
+            if (searchActive) {
+                $('#filter').hide();
+                $('#close-filter').show();
+            } else {
+                $('#filter').show();
+                $('#close-filter').hide();
+            }
+        }
+
+        $(document).on('click', '#load-more', function(){
+            if (!loading) {
+                loading = true;
+                $('#load-more').hide();
+                $('.loading').show();
+
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'search_favorites' %}",
+                    data: {'page': page },
+                    success: function (data) {
+                        if (data.procedures && data.procedures.length > 0) {
+                            const proceduresHTML = data.procedures.map(createProcedureHTML);
+
+                            if (!data.procedures[0].has_more_results) {
+                                $('#load-more').remove();
+                                $('.loading').remove();
+                            }
+
+                            page++;
+                        }
+
+                        loading = false;
+                        $('.loading').hide();
+                        $('#load-more').show();
+                    }
+                });
+            }
+        });
+
+        form.submit(function (e) {
+            e.preventDefault();
+
+            searchActive = true;
+            toggleFilterVisibility(searchActive);
+
+            resultsAll.empty();
+            const query = form.find('input[name="q"]').val().trim();
+
+            $.ajax({
+                type: "GET",
+                url: form.attr('action'),
+                data: { 'q': query},
+                success: function (data) {
+                    if (data.procedures && data.procedures.length > 0) {
+                        resultFolder.addClass('hidden');
+                        const proceduresHTML = data.procedures.map(createProcedureHTML);
+
+                        if (data.procedures[0].has_more_results) {
+                            resultsAll.append('<button id="load-more" style="display: block;">Carregar Mais</button>');
+                            resultsAll.append('<div class="loading" style="display: none;">carregando...</div>');
+                        }
+
+                        optionsIcon.hide();
+                        closeIcon.show();
+                    } else {
+                        const noProceduresMessage = $('<p class="no-procedures">Procedimento não encontrado</p>');
+                        resultsAll.append(noProceduresMessage);
+                    }
+
+                    banner.addClass('none')
+                    const div_search = searchResults.parent()
+
+                    div_search.removeClass('none')
+                    div_search.addClass('block')
+                    
+                    const loadMoreButton = $('#load-more');
+                    const loadingIndicator = $('.loading');
+
+                    loadMoreButton.click(function () {
+                        if (!loading) {
+                            loading = true;
+                            loadMoreButton.hide();
+                            loadingIndicator.show();
+                            const query = form.find('input[name="q"]').val().trim();
+
+                            $.ajax({
+                                type: "GET",
+                                url: form.attr('action'),
+                                data: { 'q': query, 'record_name': record_name, 'page': page },
+                                dataType: "json",
+                                success: function (data) {
+                                    if (data.procedures && data.procedures.length > 0) {
+                                        const proceduresHTML = data.procedures.map(createProcedureHTML);
+
+                                        if(data.procedures[0].has_more_results==false) {
+                                            loadMoreButton.remove();
+                                            loadingIndicator.remove()
+                                        }
+
+                                        page++;
+
+                                    }
+
+                                    loading = false;
+                                    loadingIndicator.hide();
+                                    loadMoreButton.show();
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        closeIcon.parent().click(function() {
+            searchActive = false;
+            toggleFilterVisibility(searchActive);
+
+            resultsAll.empty();
+            closeIcon.hide();
+            optionsIcon.show();
+            banner.removeClass('none');
+            const div_search = searchResults.parent();
+            div_search.removeClass('block');
+            div_search.addClass('none');
+            resultFolder.removeClass('hidden');
+            let page_close = 1;
+
+            
+        });
+
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.querySelector(".modal-content");
+        const filterButton = document.getElementById("filter");
+        const closeModalButton = document.getElementById("close-modal");
+        const blurOverlay = document.querySelector(".blur");
+
+        filterButton.addEventListener("click", function () {
+            modal.style.display = "block";
+            blurOverlay.style.display = "block"
+        });
+
+        closeModalButton.addEventListener("click", function () {
+            modal.style.display = "none";
+            blurOverlay.style.display = "none";
+        });
+
+        blurOverlay.addEventListener("click", function () {
+            modal.style.display = "none";
+            blurOverlay.style.display = "none";
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const expandIcons = document.querySelectorAll(".expand");
+
+        expandIcons.forEach(icon => {
+            icon.addEventListener("click", function() {
+                const folderProcedures = this.closest(".favorite-folder").nextElementSibling;
+
+                if (folderProcedures.style.display === "none") {
+                    folderProcedures.style.display = "block";
+                    this.querySelector("ion-icon").setAttribute("name", "caret-up-outline");
+                } else {
+                    folderProcedures.style.display = "none";
+                    this.querySelector("ion-icon").setAttribute("name", "caret-down-outline");
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    function openEditModal(folderId, folderName, folderDescription) {
+        const modal = document.querySelector('.modal-content-edit');
+        const folderIdInput = document.getElementById('folder-id');
+        const nameInput = document.getElementById('id_name_edit');
+        const descriptionInput = document.getElementById('id_description_edit');
+        const blurEditOverlay = document.querySelector(".blur_edit");
+        
+        folderIdInput.value = folderId;
+        nameInput.value = folderName;
+        descriptionInput.value = folderDescription;
+
+        modal.classList.remove('hidden');
+        blurEditOverlay.classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        const modal = document.querySelector('.modal-content-edit');
+        const blurEditOverlay = document.querySelector(".blur_edit");
+        modal.classList.add('hidden');
+        blurEditOverlay.style.display = "none";
+    }
+</script>
+
+<script>
+    function editFolder() {
+        const folderId = document.getElementById('folder-id').value;
+        const name = document.getElementById('id_name_edit').value;
+        const description = document.getElementById('id_description_edit').value;
+
+        $.ajax({
+            url: '/favorite_folder_edit/' + folderId + '/',
+            type: 'POST',
+            data: {
+                name: name,
+                description: description,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data) {
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao editar a pasta de favoritos:', error);
+            }
+        });
+    }
+
+    function deleteFolder() {
+        const folderId = document.getElementById('folder-id').value;
+
+        $.ajax({
+            url: '/favorite_folder_delete/' + folderId + '/',
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data) {
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao excluir a pasta de favoritos:', error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('#edit-folder-form').submit(function(e) {
+            e.preventDefault();
+            editFolder();
+        });
+
+        $('#delete-folder-button').click(function() {
+            deleteFolder();
+        });
+    });
+
+    function copyText(code) {
+        const tempTextArea = $('<textarea>');
+        tempTextArea.val(code);
+        $('body').append(tempTextArea);
+
+        tempTextArea.select();
+        document.execCommand('copy');
+
+        tempTextArea.remove();
+
+        const feedback = $('<div class="copy-feedback">Código Copiado!</div>');
+        feedback.css({
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            zIndex: '1000',
+            boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.3)',
+        });
+        $('body').append(feedback);
+
+        setTimeout(function () {
+            feedback.remove();
+        }, 2000);
+    }
+
+    $(document).on('click', '.procedure_code', function () {
+        const code = $(this).text().trim();
+        copyText(code);
+    });
+
+</script>
+{% endblock %}

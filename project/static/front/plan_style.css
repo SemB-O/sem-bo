@@ -1,0 +1,50 @@
+body {
+    display: flex !important;
+    margin: 0;
+    max-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    background-color: #f7f7f7;
+    box-sizing: border-box;
+}
+
+.plans_list {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.plan-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 1000;
+}
+
+.select-button {
+    width: 100%;
+}
+
+@media (max-width: 800px) {
+    .plans_list {
+        flex-direction: column;
+        padding: 2rem;
+    }
+
+    .mb-4 {
+        margin-bottom: 0 !important;
+    }
+
+    .plan-div {
+        justify-content: flex-start;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+}

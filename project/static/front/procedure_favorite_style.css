@@ -1,0 +1,454 @@
+body {
+    display: flex !important;
+    flex-direction: column;
+    margin: 0;
+    max-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    background-color: #FFFFFF;
+}
+
+.menu-top {
+    margin-bottom: 1.5rem;
+}
+
+.menu-top a {
+    display: flex;
+    align-items: center;
+}
+
+.menu-top a img {
+    width: 10rem;
+}
+
+.search {
+    width: 100%;
+}
+
+.search input{
+    background-color: #F4F4F8;
+    border-radius: 10px;
+    width: 100%;
+    padding-left: 5rem;
+}
+
+.search ion-icon {
+    left: 4rem;
+}
+
+.filter {
+    background-color: #F4F4F8;
+    border-radius: 10px;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    cursor: pointer;
+    width: 3rem;
+    height: 2.8rem;
+    transition: 0.5s;
+}
+
+.filter:hover {
+    background-color: #ececec;
+    transition: 0.5s;
+}
+
+.results {
+    width: 97.5vw;
+    align-self: center;
+    justify-self: center;
+    height: 64vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.results_search {
+    width: 97.5vw;
+    align-self: center;
+    justify-self: center;
+    max-height: 64vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.results-container {
+    width: 94.3%;
+    margin-left: 2rem;
+}
+
+.results-container div {
+    background-color: #FAFAFB;
+}
+
+.procedure {
+    display: flex;
+    justify-content: space-between;
+}
+
+.procedure a {
+    font-size: 12px;
+}
+
+.help {
+    background-color: #f3f3f899;
+    display: flex;
+    width: 3.5rem;
+    height: 3.2rem;
+    border-radius: 0 1rem 1rem 0;
+    align-items: center;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.folder_name {
+    background-color: #7d838b;
+    display: flex;
+    width: 8rem;
+    height: 3.2rem;
+    border-radius: 0.3rem;
+    align-items: center;
+    transition: 0.3s;
+    cursor: pointer;
+    color: white;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    font-size: 12px;
+}
+
+.help:hover {
+    background-color: #dfdfe499;
+    transition: 0.5s;
+    width: 4rem;
+    align-items: center;
+    height: 3.2rem;
+}
+
+.help ion-icon{
+    align-self: center !important;
+    font-size: 1.5rem;
+    font-weight: bolder;
+    justify-self: center;
+    justify-content: center;
+}
+
+.procedure ion-icon {
+    margin-top: 0.2rem;
+    margin-left: 1rem;
+    cursor: pointer;
+    align-self: center;
+}
+
+#load-more {
+    display: block;
+    text-align: center;
+    width: 100%;
+    background-color: RGB(245, 245, 249);
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.loading {
+    display: block;
+    text-align: center;
+    width: 100%;
+    background-color: RGB(245, 245, 249);
+    padding: 10px;
+    border-radius: 12px;
+}
+
+::-webkit-scrollbar {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(224, 224, 224);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-corner {
+    background: rgb(224, 224, 224);
+    border-radius: 10px;
+}
+
+.right_info {
+    display: flex;
+    gap: 1rem;
+}
+
+.procedure_code {
+    background-color: #7d838b;
+    display: flex;
+    width: 8rem;
+    height: 3.2rem;
+    border-radius: 0.3rem;
+    align-items: center;
+    transition: 0.3s;
+    cursor: pointer;
+    color: white;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.title_tags .title_folder {
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.title_tags .procedure_title {
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.records_tags a {
+    background-color: #f3f3f899;
+    padding: 6px;
+    border-radius: 5px;
+    color: black;
+    margin-right: 5px;
+}
+
+.modal-content {
+    position: absolute;
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
+    bottom: 40vh;
+}
+
+.modal-content-edit {
+    position: absolute;
+    align-self: center;
+    justify-self: center;
+    z-index: 10;
+    bottom: 40vh;
+}
+
+.blur {
+    position: absolute;
+    top: 0;
+    backdrop-filter: blur(1px);
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 9;
+}
+
+.blur_edit {
+    position: absolute;
+    top: 0;
+    backdrop-filter: blur(3.5px);
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 9;
+}
+
+.content-principal {
+    display: flex;
+    max-height: 100%;
+    max-width: 100%;
+    justify-content: center;
+}
+
+.no-procedures {
+    font-size: 1rem;
+    color: #3d3e41;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #e9e8e8;
+    border-radius: 5px;
+}
+
+.favorite-folder {
+    justify-content: space-between;
+    background-color: #F5F5F9;
+    border: 0;
+}
+
+.favorite-folder a {
+    font-size: 12px;
+}
+
+.folder-img {
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: #313133;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.info-folder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.info-folder .title_folder {
+    color: #070707;
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0.8;
+    margin-bottom: -4px;
+}
+
+.info-folder .description {
+    font-size: 0.8rem;
+    color: #050505;
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    width: 7rem;
+}
+
+.expand {
+    background-color: #f3f3f899;
+    display: flex;
+    width: 3rem;
+    height: 3.2rem;
+    border-radius: 0 1rem 1rem 0;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.expand:hover {
+    background-color: #dfdfe499;
+    transition: 0.5s;
+    width: 3.5rem;
+    align-items: center;
+    height: 3.2rem;
+}
+
+.expand ion-icon{
+    align-self: center !important;
+    font-size: 1.5rem;
+    font-weight: bolder;
+    justify-self: center;
+    justify-content: center;
+}
+
+.edit {
+    background-color: #f3f3f899;
+    display: flex;
+    width: 3rem;
+    height: 3.2rem;
+    border-radius: 0 1rem 1rem 0;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.edit:hover {
+    background-color: #b1b1b399;
+}
+
+.edit ion-icon{
+    align-self: center !important;
+    font-size: 1.5rem;
+    font-weight: bolder;
+    justify-self: center;
+    justify-content: center;
+}
+
+.procedure-occupation {
+    background-color: #7d838b !important;
+    color: white !important;
+}
+
+
+@media (max-width: 800px) {
+    .procedure {
+        flex-direction: column;
+    }
+
+    .results {
+        width: 89vw;
+        max-height: 42rem;
+        align-self: center;
+        justify-self: center;
+    }
+
+    .right_info {
+        display: flex;
+        justify-content: space-evenly;
+        justify-content: center;
+        background: #F4F4F8;
+        padding: 0.8rem;
+        height: auto;
+        border-radius: 0.4rem;
+    }
+
+    .procedure_code {
+        height: auto;
+    }
+
+    .help {
+        background-color: #ebebed;
+        display: flex;
+        width: 3.5rem;
+        height: 2rem;
+        border-radius: 0.5rem;
+        align-items: center;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    ::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        display: none !important;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-corner {
+        display: none !important;
+        border-radius: 10px;
+    }
+
+    .favorite-icon {
+        margin-right: 0.5rem;
+    }
+
+    .records_tags a {
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .help-icon {
+        display: flex;
+        align-items: center;   
+    }
+
+    .help {
+        justify-content: center;
+    }
+
+    .procedure ion-icon {
+        margin-left: 0.4rem;
+    }
+
+    .procedure ion-icon:first-child {
+        margin-right: 0.5rem;
+    }
+
+    .procedure_code {
+        height: auto;
+    }
+}
