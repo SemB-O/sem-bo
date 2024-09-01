@@ -34,7 +34,7 @@ Sem B.O
         </div>
     </div>
     
-    <div class="profile p-8">
+    <div class="profile">
         <div class="mb-4">
             {% if messages %}
                 <div class="messages mt-4 mb-2">
@@ -87,7 +87,7 @@ Sem B.O
                         <input type="text" name="occupational_registration" id="id_occupational_registration" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Registro ocupacional" value="{{ request.user.occupational_registration }}">
                     </div>
                     
-                    <button type="submit" class="save-edit w-full py-2 px-4 rounded-md" style="background-color: #cfcfcf; color: rgb(0, 0, 0);">Confirmar alterações</button>
+                    <button type="submit" class="save-edit w-full rounded-md">Confirmar alterações</button>
                 </form>
                 
             </div>
@@ -104,16 +104,10 @@ Sem B.O
 </div>
 
 <script>
-    
     function toggleForm() {
-        var form = document.querySelector('.profile-form');
-        if (form.style.display === 'none' || form.style.display === '') {
-            form.style.display = 'contents';
-        } else {
-            form.style.display = 'none';
-        }
+        let form = document.querySelector('.profile-form');
+        form.classList.toggle('visible');
     }
-
 </script>
 
 <script>
