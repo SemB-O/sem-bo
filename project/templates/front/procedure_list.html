@@ -492,6 +492,16 @@ Sem B.O
     });
 </script>
 
+<script>
+    document.getElementById('apply-filter').addEventListener('click', function() {
+        let selectedRecord = document.getElementById('record-name-filter').value;
+        let queryParams = new URLSearchParams(window.location.search);
+
+        queryParams.set('record_name', selectedRecord);
+
+        window.location.href = '/procedures/?' + queryParams.toString();
+    });
+</script>
 
 
 {% endblock %}
