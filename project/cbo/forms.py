@@ -17,7 +17,7 @@ class EmailAuthenticationForm(AuthenticationForm):
         fields = ['email', 'password']
 
 
-class UserRegistrationForm(UserCreationForm):
+class UserRegisterForm(UserCreationForm):
     def filter_occupations(self):
         occupations = Occupation.objects.all()
         
