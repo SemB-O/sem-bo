@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from cbo.views import Error404View
+from cbo.views.error import Error404View
 
 handler404 = Error404View.as_view()
 
