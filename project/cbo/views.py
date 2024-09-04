@@ -34,6 +34,7 @@ from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 import json
 from django.conf import settings
+from django.views.generic.base import TemplateView
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -797,3 +798,8 @@ def send_info_user_email(to_email):
     email = EmailMessage(mail_subject, message, to=[to_email])
     email.content_subtype = 'html' 
     email.send()
+
+
+class Error404View(TemplateView):
+    template_name = 'errors/404.html'
+    
