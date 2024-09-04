@@ -30,5 +30,7 @@ class UploadDataView(View):
                 DataImporter.import_procedure_has_occupation_data(arquivo)
             elif 'rl_procedimento_registro' in arquivo.name:
                 DataImporter.import_procedure_has_record_data(arquivo)
+            elif 'tb_descricao' in arquivo.name:
+                DataImporter.import_description_data(arquivo)
 
         return redirect('home')

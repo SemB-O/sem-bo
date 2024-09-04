@@ -1,6 +1,5 @@
-import codecs
 from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from .models.description import Description
 from django.utils import timezone
 
 class DataImporter:
@@ -272,4 +271,30 @@ class DataImporter:
                 procedure=procedure,
                 record=record
             )
-            procedure_has_record.save()        
+            procedure_has_record.save()     
+
+    def import_description_data(file):
+        content = file.read()
+        content_str = content.decode('iso-8859-1')
+
+        for linha in content_str.split('\n'):
+            if len(linha) >= 4016:
+                co_procedimento = linha[0:10].strip()
+                description = linha[10:4010].strip()
+                dt_competencia = linha[4011:4017].strip()
+
+                procedure = Procedure.objects.filter(procedure_code=co_procedimento).first()
+                if procedure:
+                    description_obj, created = Description.objects.get_or_create(
+                        procedure=procedure,
+                        defaults={
+                            'description': description,
+                            'competence_date': dt_competencia,
+                        }
+                    )
+
+                    if not created:
+                        description_obj.description = description
+                        description_obj.competence_date = dt_competencia
+
+                    description_obj.save()   
