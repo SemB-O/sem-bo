@@ -245,52 +245,18 @@ Sem B.O
                     );
                 }
 
-                function initializeBasicSelect2(selectors) {
-                    $(selectors).select2({
+                function initializeSelect2(selector, placeholder, url = null, maxSelection = 1) {
+                    let config = {
                         allowClear: true,
-                        width: '100%'
-                    });
-                }
-
-                function initializeCid10Select2() {
-                    const url = window.location.origin + "{% url 'cid-autocomplete' %}";
-                    console.log('URL para autocomplete:', url);
-
-                    $('#cid_10').select2({
-                        ajax: {
-                            url: url,
-                            dataType: 'json',
-                            delay: 250,
-                            type: 'GET',
-                            data: function(params) {
-                                console.log('Ajax data params:', params);
-                                return {
-                                    term: params.term,
-                                    page: params.page || 1
-                                };
-                            },
-                            processResults: function(data, params) {
-                                console.log('Ajax response data:', data);
-                                params.page = params.page || 1;
-                                return {
-                                    results: data.results,
-                                    pagination: {
-                                        more: data.pagination.more
-                                    }
-                                };
-                            },
-                            cache: true
-                        },
-                        minimumInputLength: 1,
-                        placeholder: 'Selecione até 3 CIDs',
-                        allowClear: true,
-                        maximumSelectionLength: 3,
+                        width: '100%',
+                        placeholder: placeholder,
+                        maximumSelectionLength: maxSelection,
                         language: {
                             inputTooShort: function() {
                                 return "Digite pelo menos 1 caractere...";
                             },
                             maximumSelected: function() {
-                                return "Você pode selecionar no máximo 3 CIDs";
+                                return `Você pode selecionar no máximo ${maxSelection} itens`;
                             },
                             noResults: function() {
                                 return "Nenhum resultado encontrado";
@@ -301,36 +267,60 @@ Sem B.O
                         },
                         escapeMarkup: function(markup) {
                             return markup;
-                        },
-                        templateResult: function(cid) {
-                            return cid.text;
-                        },
-                        templateSelection: function(cid) {
-                            return cid.text;
+                        }
+                    };
+
+                    if (url) {
+                        config.ajax = {
+                            url: url,
+                            dataType: 'json',
+                            delay: 250,
+                            type: 'GET',
+                            data: function(params) {
+                                return {
+                                    term: params.term,
+                                    page: params.page || 1
+                                };
+                            },
+                            processResults: function(data, params) {
+                                params.page = params.page || 1;
+                                return {
+                                    results: data.results,
+                                    pagination: {
+                                        more: data.pagination.more
+                                    }
+                                };
+                            },
+                            cache: true
+                        };
+                    }
+
+                    $(selector).select2(config);
+                }
+
+                const cid_url = window.location.origin + "{% url 'cid-autocomplete' %}";
+                const procedure_url = window.location.origin + "{% url 'cid-autocomplete' %}";
+                initializeSelect2('#cid_10, #cid_initial, #cid_secundary', 'Selecione até 3 CIDs', cid_url, 3);
+                initializeSelect2('#procedure', 'Selecione até 3 procedimentos', procedure_url, 3);
+                initializeSelect2('#procedure_principal, #procedure_secundary', 'Selecione uma opção', procedure_url);
+
+                function initializeFlatpickr(selectors) {
+                    flatpickr(selectors, {
+                        dateFormat: "Y-m-d",
+                        altInput: true,
+                        altFormat: "d/m/Y",
+                        placeholder: "Selecione a data",
+                        onChange: function(selectedDates, dateStr, instance) {
+                            instance.element.value = dateStr;
                         }
                     });
                 }
+                initializeFlatpickr("#data_alta, #internacao, #prev_alta");
 
-                initializeBasicSelect2('#procedure, #cid_initial, #cid_secundary, #procedure_principal, #procedure_secundary');
-
-                if (!$('#cid_10').data('select2')) {
-                    initializeCid10Select2();
-                }
-
-                flatpickr("#data_alta, #internacao, #prev_alta", {
-                    dateFormat: "Y-m-d",
-                    altInput: true,
-                    altFormat: "d/m/Y",
-                    placeholder: "Selecione a data",
-                    onChange: function(selectedDates, dateStr, instance) {
-                        instance.element.value = dateStr;
-                    }
-                });
 
                 toggleModal("specificFormModal", true);
             });
         });
-
 </script>
 
 {% endblock %}

@@ -62,6 +62,11 @@ body {
 
 #specificForm {
     overflow: scroll;
+    overflow-x: hidden;
+}
+
+.select2-search {
+    width: 100% !important;
 }
 
 .modal-content-form {

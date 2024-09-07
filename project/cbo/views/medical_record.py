@@ -11,25 +11,14 @@ class MedicalRecordView(View):
     template_name = 'front/medical_record.html'
 
     def get(self, request):
-        user_occupations = request.user.occupations.all()
-
-        procedures_list = Procedure.objects.filter(
-            Q(procedures_has_occupation__occupation__in=user_occupations)
-        ).distinct()
-
-        procedure_options = [(proc.procedure_code, proc.name) for proc in procedures_list]
-
-        form = RecordMedicalForm(
-            procedure_options=procedure_options,
-            cid_options=[]
-        )
+        form = RecordMedicalForm()
 
         context = {
             'form': form
         }
 
         return render(request, self.template_name, context)
-    
+
 
 class CidAutocompleteView(View):
     def get(self, request, *args, **kwargs):
@@ -59,5 +48,33 @@ class CidAutocompleteView(View):
             'results': results,
             'pagination': {
                 'more': paginated_cids.has_next()
+            }
+        })
+    
+
+class ProcedureAutocompleteView(View):
+    def get(self, request, *args, **kwargs):
+        term = request.GET.get('term', '')
+        page = request.GET.get('page', 1)
+
+        user_occupations = request.user.occupations.all()
+
+        procedures = Procedure.objects.filter(
+            Q(procedures_has_occupation__occupation__in=user_occupations) &
+            Q(name__icontains=term)
+        ).distinct()
+
+        paginator = Paginator(procedures, 30)
+        paginated_procedures = paginator.get_page(page)
+
+        results = [
+            {'id': procedure.procedure_code, 'text': procedure.name}
+            for procedure in paginated_procedures
+        ]
+
+        return JsonResponse({
+            'results': results,
+            'pagination': {
+                'more': paginated_procedures.has_next()
             }
         })
