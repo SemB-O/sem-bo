@@ -80,6 +80,7 @@ body {
 
 #formFields div input {
     background-color: #F2F2F7;
+    width: 100% !important;
 }
 
 #formFields div textarea {
@@ -105,7 +106,7 @@ body {
     background: #F2F2F7;
     background-image: none;
     flex: 1;
-    color: #A0A7B3;
+    color: #3d3e3f;
     background-image: url('data:image/svg+xml;utf8,<svg fill="black" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"></path></svg>');
     background-repeat: no-repeat;
     background-size: 1.4rem;
@@ -131,8 +132,16 @@ body {
     transition: .25s all ease;
 }
 
-.close {
+.close-form {
     font-size: 1.5rem;
+}
+
+.close-specific-form {
+    font-size: 1.5rem;
+}
+
+#formModal {
+    cursor: pointer;
 }
 
 .title_logo {
@@ -141,7 +150,7 @@ body {
 }
 
 .select2-container {
-    width: 100%;
+    width: 100% !important;
 }
 
 .select2-container .select2-selection--multiple, .select2-container .select2-selection--single {

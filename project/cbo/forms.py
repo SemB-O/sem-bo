@@ -243,4 +243,14 @@ class RecordMedicalForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        cid_options = kwargs.pop('cid_options', [])
+        procedure_options = kwargs.pop('procedure_options', [])
+
         super().__init__(*args, **kwargs)
+
+        self.fields['cid_10'].choices = cid_options
+        self.fields['cid_initial'].choices = cid_options
+        self.fields['cid_secundary'].choices = cid_options
+        self.fields['procedure'].choices = procedure_options
+        self.fields['procedure_principal'].choices = procedure_options
+        self.fields['procedure_secundary'].choices = procedure_options

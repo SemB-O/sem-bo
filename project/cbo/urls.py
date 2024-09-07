@@ -27,5 +27,6 @@ urlpatterns = [
     path('password_reset/', user.PasswordResetView.as_view(), name='password_reset'),
     path('password_reset/<uidb64>/<token>/', user.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('activate/<uidb64>/<token>', user.activate, name='verify_email'),
+    path('cid_autocomplete/', medical_record.CidAutocompleteView.as_view(), name='cid-autocomplete'),
     path('api/', include('cbo.api.urls'), name='cbo_api')
 ]

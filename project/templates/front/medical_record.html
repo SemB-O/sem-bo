@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block title %}
+
+Sem B.O
+
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'front/medical_record_style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap">
+
+{% endblock %}
+
+{% block content %}
+
+<section class="content-page">
+    {% include 'parciais/menu.html' %}
+
+    <div class="container-medical-record">
+        <h1>Sistema de Prontuários</h1>
+        <div class="buttons">
+            <div class="w-full focus:outline-none bg-gray-100" id="createNewRecordBtn">
+                <h4>Criar <b>Novo Prontuário</b></h4>
+            </div>
+            <div class="w-full focus:outline-none bg-gray-100" id="savedRecordsBtn">
+                <h4>Prontuários <b>Salvos</b></h4>
+            </div>
+        </div>
+    </div>
+    
+    {% include 'parciais/menu_inferior.html' %}
+</section>
+
+<div class="content-principal folder-modal">
+    <div id="formModal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6">
+            <div class="sup-folder flex justify-between items-center mb-4">
+                <h2 class="text-xl ml-2 title-modal-folders">Escolha um formulário</h2>
+                <span class="close-form text-gray-600 cursor-pointer">&times;</span>
+            </div>
+            <form id="formSelection" method="post" action="/submit">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="patientName" class="block text-gray-700">Nome do Paciente:</label>
+                    <input type="text" id="patientName" name="patientName" required class="mt-1 p-2 w-full border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="formType" class="block text-gray-700">Tipo de Formulário:</label>
+                    <select id="formType" name="formType" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none filter-results">
+                        <option value="resumo_alta">Resumo de Alta</option>
+                        <option value="laudo_medico_procedimento_hospitalar">Laudo Médico para realização de procedimento hospitalar</option>
+                        <!-- Adicione mais opções conforme necessário -->
+                    </select>
+                </div>
+                <button type="button" id="chooseFormBtn" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Enviar</button>
+            </form>
+        </div>
+    </div>
+    <div class="blur hidden"></div>
+</div>
+
+<div id="specificFormModal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="modal-content-form w-11/12 md:w-2/3 mx-auto rounded-lg p-6">
+        <div class="sup-folder flex justify-between items-center mb-4">
+            <div></div>
+            <img src="{% static 'assets/logo.png' %}" alt="" class="title_logo">
+            <span class="close-specific-form text-gray-600 cursor-pointer">&times;</span>
+        </div>
+        <form id="specificForm" method="post" action="/submit">
+            {% csrf_token %}
+            <input type="hidden" id="hiddenPatientName" name="patientName">
+            <input type="hidden" id="hiddenFormType" name="formType">
+            <div id="formFields"></div>
+            <button type="button" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Enviar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        function createInputField(id, label, type = "text", placeholder = "", value = "", required = true) {
+                return `
+                    <div class="mb-4">
+                        <label for="${id}" class="block text-gray-700">${label}:</label>
+                        <input class="w-full px-4 py-2 rounded-md focus:outline-none" type="${type}" id="${id}" name="${id}" value="${value}" placeholder="${placeholder}" ${required ? 'required' : ''}>
+                    </div>
+                `;
+            }
+
+            function createTextareaField(id, label, placeholder = "", required = true) {
+                return `
+                    <div class="mb-4">
+                        <label for="${id}" class="block text-gray-700">${label}:</label>
+                        <textarea class="w-full px-4 py-2 rounded-md focus:outline-none" id="${id}" name="${id}" placeholder="${placeholder}" ${required ? 'required' : ''}></textarea>
+                    </div>
+                `;
+            }
+
+            function createSelectField(id, label, options = [], required = true) {
+                let optionsHtml = options.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+                return `
+                    <div class="mb-4">
+                        <label for="${id}" class="block text-gray-700">${label}:</label>
+                        <select id="${id}" name="${id}" class="block w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none filter-results" ${required ? 'required' : ''}>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            }
+
+            function toggleModal(modalId, show = true) {
+                $(`#${modalId}`).toggleClass("hidden", !show);
+            }
+
+            $("#createNewRecordBtn").click(() => toggleModal("formModal", true));
+
+            $(document).on("click", ".close-form", () => toggleModal("formModal", false));
+
+            $(document).on("click", ".close-specific-form", () => {
+                toggleModal("specificFormModal", false);
+                toggleModal("formModal", false);
+            });
+            
+            $(window).click(function(event) {
+                if ($(event.target).is("#formModal")) {
+                    toggleModal("formModal", false);
+                }
+            });
+
+            $("#chooseFormBtn").click(function() {
+                const patientName = $("#patientName").val();
+                const formType = $("#formType").val();
+
+                $("#hiddenPatientName").val(patientName);
+                $("#hiddenFormType").val(formType);
+
+                const $formFields = $("#formFields");
+                $formFields.empty();
+
+                if (formType === "resumo_alta") {
+                    $formFields.append(
+                        createInputField("clinica", "Clínica", "text", "Digite a Clínica") +
+                        createInputField("nome", "Nome", "text", "Digite o nome do paciente", patientName) +
+                        createInputField("prontuario", "Prontuário", "text", "Digite o Prontuário") +
+                        createInputField("idade", "Idade", "number", "Digite a idade do paciente") +
+                        createTextareaField("motivo_internacao", "Motivo da Internação", "Digite o motivo de internação") +
+                        createTextareaField("resumo_internacao", "Resumo da Internação", "Digite o resumo de internação") +
+                        createTextareaField("cirurgia", "Cirurgia", "Digite a cirurgia") +
+                        createTextareaField("resultados_exames", "Resultados dos Principais Exames", "Digite os resultados dos exames") +
+                        createTextareaField("medicacoes_recomendacoes", "Medicações e Recomendações", "Digite as medicações e recomendações") +
+                        createSelectField("condicao_alta", "Condição da Alta", [
+                            { value: "Curado", text: "Curado" },
+                            { value: "Melhorado", text: "Melhorado" },
+                            { value: "Inalterado", text: "Inalterado" },
+                            { value: "Óbito", text: "Óbito" },
+                            { value: "Outra", text: "Outra" },
+                            { value: "A Pedido", text: "A Pedido" },
+                        ]) +
+                        createSelectField("encaminhamento", "Encaminhado ao Ambulatório", [
+                            { value: "Do Hospital Federal da Lagoa", text: "Do Hospital Federal da Lagoa" },
+                            { value: "De Outra Unidade do SUS", text: "De Outra Unidade do SUS" },
+                        ]) +
+                        `
+                        <div class="mb-4">
+                            <label for="cid_10" class="block text-gray-700">CID-10:</label>
+                            {{ form.cid_10 }}
+                        </div>
+                        <div class="mb-4">
+                            <label for="procedure" class="block text-gray-700">Procedimento:</label>
+                            {{ form.procedure }}
+                        </div>
+                        `
+                    );
+                } else if (formType === "laudo_medico_procedimento_hospitalar") {
+                    $formFields.append(
+                        createInputField("unidade", "Unidade", "text", "Digite a Unidade") +
+                        createInputField("cnes", "CNES", "number", "Digite o CNES") +
+                        `<div class="tabs_form"><h2>Identificação:</h2></div>` +
+                        createInputField("nome", "Nome", "text", "Digite o Nome", patientName) +
+                        createInputField("prontuario", "Prontuário", "text", "Digite o Prontuário") +
+                        createInputField("cns", "CNS", "text", "Digite o CNS") +
+                        createInputField("endereco", "Endereço", "text", "Digite o Endereço") +
+                        createInputField("numero", "Número", "text", "Digite o Número") +
+                        createInputField("complemento", "Complemento", "text", "Digite o Complemento") +
+                        createInputField("bairro", "Bairro", "text", "Digite o Bairro") +
+                        createInputField("municipio", "Município", "text", "Digite o Município") +
+                        createInputField("uf", "UF", "text", "Digite o UF") +
+                        createInputField("cep", "CEP", "text", "Digite o CEP") +
+                        createInputField("telefone", "Telefone (com DDD)", "text", "Digite o Telefone com DDD") +
+                        createInputField("responsavel", "Nome do Responsável (para menores de idade)", "text", "Digite o Nome do Responsável") +
+                        createInputField("parentesco", "Parentesco", "text", "Digite o Parentesco") +
+                        `<div class="tabs_form"><h2>Origem do Paciente:</h2></div>` +
+                        createSelectField("origem", "Origem do Paciente", [
+                            { value: "ambulatorio_externa", text: "Ambulatório Externa" },
+                            { value: "transferido", text: "Transferido" },
+                        ]) +
+                        createInputField("numero_autorizacao", "Número de autorização da regulação", "text", "Digite o Número de Autorização da Regulação") +
+                        createInputField("unidade_origem", "Unidade de Origem", "text", "Digite a Unidade de Origem") +
+                        `<div class="tabs_form"><h2>Laudo Técnico:</h2></div>` +
+                        createInputField("condicoes", "Condições que justifiquem a internação", "text", "Digite as condições que justifiquem a internação") +
+                        createInputField("diagnostico", "Diagnóstico(s) clínico(s)", "text", "Digite os Diagnóstico(s) Clínico(s)") +
+                        createInputField("exames", "Principais exames realizados que justifiquem a internação", "text", "Digite os principais exames realizados") +
+                        createSelectField("regime_internacao", "Regime de Internação", [
+                            { value: "hospitalar", text: "Hospitalar" },
+                            { value: "hospital_dia", text: "Hospital Dia" },
+                        ]) +
+                        createSelectField("procedimento_internacao", "Procedimento", [
+                            { value: "cirurgico", text: "Cirúrgico" },
+                            { value: "clinico", text: "Clínico" },
+                        ]) +
+                        createInputField("prev_alta", "Prev. Alta", "date") +
+                        createInputField("clinica_solicitante", "Clínica Solicitante", "text", "Digite a Clínica Solicitante") +
+                        createInputField("leito", "Leito", "text", "Digite o Leito") +
+                        `<!-- Campos com select2 -->
+                        <div class="mb-4">
+                            <label for="cid_initial" class="block text-gray-700">CID do diagnóstico inicial:</label>
+                            {{ form.cid_initial }}
+                        </div>
+                        <div class="mb-4">
+                            <label for="cid_secundary" class="block text-gray-700">CID Secundário:</label>
+                            {{ form.cid_secundary }}
+                        </div>
+                        <div class="mb-4">
+                            <label for="procedure_principal" class="block text-gray-700">Procedimento Principal:</label>
+                            {{ form.procedure_principal }}
+                        </div>
+                        <div class="mb-4">
+                            <label for="procedure_secundary" class="block text-gray-700">Procedimento Secundário:</label>
+                            {{ form.procedure_secundary }}
+                        </div>` +
+                        createSelectField("risco_morte", "Risco de morte? (paciente sem documento)", [
+                            { value: "sim", text: "Sim" },
+                            { value: "nao", text: "Não" },
+                        ])
+                    );
+                }
+
+                function initializeBasicSelect2(selectors) {
+                    $(selectors).select2({
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+
+                function initializeCid10Select2() {
+                    const url = window.location.origin + "{% url 'cid-autocomplete' %}";
+                    console.log('URL para autocomplete:', url);
+
+                    $('#cid_10').select2({
+                        ajax: {
+                            url: url,
+                            dataType: 'json',
+                            delay: 250,
+                            type: 'GET',
+                            data: function(params) {
+                                console.log('Ajax data params:', params);
+                                return {
+                                    term: params.term,
+                                    page: params.page || 1
+                                };
+                            },
+                            processResults: function(data, params) {
+                                console.log('Ajax response data:', data);
+                                params.page = params.page || 1;
+                                return {
+                                    results: data.results,
+                                    pagination: {
+                                        more: data.pagination.more
+                                    }
+                                };
+                            },
+                            cache: true
+                        },
+                        minimumInputLength: 1,
+                        placeholder: 'Selecione até 3 CIDs',
+                        allowClear: true,
+                        maximumSelectionLength: 3,
+                        language: {
+                            inputTooShort: function() {
+                                return "Digite pelo menos 1 caractere...";
+                            },
+                            maximumSelected: function() {
+                                return "Você pode selecionar no máximo 3 CIDs";
+                            },
+                            noResults: function() {
+                                return "Nenhum resultado encontrado";
+                            },
+                            searching: function() {
+                                return "Buscando...";
+                            }
+                        },
+                        escapeMarkup: function(markup) {
+                            return markup;
+                        },
+                        templateResult: function(cid) {
+                            return cid.text;
+                        },
+                        templateSelection: function(cid) {
+                            return cid.text;
+                        }
+                    });
+                }
+
+                initializeBasicSelect2('#procedure, #cid_initial, #cid_secundary, #procedure_principal, #procedure_secundary');
+
+                if (!$('#cid_10').data('select2')) {
+                    initializeCid10Select2();
+                }
+
+                flatpickr("#data_alta, #internacao, #prev_alta", {
+                    dateFormat: "Y-m-d",
+                    altInput: true,
+                    altFormat: "d/m/Y",
+                    placeholder: "Selecione a data",
+                    onChange: function(selectedDates, dateStr, instance) {
+                        instance.element.value = dateStr;
+                    }
+                });
+
+                toggleModal("specificFormModal", true);
+            });
+        });
+
+</script>
+
+{% endblock %}
