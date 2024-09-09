@@ -1,8 +1,12 @@
+import pdfkit
+import json
 from django.db.models import Q
 from django.views import View
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from ..models import Cid, Procedure
 from ..forms import RecordMedicalForm
 
@@ -78,3 +82,33 @@ class ProcedureAutocompleteView(View):
                 'more': paginated_procedures.has_next()
             }
         })
+
+
+class SubmitFormDataView(View):
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            form_type = data.get('type')
+
+            html_content = self.render_html_template(data, form_type)
+            if not html_content:
+                return JsonResponse({'status': 'error', 'message': 'Unknown form type'}, status=400)
+
+            pdf = pdfkit.from_string(html_content, False)
+
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename={form_type}_record.pdf'
+            return response
+
+        except (KeyError, ValueError) as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred'}, status=500)
+
+    def render_html_template(self, data, form_type):
+        if form_type == 'resumo_alta':
+            return render_to_string('prontuarios/resumo_alta.html', data)
+        elif form_type == 'laudo_medico':
+            return render_to_string('prontuarios/laudo_medico_hospitalar.html', data)
+        return None

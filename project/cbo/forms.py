@@ -238,3 +238,17 @@ class RecordMedicalForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class ResumoAltaForm(forms.Form):
+    nome = forms.CharField(label="Nome", max_length=100)
+    prontuario = forms.CharField(label="Prontuário", max_length=100)
+    idade = forms.IntegerField(label="Idade")
+    internacao = forms.DateField(label="Data de Internação", widget=forms.TextInput(attrs={'type': 'date'}))
+    alta = forms.DateField(label="Data de Alta", widget=forms.TextInput(attrs={'type': 'date'}))
+    motivo_internacao = forms.CharField(label="Motivo da Internação", widget=forms.Textarea)
+    resumo_internacao = forms.CharField(label="Resumo da Internação", widget=forms.Textarea)
+    cirurgia = forms.CharField(label="Cirurgia", required=False, widget=forms.Textarea)
+    exames = forms.CharField(label="Resultados dos Principais Exames", widget=forms.Textarea)
+    medicacoes = forms.CharField(label="Medicações e Recomendações", widget=forms.Textarea)
+    diagnostico_alta = forms.CharField(label="Diagnóstico da Alta", widget=forms.Textarea)
