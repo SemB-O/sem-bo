@@ -76,12 +76,12 @@ Sem B.O
             <img src="{% static 'assets/logo.png' %}" alt="" class="title_logo">
             <span class="close-specific-form text-gray-600 cursor-pointer">&times;</span>
         </div>
-        <form id="specificForm" method="post" action="/submit">
+        <form id="specificForm" method="post" action="{% url 'submit-pdf' %}">
             {% csrf_token %}
             <input type="hidden" id="hiddenPatientName" name="patientName">
             <input type="hidden" id="hiddenFormType" name="formType">
             <div id="formFields"></div>
-            <button type="button" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Enviar</button>
+            <button class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Enviar</button>
         </form>
     </div>
 </div>
@@ -179,6 +179,7 @@ Sem B.O
                             <label for="procedure" class="block text-gray-700">Procedimento:</label>
                             {{ form.procedure }}
                         </div>
+                        <input name="type" value="resumo_alta" hidden>
                         `
                     );
                 } else if (formType === "laudo_medico_procedimento_hospitalar") {
@@ -221,7 +222,7 @@ Sem B.O
                         createInputField("prev_alta", "Prev. Alta", "date") +
                         createInputField("clinica_solicitante", "Clínica Solicitante", "text", "Digite a Clínica Solicitante") +
                         createInputField("leito", "Leito", "text", "Digite o Leito") +
-                        `<!-- Campos com select2 -->
+                        `
                         <div class="mb-4">
                             <label for="cid_initial" class="block text-gray-700">CID do diagnóstico inicial:</label>
                             {{ form.cid_initial }}
@@ -237,7 +238,9 @@ Sem B.O
                         <div class="mb-4">
                             <label for="procedure_secundary" class="block text-gray-700">Procedimento Secundário:</label>
                             {{ form.procedure_secundary }}
-                        </div>` +
+                        </div>
+                        <input name="type" value="laudo_medico_hospitalar" hidden>
+                        ` +
                         createSelectField("risco_morte", "Risco de morte? (paciente sem documento)", [
                             { value: "sim", text: "Sim" },
                             { value: "nao", text: "Não" },

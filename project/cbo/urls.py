@@ -29,5 +29,6 @@ urlpatterns = [
     path('activate/<uidb64>/<token>', user.activate, name='verify_email'),
     path('cid_autocomplete/', medical_record.CidAutocompleteView.as_view(), name='cid-autocomplete'),
     path('procedure_autocomplete/', medical_record.ProcedureAutocompleteView.as_view(), name='procedure-autocomplete'),
+    path('submit_pdf/', medical_record.SubmitFormDataView.as_view(), name='submit-pdf'),
     path('api/', include('cbo.api.urls'), name='cbo_api')
 ]

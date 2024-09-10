@@ -4,7 +4,9 @@ EXPOSE 8000
 WORKDIR /project
 
 ADD requirements.txt /project
+    
 RUN pip install -r requirements.txt
+
 
 ADD ./project /project
 

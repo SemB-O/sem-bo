@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,14 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo de Alta</title>
     <style>
+        @page {
+            size: 315mm 575mm;
+            margin: 0in 0.44in 0.2in 0.44in;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 1rem 0;
+            width: 100%;
         }
 
         .container {
-            width: 80%;
+            width: 100%;
             margin: 0 auto;
             border: 0.1rem dotted #000;
             padding: 1rem 0;
@@ -44,7 +52,7 @@
         }
 
         .clinica p {
-            font-size: 1.4rem;
+            font-size: 1rem;
         }
 
         .identification h2 {
@@ -180,9 +188,9 @@
             </div>
             <div class="identification">
                 <h2>IDENTIFICAÇÃO (Etiqueta)</h2>
-                <p>NOME:___________________________________________</p>
-                <p>PRONTUÁRIO: ____________________________________</p>
-                <p>IDADE:___________________________________________</p>
+                <p>NOME:_____________________</p>
+                <p>PRONTUÁRIO: ___________________________</p>
+                <p>IDADE:_____________________</p>
                 <p>INTERNAÇÃO: ______/_____/___________</p>
             </div>    
         </section>    

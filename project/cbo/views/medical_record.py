@@ -1,5 +1,3 @@
-import pdfkit
-import json
 from django.db.models import Q
 from django.views import View
 from django.core.paginator import Paginator
@@ -7,6 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from weasyprint import HTML, CSS
 from ..models import Cid, Procedure
 from ..forms import RecordMedicalForm
 
@@ -88,14 +87,14 @@ class SubmitFormDataView(View):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.body)
+            data = request.POST.dict()
             form_type = data.get('type')
 
             html_content = self.render_html_template(data, form_type)
             if not html_content:
                 return JsonResponse({'status': 'error', 'message': 'Unknown form type'}, status=400)
 
-            pdf = pdfkit.from_string(html_content, False)
+            pdf = HTML(string=html_content).write_pdf()
 
             response = HttpResponse(pdf, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename={form_type}_record.pdf'

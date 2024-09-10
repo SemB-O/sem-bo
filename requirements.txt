@@ -31,3 +31,4 @@ twilio==9.0.0
 typing_extensions==4.8.0
 urllib3==2.2.1
 yarl==1.9.4
+weasyprint
