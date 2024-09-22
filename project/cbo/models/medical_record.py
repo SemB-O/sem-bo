@@ -6,6 +6,7 @@ from .patient import Patient
 class MedicalRecord(BaseModel):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     record_name = models.CharField(max_length=255)
+    record_type = models.CharField(max_length=20)
     pdf = models.FileField(upload_to='medical_records/')
 
     def __str__(self):

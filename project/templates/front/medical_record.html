@@ -106,7 +106,7 @@ Sem B.O
                 `;
             }
 
-            function createSelectField(id, label, options = [], required = true) {
+            function createSelectField(id, label=null, options = [], required = true) {
                 let optionsHtml = options.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
                 return `
                     <div class="mb-4">
@@ -158,6 +158,26 @@ Sem B.O
                         createTextareaField("cirurgia", "Cirurgia", "Digite a cirurgia") +
                         createTextareaField("resultados_exames", "Resultados dos Principais Exames", "Digite os resultados dos exames") +
                         createTextareaField("medicacoes_recomendacoes", "Medicações e Recomendações", "Digite as medicações e recomendações") +
+                        createSelectField("medicacoes_recomendacoes_select", "Medicações e Recomendações", [
+                            { value: "Tomografia", text: "Tomografia" },
+                            { value: "Hemodiálise", text: "Hemodiálise" },
+                            { value: "Diálise Peritoneal", text: "Diálise Peritoneal" },
+                            { value: "Estudos Hemodinâmicos", text: "Estudos Hemodinâmicos" },
+                            { value: "Quimioterapia", text: "Quimioterapia" },
+                            { value: "Colonoscopia", text: "Colonoscopia" },
+                            { value: "Angiografia", text: "Angiografia" },
+                            { value: "Nutrição Parenteral", text: "Nutrição Parenteral" },
+                            { value: "Sangue e Hemoderivados", text: "Sangue e Hemoderivados" },
+                            { value: "Albumina", text: "Albumina" },
+                            { value: "Ciclosporina", text: "Ciclosporina" },
+                            { value: "Estreptoquinase", text: "Estreptoquinase" },
+                            { value: "Fatores de Coagulação", text: "Fatores de Coagulação" },
+                            { value: "Monitorização de Pressão Intracraniana", text: "Monitorização de Pressão Intracraniana" },
+                            { value: "Cirurgia Múltipla", text: "Cirurgia Múltipla" },
+                            { value: "UTI", text: "UTI" },
+                            { value: "Órtese e Prótese", text: "Órtese e Prótese" }
+                        ]) +
+                        createTextareaField("diagnostico_alta", "Diagnóstico da Alta", "Digite o diagnóstico da alta") +
                         createSelectField("condicao_alta", "Condição da Alta", [
                             { value: "Curado", text: "Curado" },
                             { value: "Melhorado", text: "Melhorado" },
@@ -302,7 +322,7 @@ Sem B.O
                 }
 
                 const cid_url = window.location.origin + "{% url 'cid-autocomplete' %}";
-                const procedure_url = window.location.origin + "{% url 'cid-autocomplete' %}";
+                const procedure_url = window.location.origin + "{% url 'procedure-autocomplete' %}";
                 initializeSelect2('#cid_10, #cid_initial, #cid_secundary', 'Selecione até 3 CIDs', cid_url, 3);
                 initializeSelect2('#procedure', 'Selecione até 3 procedimentos', procedure_url, 3);
                 initializeSelect2('#procedure_principal, #procedure_secundary', 'Selecione uma opção', procedure_url);
@@ -320,6 +340,17 @@ Sem B.O
                 }
                 initializeFlatpickr("#data_alta, #internacao, #prev_alta");
 
+                $("#cid_10, #cid_initial, #cid_secundary").on('change', function() {
+                    console.log('Selected values:', $(this).val());
+                });
+
+                $('#cid_10').on('change', function() {
+                    console.log('Selected CIDs:', $(this).val());
+                });
+
+                $('#procedure').on('change', function() {
+                    console.log('Selected Procedures:', $(this).val());
+                });
 
                 toggleModal("specificFormModal", true);
             });

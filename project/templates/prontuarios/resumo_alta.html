@@ -8,7 +8,7 @@
     <title>Resumo de Alta</title>
     <style>
         @page {
-            size: 315mm 575mm;
+            size: 315mm 525mm;
             margin: 0in 0.44in 0.2in 0.44in;
         }
 
@@ -26,21 +26,31 @@
             padding: 1rem 0;
         }
 
-        p {
-            margin: 10px 0;
-        }
-
         .identification {
             border: 0.13rem solid black;
             display: flex;
             flex-direction: column;
             align-items: left;
+            justify-content: center;
             padding: 1rem;
-            width: 40%;
+            width: 30em;
+            height: 17em;
+            margin-top: 1.5em;
         }
 
         .identification p {
-            font-size: 1.3rem;
+            display: flex;
+            font-size: 1em;
+            margin-top: 0.05em;
+        }
+
+        .identification h2 {
+            font-size: 1.4em;
+            margin-top: 0.3em;
+        }
+
+        .identification input {
+            font-size: 1em;
         }
 
         .clinica {
@@ -48,11 +58,19 @@
             display: flex;
             flex-direction: column;
             align-items: left;
-            padding: 1rem;
+            justify-content: center;
+            padding: 1em;
+            padding-top: 2em !important;
+            height: 5em;
+        }
+
+        .clinica p:first-child {
+            margin-top: 1em;
         }
 
         .clinica p {
-            font-size: 1rem;
+            margin-top: 0.1em;
+            font-size: 1em;
         }
 
         .identification h2 {
@@ -60,13 +78,16 @@
         }
 
         .resumo_alta {
-            width: 45%;
+            width: 30em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .resumo_alta h1{
             text-align: center;
             text-decoration: underline;
-            font-size: 2rem;
+            font-size: 1.5em;
         }
 
         .first_section {
@@ -76,7 +97,7 @@
         }
 
         .tabs {
-            font-size: 1.5rem;
+            font-size: 1em;
             font-weight: bold;
             background-color: rgb(218, 218, 218);
             padding: 0.5rem;
@@ -85,36 +106,63 @@
         }
 
         .response {
-            border-bottom: 0.1rem dotted black;
-            height: 2.8rem;
+            height: 2.8em;
+            border: none;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            resize: none;
+            overflow: hidden;
+            box-sizing: border-box;
+            white-space: pre-wrap; 
+            font-size: 1em;
+            outline: none;
+            padding-top: 1.5em;
+            padding-left: 1em;
         }
 
         .checkbox-group {
-            width: 100%;
+            width: 40em;
+            height: 10em;
             display: flex;
             flex-direction: column;
             font-size: 1.4rem;
         }
 
+        .checkbox-group input {
+            border: none;
+            border-bottom: 0.1em solid black;
+            padding: 0.5rem;
+            outline: none;
+            width: 8em;
+        }
+
         .checkbox-group h4 {
             padding-left: 0.7rem;
+            font-size: 0.75em;
             margin: 0.2rem 0 !important;
+            margin-top: 0.5em !important;
         }
 
         .checkbox-group div {
             display: flex;
             justify-content: space-between;
-            font-size: 1.4rem;
+            font-size: 0.8em;
             padding: 0.5rem;
+            white-space: nowrap; 
         }
 
         .diagnostico {
-            font-size: 1.3rem;
-            font-weight: bold;
-            border-top: 0.15rem solid black;
-            border-bottom: 0.15rem solid black;
+            margin-top: 0.5em;
+            border-top: 0.1em solid black;
+            border-bottom: 0.1em solid black;
             padding-bottom: 3rem;
             padding-left: 0.8rem;
+        }
+
+        .diagnostico h3 {
+            font-size: 1em;
+            font-weight: bold;
         }
 
         .ambulatorio {
@@ -131,14 +179,21 @@
             padding-top: 2rem;
         }
 
+        .footer p {
+            font-size: 0.8em;
+        }
+
         .procedimento_code {
+            width: 30em;
             padding-left: 0.5rem;
             display: flex;
             flex-direction: column;
-            border-bottom: 0.15rem solid #000;
-            gap: 0.5rem;
-            width: 50%;
-            align-items: center;
+            align-items: left;
+            justify-content: center;
+        }
+
+        .procedimento_code h4 {
+            margin: 0 !important;
         }
 
         .procedimento_code:first-child .cid {
@@ -147,7 +202,18 @@
 
         .procedimento_code .cid {
             display: flex;
-            gap: 1.5rem;
+            width: 30em;
+            align-items: center;
+        }
+
+        .procedimento_code:first-child .procedure {
+            justify-content: left;
+        }
+
+        .procedimento_code .procedure {
+            display: flex;
+            margin-bottom: 1em;
+            width: 50em;
             align-items: center;
         }
 
@@ -157,19 +223,25 @@
 
         .procedimento_code section {
             display: flex;
-            gap: 0.1rem;
+            width: 5em;
+            margin-right: 0.5em;
         }
 
         .procedimento_code section div {
             border: 0.15rem solid #000;
-            width: 2.5rem;
-            height: 3rem;
+            width: 2.5em;
+            height: 3em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .codes {
+            width: 67.2em;
+            border-bottom: 0.1em solid black;
             display: flex;
+            padding: 1em;
         }
-
     </style>
 </head>
 <body>
@@ -182,34 +254,39 @@
             <div class="resumo_alta">
                 <h1>RESUMO DE ALTA</h1>
                 <div class="clinica">
-                    <p>Clínica:</p>
+                    <p>Clínica: {{ clinica }}</p>
                     <p>Data de Alta: ______/_____/_____</p>
                 </div>  
             </div>
             <div class="identification">
                 <h2>IDENTIFICAÇÃO (Etiqueta)</h2>
-                <p>NOME:_____________________</p>
-                <p>PRONTUÁRIO: ___________________________</p>
-                <p>IDADE:_____________________</p>
+                <p>NOME: <input type="text" value="{{ nome }}" style="border: none; border-bottom: 1px solid black; width: 26em; padding: 2px 0.5em;"/></p>
+                <p>PRONTUÁRIO: <input type="text" value="{{ prontuario }}" style="border: none; border-bottom: 1px solid black; width: 22.6em; padding: 2px 0.5em;"/></p>
+                <p>IDADE: <input type="text" value="{{ idade }}" style="border: none; border-bottom: 1px solid black; width: 26em; padding: 2px 0.5em;"/></p>
                 <p>INTERNAÇÃO: ______/_____/___________</p>
             </div>    
         </section>    
 
         <div class="tabs">MOTIVO DA INTERNAÇÃO</div>
-        <div class="response"></div>
-        <div class="response"></div>
+        <textarea class="response" style="border-bottom: 0.1rem dotted black;" readonly>{{ motivo_internacao }}</textarea>
+        <textarea class="response" readonly></textarea>
+
         <div class="tabs">RESUMO DA INTERNAÇÃO</div>
-        <div class="response"></div>
-        <div class="response"></div>        
+        <textarea class="response" style="border-bottom: 0.1rem dotted black;" readonly>{{ resumo_internacao }}</textarea>
+        <textarea class="response" readonly></textarea>
+
         <div class="tabs">CIRURGIA</div>
-        <div class="response"></div>
+        <textarea class="response" readonly>{{ cirurgia }}</textarea>
+
         <div class="tabs">RESULTADOS DOS PRINCIPAIS EXAMES</div>
-        <div class="response"></div>
-        <div class="response"></div>
+        <textarea class="response" style="border-bottom: 0.1rem dotted black;" readonly>{{ resultados_exames }}</textarea>
+        <textarea class="response" readonly></textarea>
+
         <div class="tabs">MEDICAÇÕES E RECOMENDAÇÕES</div>
-        <div class="response"></div>
-        <div class="response"></div>
-        <div class="checkbox-group">
+        <textarea class="response" style="border-bottom: 0.1rem dotted black;" readonly>{{ medicacoes_recomendacoes }}</textarea>
+        <textarea class="response" style="border-bottom: 0.1rem dotted black;" readonly></textarea>
+
+        <div class="checkbox-group medicacoes_recomendacoes_select">
             <div>
                 <div>(  ) Tomografia</div>
                 <div>(  ) Hemodiálise</div>
@@ -243,118 +320,124 @@
             </div>
         </div>
         
-        <div class="diagnostico">DIAGNÓSTICO DA ALTA:</div>
-
+        <div class="diagnostico">
+            <h3>DIAGNÓSTICO DA ALTA:</h3>
+            <div>{{ diagnostico_alta }}</div>
+        </div>
+        <div>
+        </div>
         <div class="codes">
-            <div class="procedimento_code">
+            <div class="procedimento_code select_cid">
                 <h4>CID-10</h4>
                 <div class="cid">
                     <h5>1)</h5>
-                    <section>
-                        <div></div>
+                    <section style="width: 2.5em !important;">
+                        <div id="cid-1-1"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="cid-1-2" style="margin-right: 0.1em;"></div>
+                        <div id="cid-1-3"></div>
                     </section>
                     <section>
-                        <div></div>
+                        <div id="cid-1-4"></div>
                     </section>
                 </div>
+                
                 <div class="cid">
                     <h5>2)</h5>
-                    <section>
-                        <div></div>
+                    <section style="width: 2.5em !important;">
+                        <div id="cid-2-1"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="cid-2-2" style="margin-right: 0.1em;"></div>
+                        <div id="cid-2-3"></div>
                     </section>
                     <section>
-                        <div></div>
+                        <div id="cid-2-4"></div>
                     </section>
                 </div>
+                
                 <div class="cid">
                     <h5>3)</h5>
-                    <section>
-                        <div></div>
+                    <section style="width: 2.5em !important;">
+                        <div id="cid-3-1"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="cid-3-2" style="margin-right: 0.1em;"></div>
+                        <div id="cid-3-3"></div>
                     </section>
                     <section>
-                        <div></div>
+                        <div id="cid-3-4"></div>
                     </section>
-                </div>       
+                </div>      
             </div>
             <div class="procedimento_code">
                 <h4>Procedimento:</h4>
-                <div class="cid">
+                <div class="procedure">
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-1-1" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-1-2"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-1-3" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-1-4"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-1-5" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-1-6"></div>
                     </section>
-                    <section>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                    </section>
-                </div>
-                <div class="cid">
-                    <section>
-                        <div></div>
-                        <div></div>
-                    </section>
-                    <section>
-                        <div></div>
-                        <div></div>
-                    </section>
-                    <section>
-                        <div></div>
-                        <div></div>
-                    </section>
-                    <section>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
+                    <section style="width: 10em !important;">
+                        <div id="procedure-1-7" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-1-8" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-1-9" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-1-10"></div>
                     </section>
                 </div>
-                <div class="cid">
+                <div class="procedure">
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-2-1" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-2-2"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-2-3" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-2-4"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-2-5" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-2-6"></div>
+                    </section>
+                    <section style="width: 10em !important;">
+                        <div id="procedure-2-7" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-2-8" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-2-9" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-2-10"></div>
+                    </section>
+                </div>
+                <div class="procedure">
+                    <section>
+                        <div id="procedure-3-1" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-3-2"></div>
                     </section>
                     <section>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
+                        <div id="procedure-3-3" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-3-4"></div>
+                    </section>
+                    <section>
+                        <div id="procedure-3-5" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-3-6"></div>
+                    </section>
+                    <section style="width: 10em !important;">
+                        <div id="procedure-3-7" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-3-8" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-3-9" style="margin-right: 0.1em;"></div>
+                        <div id="procedure-3-10"></div>
                     </section>
                 </div>
             </div>
 
         </div>
         
-        <div class="checkbox-group">
+        <div class="checkbox-group" style="height: 9em !important;">
             <h4>CONDIÇÃO DA ALTA</h4>
             <div>
                 <div>(  ) Curado</div>
@@ -364,7 +447,7 @@
                 <div>(  ) Outra ____________________________</div>
             </div>
             <div>
-                <p>( ) A Pedido (necessário preencher o formulário: HFL-MED-320- Desistência de Tratamento)</p>
+                <div>( ) A Pedido (necessário preencher o formulário: HFL-MED-320- Desistência de Tratamento)</div>
             </div>
             <div class="ambulatorio">
                 <div>Encaminhado ao Ambulatório:</div>

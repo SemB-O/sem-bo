@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Occupation, Record, Procedure, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord, Plan, PlanPoint, PlanPointAvailability, FavoriteFolder, FavoriteProcedure
+from .models import User, Occupation, Record, Procedure, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord, Plan, PlanPoint, PlanPointAvailability, FavoriteFolder, FavoriteProcedure, patient, medical_record
 
 admin.site.register(User)
 admin.site.register(Occupation)
@@ -14,3 +14,5 @@ admin.site.register(Plan)
 admin.site.register(PlanPointAvailability)
 admin.site.register(FavoriteFolder)
 admin.site.register(FavoriteProcedure)
+admin.site.register(patient.Patient)
+admin.site.register(medical_record.MedicalRecord)

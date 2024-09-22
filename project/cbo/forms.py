@@ -170,7 +170,7 @@ class FavoriteFolderForm(forms.ModelForm):
 
 
 class RecordMedicalForm(forms.Form):
-    cid_10 = forms.ChoiceField(
+    cid_10 = forms.MultipleChoiceField(
         choices=[],
         widget=forms.SelectMultiple(
             attrs={
@@ -203,7 +203,7 @@ class RecordMedicalForm(forms.Form):
         )
     )
 
-    procedure = forms.ChoiceField(
+    procedure = forms.MultipleChoiceField(
         choices=[],
         widget=forms.SelectMultiple(
             attrs={

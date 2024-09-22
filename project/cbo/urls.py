@@ -30,5 +30,8 @@ urlpatterns = [
     path('cid_autocomplete/', medical_record.CidAutocompleteView.as_view(), name='cid-autocomplete'),
     path('procedure_autocomplete/', medical_record.ProcedureAutocompleteView.as_view(), name='procedure-autocomplete'),
     path('submit_pdf/', medical_record.SubmitFormDataView.as_view(), name='submit-pdf'),
+    path('medical_record/<int:record_id>/', medical_record.ViewSingleMedicalRecord.as_view(), name='view_single_medical_record'),
+    path('records/<int:record_id>/send-email/', medical_record.ViewSingleMedicalRecord.as_view(), name='send_medical_record_email'),
+    path('view_medical_record/<int:record_id>/', medical_record.ViewMedicalRecordPDF.as_view(), name='view_medical_record'),
     path('api/', include('cbo.api.urls'), name='cbo_api')
 ]

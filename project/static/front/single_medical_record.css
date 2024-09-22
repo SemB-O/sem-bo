@@ -1,0 +1,64 @@
+
+.menu-top {
+    margin-bottom: 1.5rem;
+}
+
+.menu-top a {
+    display: flex;
+    align-items: center;
+}
+
+.menu-top a img {
+    width: 10rem;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+.content-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+}
+
+.container-medical-record h1 {
+    font-size: 2.5rem !important; 
+    font-weight: 1000 !important;
+}
+
+.container-medical-record {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+}
+
+.buttons {
+    width: 65%;
+    display: flex;
+    gap: 1rem;
+}
+
+.buttons div {
+    display: flex;
+    align-items: center;
+    border-radius: 0.5rem;
+    height: 5rem;
+    margin-bottom: 0.5rem;
+    transition: 0.3s;
+    cursor: pointer;
+    padding: 2rem;
+    width: 100%;
+    transition: 0.3s;
+    justify-content: center;
+}
+
+.buttons div:hover {
+    background-color: rgb(71, 71, 71);
+    color: white;
+    transition: 0.3s;
+}
