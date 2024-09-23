@@ -34,7 +34,7 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .buttons {
@@ -61,4 +61,46 @@ body {
     background-color: rgb(71, 71, 71);
     color: white;
     transition: 0.3s;
+}
+
+.title_medical_record {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title_medical_record h1 {
+    font-size: 3.5rem !important;
+}
+
+.title_medical_record h5 {
+    margin-top: -0.5rem;
+}
+
+@media (max-width: 896px) {
+    .menu-top {
+        position: fixed;
+        top: 0.5rem;
+    }
+
+    .content-page {
+        justify-content: none;
+    }
+
+    .container-medical-record {
+        text-align: center;
+        position: absolute;
+        top: 30%;
+    }
+
+    .buttons {
+        width: 90%;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .container-medical-record h1 {
+        font-size: 1.8rem;
+    }
 }

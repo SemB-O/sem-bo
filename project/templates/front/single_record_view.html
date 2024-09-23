@@ -19,9 +19,10 @@ Sem B.O
     {% include 'parciais/menu.html' %}
 
     <div class="container-medical-record">
-        {% if record.record_type == 'resumo_alta' %}
-            <h1>Resumo de Alta</h1>
-        {% endif %}
+        <div class="title_medical_record">
+            <h1>{{ record.record_type }}</h1>
+            <h5><b>{{ record.patient.name }}</b> - {{ record.created_at }}</h5>
+        </div>
         <div class="buttons">
             <div class="w-full focus:outline-none bg-gray-100" id="viewRecordBtn">
                 <h4><b>Visualizar</b> prontuário</h4>
@@ -40,7 +41,7 @@ Sem B.O
     <div id="emailModal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
         <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto rounded-lg p-6">
             <div class="sup-folder flex justify-between items-center mb-4">
-                <h2 class="text-xl ml-2 title-modal-folders">Enviar PDF por E-mail</h2>
+                <h2 class="text-xl title-modal-folders">Enviar PDF por E-mail</h2>
                 <span class="close-form text-gray-600 cursor-pointer" onclick="closeModal()">&times;</span>
             </div>
             <form id="emailForm" method="post" action="{% url 'send_medical_record_email' record.id %}">
@@ -54,6 +55,15 @@ Sem B.O
         </div>
     </div>
     <div class="blur hidden"></div>
+
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="flex flex-col items-center">
+            <div class="loader border-t-4 border-b-4 border-white rounded-full w-12 h-12 animate-spin mb-4"></div>
+            <div class="text-white text-xl animate-pulse">
+                Enviando e-mail...
+            </div>
+        </div>
+    </div>
     
 
     {% include 'parciais/menu_inferior.html' %}
@@ -62,6 +72,11 @@ Sem B.O
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    function closeModal() {
+        $('#emailModal').addClass('hidden');
+        $('.blur').addClass('hidden');
+    }
+
     $(document).ready(function() {
         $('#viewRecordBtn').click(function() {
             window.open("{% url 'view_medical_record' record.id %}", '_blank');
@@ -84,8 +99,27 @@ Sem B.O
             $('.blur').addClass('hidden');
         }
 
+        function showFeedbackMessage(message, success = true) {
+            const feedback = $('<div class="feedback-message"></div>').css({
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                backgroundColor: success ? '#4CAF50' : '#F44336',
+                color: 'white',
+                padding: '10px',
+                borderRadius: '5px',
+                zIndex: '1000',
+                boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.3)'
+            }).text(message).appendTo('body').delay(2000).fadeOut(500, function () {
+                $(this).remove();
+            });
+        }
+
         $('#emailForm').submit(function(e) {
             e.preventDefault();
+
+            $('#loadingOverlay').removeClass('hidden');
+
             const url = $(this).attr('action');
             const email = $('#recipient_email').val();
             const csrfToken = '{{ csrf_token }}';
@@ -100,12 +134,15 @@ Sem B.O
                     recipient_email: email
                 },
                 success: function(data) {
-                    alert('E-mail enviado com sucesso!');
+                    showFeedbackMessage('E-mail enviado com sucesso!', true);
                     toggleModal();
                 },
                 error: function(error) {
                     console.error('Erro ao enviar e-mail:', error);
-                    alert('Falha ao enviar o e-mail.');
+                    showFeedbackMessage('Falha ao enviar o e-mail.', false);
+                },
+                complete: function() {
+                    $('#loadingOverlay').addClass('hidden');
                 }
             });
         });

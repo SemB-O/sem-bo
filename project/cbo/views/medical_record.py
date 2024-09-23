@@ -99,7 +99,7 @@ class SubmitFormDataView(View):
             data = request.POST.dict()
             form_type = data.get('type')
 
-            if form_type == 'resumo_alta':
+            if form_type.lower().replace(' ', '_') == 'resumo_de_alta':
                 html_content = self.handle_resumo_alta(data)
             else:
                 return JsonResponse({'status': 'error', 'message': 'Unknown form type'}, status=400)
@@ -194,7 +194,7 @@ class SubmitFormDataView(View):
                     element.string = char
 
         return str(soup)
-    
+
     def update_procedure_sections(self, html_content, procedures):
         soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -212,25 +212,25 @@ class SubmitFormDataView(View):
         return patient
 
     def save_pdf_to_medical_record(self, patient, form_type, pdf):
-        record_name = f"{form_type}_record"
         date_str = datetime.now().strftime("%Y_%m_%d")
-        patient_name = patient.name.replace(" ", "_")
+        patient_name = patient.name.lower().replace(" ", "_")
+        record_name = f"{patient_name}_{date_str}"
     
-        pdf_filename = f"{record_name}_{patient_name}_{date_str}.pdf"
+        pdf_filename = f"{record_name}.pdf"
             
         pdf_directory = Path('medical_records/')
-        
+
         if not pdf_directory.exists():
             os.makedirs(pdf_directory)
 
         pdf_path = Path(f'medical_records/{pdf_filename}')
-        
+
         medical_record = MedicalRecord.objects.create(
             patient=patient,
             record_name=record_name,
             record_type=form_type
         )
-        
+
         with pdf_path.open('wb') as f:
             f.write(pdf)
 
@@ -264,14 +264,17 @@ class ViewSingleMedicalRecord(View):
             return JsonResponse({'status': 'error', 'message': 'PDF não encontrado.'}, status=404)
 
         try:
-            subject = f"Registro Médico - {record.patient.name}"
+            subject = f"{record.record_type} - {record.patient.name}"
             context = {
                 'patient_name': record.patient.name,
                 'record_name': record.record_name,
                 'user': request.user,
+                'type': record.record_type
             }
             template_name = 'email/medical_record_email.html'
-            email_sent = EmailManagementView.send_email(subject, template_name, context, recipient_email, record.pdf.path)
+            record_type = record.record_type.lower().replace(' ', '_')
+            file_name = f'{record_type}_{record.record_name}'
+            email_sent = EmailManagementView.send_email(subject, template_name, context, recipient_email, record.pdf.path, file_name)
 
             if email_sent:
                 return JsonResponse({'status': 'success', 'message': 'E-mail enviado com sucesso!'})
@@ -281,9 +284,11 @@ class ViewSingleMedicalRecord(View):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
+
 class ViewMedicalRecordPDF(View):
     def get(self, request, record_id, *args, **kwargs):
         record = get_object_or_404(MedicalRecord, id=record_id)
+        record_type = record.record_type.lower().replace(' ', '_')
 
         if not record.pdf:
             raise Http404("PDF não encontrado.")
@@ -292,7 +297,7 @@ class ViewMedicalRecordPDF(View):
 
         if download:
             response = FileResponse(record.pdf.open(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{record.pdf.name}"'
+            response['Content-Disposition'] = f'attachment; filename="{record_type}_{record.record_name}.pdf"'
         else:
             response = FileResponse(record.pdf.open(), content_type='application/pdf')
 

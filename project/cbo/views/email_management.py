@@ -9,14 +9,14 @@ from django.shortcuts import redirect
 
 
 class EmailManagementView(View):
-    def send_email(subject, template_name, context, to_email, file_path=None):
+    def send_email(subject, template_name, context, to_email, file_path=None, file_name=None):
         message = render_to_string(template_name, context)
         email = EmailMessage(subject, message, to=[to_email])
         email.content_subtype = 'html'
 
         if file_path:
             with open(file_path, 'rb') as pdf_file:
-                email.attach('medical_record.pdf', pdf_file.read(), 'application/pdf')
+                email.attach(f'{file_name}.pdf', pdf_file.read(), 'application/pdf')
 
         if email.send():
             return True

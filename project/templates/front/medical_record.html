@@ -199,7 +199,7 @@ Sem B.O
                             <label for="procedure" class="block text-gray-700">Procedimento:</label>
                             {{ form.procedure }}
                         </div>
-                        <input name="type" value="resumo_alta" hidden>
+                        <input name="type" value="Resumo de Alta" hidden>
                         `
                     );
                 } else if (formType === "laudo_medico_procedimento_hospitalar") {
@@ -259,7 +259,7 @@ Sem B.O
                             <label for="procedure_secundary" class="block text-gray-700">Procedimento Secundário:</label>
                             {{ form.procedure_secundary }}
                         </div>
-                        <input name="type" value="laudo_medico_hospitalar" hidden>
+                        <input name="type" value="Laudo Médico Hospitalar" hidden>
                         ` +
                         createSelectField("risco_morte", "Risco de morte? (paciente sem documento)", [
                             { value: "sim", text: "Sim" },
