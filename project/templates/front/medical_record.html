@@ -32,9 +32,11 @@ Sem B.O
             <div class="w-full focus:outline-none bg-gray-100" id="createNewRecordBtn">
                 <h4>Criar <b>Novo Prontuário</b></h4>
             </div>
-            <div class="w-full focus:outline-none bg-gray-100" id="savedRecordsBtn">
-                <h4>Prontuários <b>Salvos</b></h4>
-            </div>
+            <a href="{% url 'medical_record_list' %}">
+                <div class="w-full focus:outline-none bg-gray-100" id="savedRecordsBtn">
+                    <h4>Prontuários <b>Salvos</b></h4>
+                </div>
+            </a>
         </div>
     </div>
     
@@ -222,8 +224,8 @@ Sem B.O
                         createInputField("parentesco", "Parentesco", "text", "Digite o Parentesco") +
                         `<div class="tabs_form"><h2>Origem do Paciente:</h2></div>` +
                         createSelectField("origem", "Origem do Paciente", [
-                            { value: "ambulatorio_externa", text: "Ambulatório Externa" },
-                            { value: "transferido", text: "Transferido" },
+                            { value: "ambulatorio_externa", text: "Ambulatório" },
+                            { value: "transferido", text: "Transferência Externa" },
                         ]) +
                         createInputField("numero_autorizacao", "Número de autorização da regulação", "text", "Digite o Número de Autorização da Regulação") +
                         createInputField("unidade_origem", "Unidade de Origem", "text", "Digite a Unidade de Origem") +

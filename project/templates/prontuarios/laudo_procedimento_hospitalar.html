@@ -5,28 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laudo Médico</title>
     <style>
+        @page {
+            size: 315mm 540mm;
+            margin: 0in 0.44in 0.2in 0.44in;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f8f8f8;
         }
         
         .container {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
             background-color: white;
             border: 0.1rem solid #000;
             padding: 1rem;
-            margin: 2rem;
+            margin: 1rem;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
+        }
+
+        .header {
+            margin-bottom: 1em;
         }
 
         .header h1 {
             text-align: center;
             margin: 0.5rem;
+            font-size: 1.5em;
         }
         
         .label {
@@ -67,7 +75,8 @@
 
         .unidade div:first-child {
             display: flex;
-            justify-content: center;
+            justify-content: left;
+            padding-left: 1rem;
             align-items: center;
             width: 70%;
             font-weight: bold;
@@ -77,7 +86,8 @@
 
         .unidade div:last-child {
             display: flex;
-            justify-content: center;
+            justify-content: left;
+            padding-left: 2rem;
             align-items: center;
             width: 30%;
             font-weight: bold;
@@ -89,8 +99,7 @@
             font-weight: bold;
             display: flex;
             justify-content: center;
-            border-top: 0.15rem solid #000;
-            padding-top: 1rem;
+            margin-top: 1em;
         }
 
         .title_origem {
@@ -98,6 +107,7 @@
             font-weight: bold;
             display: flex;
             justify-content: center;
+            margin-top: 1em;
         }
 
         .identificacao {
@@ -153,17 +163,16 @@
             background-color: white;
             border: 0.15rem solid #000;
             display: flex;
-            height: 2.5rem;
+            height: 4rem;
         }
 
         .origem div {
             display: flex;
             align-items: center;
             border-right: 0.1rem solid #000;
-            height: 100%;
             padding-left: 0.5rem;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .first_origem_div {
@@ -174,13 +183,17 @@
             border: 0 !important;
         }
 
+        .first_origem_div div:first-child label {
+            margin-right: 2rem;
+        }
+
         .laudo {
             background-color: white;
             border: 0.15rem solid #000;
         }
 
         .internacao {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             border-bottom: 0.15rem solid #000;
             padding: 0.5rem;            
@@ -188,7 +201,7 @@
         }
 
         .laudo_normal {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             padding: 0.5rem;
             height: 3rem;
@@ -233,7 +246,7 @@
             margin: 0.3rem 0;
             width: 45%;
             padding: 0.5rem;
-            margin-left: 1rem;
+            margin-left: 0.9rem;
         }
 
         .obs_alta {
@@ -250,7 +263,7 @@
 
         .clinica div {
             width: 50%;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             border: 0.15rem solid #000;
             border-left: 0;
@@ -355,21 +368,17 @@
         .section_assinatura {
             display: flex;
             border-bottom: 0.15rem solid #000;
-        }
-
-        .section_assinatura div:first-child {
-            width: 20%;
+            height: 10rem;
         }
 
         .section_assinatura div:last-child {
-            width: 80%;
             padding-left: 0.5rem;
             border-left: 0.15rem solid #000;
         }
 
         .section_assinatura div:last-child div{
             border-left: 0;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             padding: 1rem 0 0 0.5rem;
         }
@@ -382,20 +391,15 @@
         }
 
         .checkbox-group div {
-            width: 100%;
             border-left: 0 !important;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .checkbox-group h4 {
-            margin: 1rem 0 0 0;
-        }
-
         .checkbox-group div h4 {
             font-size: 1.2rem;
-            margin: 0.5rem 0;
+            margin: 0;
         }
 
         .checkbox-group div div {
@@ -432,6 +436,10 @@
         .section_finish .assignature:last-child {
             width: 30%;
         }
+
+        .last-div {
+            margin-top: 1em;
+        }
     </style>
 </head>
 <body>
@@ -441,34 +449,34 @@
         </div>
         <div class="border-gray">
             <div class="unidade">
-                <div>UNIDADE:</div>
-                <div>CNES:</div>
+                <div>UNIDADE: {{ unidade }}</div>
+                <div>CNES: {{ cnes }}</div>
             </div>
         </div>
 
         <div class="title_ident">IDENTIFICAÇÃO DO PACIENTE</div>
-        <div class="border-gray">
+        <div class="border-gray ident">
             <div class="identificacao">
                 <div>
-                    <div class="ident_50">Nome:</div>
-                    <div class="ident_25">Prontuário:</div>
-                    <div class="ident_25">CNS:</div>
+                    <div class="ident_50">Nome: {{ patientName }}</div>
+                    <div class="ident_25">Prontuário: {{ prontuario }}</div>
+                    <div class="ident_25">CNS: {{ cns }}</div>
                 </div>
                 <div>
-                    <div class="ident_70">Endereço:</div>
-                    <div class="ident_15">N°:</div>
-                    <div class="ident_15">Complemento:</div>
+                    <div class="ident_70">Endereço: {{ endereco }}</div>
+                    <div class="ident_15">N°: {{ numero }}</div>
+                    <div class="ident_15">Complemento: {{ complemento }}</div>
                 </div>
                 <div>
-                    <div class="ident_20">Bairro:</div>
-                    <div class="ident_20">Município:</div>
-                    <div class="ident_15">UF:</div>
-                    <div class="ident_20">CEP:</div>
-                    <div class="ident_25">Tel (COM DDD):</div>
+                    <div class="ident_20">Bairro: {{ bairro }}</div>
+                    <div class="ident_20">Município: {{ municipio }} </div>
+                    <div class="ident_15">UF: {{ uf }}</div>
+                    <div class="ident_20">CEP: {{ cep }}</div>
+                    <div class="ident_25">Tel (COM DDD): {{ cep }}</div>
                 </div>            
                 <div>
-                    <div class="lasts-divs ident_70">Nome do Responsável (por menores de idade):</div>
-                    <div class="lasts-divs ident_30">Parentesco:</div>
+                    <div class="lasts-divs ident_70">Nome do Responsável (por menores de idade): {{ responsavel }}</div>
+                    <div class="lasts-divs ident_30">Parentesco: {{ parentesco }}</div>
                 </div>
             </div>
         </div>
@@ -487,8 +495,8 @@
                         <input type="checkbox" id="transf-externa">
                     </div>
                 </div>
-                <div class="ident_30">Nº AUTORIZAÇÃO DA REGULAÇÃO:</div>
-                <div class="ident_30">UNIDADE DE ORIGEM:</div>
+                <div class="ident_30">Nº AUTORIZAÇÃO DA REGULAÇÃO: {{ numero_autorizacao }}</div>
+                <div class="ident_30">UNIDADE DE ORIGEM: {{ unidade_origem }}</div>
             </div>
         </div>
 
@@ -496,9 +504,9 @@
 
         <div class="border-gray">
             <div class="laudo">
-                <div class="internacao">CONDIÇÕES QUE JUSTIFIQUEM A INTERNAÇÃO:</div>
-                <div class="laudo_normal">DIAGNÓSTICO(S) CLÍNICO(S):</div>
-                <div class="laudo_normal">PRINCIPAIS EXAMES REALIZADOS QUE JUSTIFIQUEM A INTERNAÇÃO:</div>
+                <div class="internacao">CONDIÇÕES QUE JUSTIFIQUEM A INTERNAÇÃO: {{ condicoes }} </div>
+                <div class="laudo_normal">DIAGNÓSTICO(S) CLÍNICO(S): {{ diagnostico }}</div>
+                <div class="laudo_normal">PRINCIPAIS EXAMES REALIZADOS QUE JUSTIFIQUEM A INTERNAÇÃO: {{ exames }} </div>
                 <section class="section_laudo">
                     <div class="section">
                         <div class="regime_internacao">
@@ -523,8 +531,8 @@
                             <div class="obs_alta">Obs: Alta até 11h</div>
                         </div>
                         <div class="clinica">
-                            <div>CLÍNICA SOLICITANTE:</div>
-                            <div>LEITO:</div>
+                            <div>CLÍNICA SOLICITANTE: {{ clinica_solicitante }}</div>
+                            <div>LEITO: {{ leito }}</div>
                         </div>
                         <div class="cids">
                             <div class="cid">
@@ -621,7 +629,7 @@
         </div>
         
 
-        <div class="border-gray">
+        <div class="border-gray last-div">
             <div class="section_finish">
                 <div class="assignature">
                     <div>ASSINATURA E CARIMBO DO MÉDICO SOLICITANTE:</div>

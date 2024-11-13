@@ -1,13 +1,14 @@
 import os
+import unidecode
 from django.db.models import Q
 from django.views import View
-from django.core.paginator import Paginator
-from django.http import JsonResponse, HttpResponse, FileResponse, Http404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse, FileResponse, Http404, HttpResponseBadRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import send_mail
 from django.conf import settings
+from django.views.generic import ListView
 from datetime import datetime
 from bs4 import BeautifulSoup
 from pathlib import Path
@@ -30,6 +31,41 @@ class MedicalRecordView(View):
         }
 
         return render(request, self.template_name, context)
+
+
+class MedicalRecordListView(ListView):
+    model = MedicalRecord
+    template_name = 'front/medical_record_list.html'
+    context_object_name = 'medical_records'
+
+    def get_queryset(self):
+        return MedicalRecord.objects.filter(patient__user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tabs'] = {
+            'medical_records': self.get_queryset(),
+        }
+        return context
+
+
+class MedicalRecordSearchView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get('q', '').strip()
+
+        medical_records = MedicalRecord.objects.filter(patient__name__icontains=query)
+
+        records = []
+        for record in medical_records:
+            records.append({
+                'id': record.id,
+                'name': record.patient.name,
+                'created_at': record.created_at.strftime('%d de %B de %Y às %H:%M'),
+                'record_type': record.record_type,
+                'has_more_results': False
+            })
+
+        return JsonResponse({'records': records})
 
 
 class CidAutocompleteView(View):
@@ -99,8 +135,11 @@ class SubmitFormDataView(View):
             data = request.POST.dict()
             form_type = data.get('type')
 
-            if form_type.lower().replace(' ', '_') == 'resumo_de_alta':
-                html_content = self.handle_resumo_alta(data)
+            format_type = form_type = unidecode.unidecode(form_type).lower().replace(' ', '_') 
+            if format_type == 'resumo_de_alta':
+                html_content = self.handle_resumo_alta(data, format_type)
+            elif format_type == 'laudo_medico_hospitalar':
+                html_content = self.handle_laudo_medico_hospitalar(data, format_type)
             else:
                 return JsonResponse({'status': 'error', 'message': 'Unknown form type'}, status=400)
 
@@ -112,18 +151,23 @@ class SubmitFormDataView(View):
 
             patient_name = data.get('patientName')
             user = request.user
-            patient = self.get_or_create_patient(patient_name, user)
-            record_id = self.save_pdf_to_medical_record(patient, form_type, pdf)
+            response = HttpResponse(pdf, content_type='application/pdf')
+            filename = f'{patient_name}_{format_type}.pdf'
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-            return redirect('view_single_medical_record', record_id=record_id)
+            # patient = self.get_or_create_patient(patient_name, user)
+            # record_id = self.save_pdf_to_medical_record(patient, form_type, pdf)
+
+            # return redirect('view_single_medical_record', record_id=record_id)
+            return response
 
         except (KeyError, ValueError) as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred'}, status=500)
 
-    def handle_resumo_alta(self, data):
-        html_content = self.render_html_template(data, 'resumo_alta')
+    def handle_resumo_alta(self, data, type):
+        html_content = self.render_html_template(data, type)
         
         medicacoes_recomendacoes_select = data.get('medicacoes_recomendacoes_select', '')
         cid_10 = data.get('cid_10', '')
@@ -134,6 +178,21 @@ class SubmitFormDataView(View):
         html_content = self.check_condition(html_content, condicao_alta)
         html_content = self.update_cid_sections(html_content, cid_10)
         html_content = self.update_procedure_sections(html_content, procedure)
+
+        return html_content
+    
+    def handle_laudo_medico_hospitalar(self, data, type):
+        html_content = self.render_html_template(data, type)
+        
+        # medicacoes_recomendacoes_select = data.get('medicacoes_recomendacoes_select', '')
+        # cid_10 = data.get('cid_10', '')
+        # procedure = data.get('procedure', '')
+        # condicao_alta = data.get('condicao_alta', '')
+
+        # html_content = self.check_recommendations(html_content, medicacoes_recomendacoes_select)
+        # html_content = self.check_condition(html_content, condicao_alta)
+        # html_content = self.update_cid_sections(html_content, cid_10)
+        # html_content = self.update_procedure_sections(html_content, procedure)
 
         return html_content
 
@@ -157,8 +216,40 @@ class SubmitFormDataView(View):
                 'procedure': data.get('procedure', ''),
                 'data_alta': data.get('data_alta', ''),
             })
-        elif form_type == 'laudo_medico':
-            return render_to_string('prontuarios/laudo_medico_hospitalar.html', data)
+        elif form_type == 'laudo_medico_hospitalar':
+            return render_to_string('prontuarios/laudo_procedimento_hospitalar.html', {
+                'patientName': data.get('patientName', ''),
+                'unidade': data.get('unidade', ''),
+                'cnes': data.get('cnes', ''),
+                'nome': data.get('nome', ''),
+                'prontuario': data.get('prontuario', ''),
+                'cns': data.get('cns', ''),
+                'endereco': data.get('endereco', ''),
+                'numero': data.get('numero', ''),
+                'complemento': data.get('complemento', ''),
+                'bairro': data.get('bairro', ''),
+                'municipio': data.get('municipio', ''),
+                'uf': data.get('uf', ''),
+                'cep': data.get('cep', ''),
+                'telefone': data.get('telefone', ''),
+                'responsavel': data.get('responsavel', ''),
+                'parentesco': data.get('parentesco', ''),
+                'origem': data.get('origem', ''),
+                'numero_autorizacao': data.get('numero_autorizacao', ''),
+                'unidade_origem': data.get('unidade_origem', ''),
+                'condicoes': data.get('condicoes', ''),
+                'diagnostico': data.get('diagnostico', ''),
+                'exames': data.get('exames', ''),
+                'regime_internacao': data.get('regime_internacao', ''),
+                'procedimento_internacao': data.get('procedimento_internacao', ''),
+                'prev_alta': data.get('prev_alta', ''),
+                'clinica_solicitante': data.get('clinica_solicitante', ''),
+                'leito': data.get('leito', ''),
+                'cid_initial': data.get('cid_initial', ''),
+                'procedure_principal': data.get('procedure_principal', ''),
+                'procedure_secundary': data.get('procedure_secundary', ''),
+                'risco_morte': data.get('risco_morte', ''),
+            })
         return None
     
     def check_recommendations(self, html_content, recommendation):

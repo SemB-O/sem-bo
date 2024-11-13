@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
+from django.db.models import Q
 from ..models import Procedure
 
 

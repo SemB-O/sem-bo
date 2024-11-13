@@ -33,5 +33,7 @@ urlpatterns = [
     path('medical_record/<int:record_id>/', medical_record.ViewSingleMedicalRecord.as_view(), name='view_single_medical_record'),
     path('records/<int:record_id>/send-email/', medical_record.ViewSingleMedicalRecord.as_view(), name='send_medical_record_email'),
     path('view_medical_record/<int:record_id>/', medical_record.ViewMedicalRecordPDF.as_view(), name='view_medical_record'),
+    path('medical_record_list', medical_record.MedicalRecordListView.as_view(), name='medical_record_list'),
+    path('medical-records/search/', medical_record.MedicalRecordSearchView.as_view(), name='medical_record_search'),
     path('api/', include('cbo.api.urls'), name='cbo_api')
 ]

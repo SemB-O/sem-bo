@@ -1,0 +1,151 @@
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    max-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    background-color: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.menu-top {
+    margin-bottom: 1.5rem;
+}
+
+.menu-top a {
+    display: flex;
+    align-items: center;
+}
+
+.menu-top a img {
+    width: 10rem;
+}
+
+.search {
+    width: 100%;
+}
+
+
+.search input{
+    background-color: #F4F4F8;
+    border-radius: 10px;
+    width: 100%;
+    padding-left: 5rem;
+}
+
+.search ion-icon {
+    left: 4rem;
+}
+
+.results {
+    width: 97.5vw;
+    align-self: center;
+    justify-self: center;
+    min-height: 61vh;
+    max-height: 64vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.medical_record {
+    display: flex;
+    justify-content: space-between;
+}
+
+.medical_record a {
+    font-size: 12px;
+}
+
+.title_tags a {
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.title_tags h5 {
+    font-size: 0.8rem;
+}
+
+.medical_record_code {
+    background-color: #7d838b;
+    display: flex;
+    width: 8rem;
+    height: 3.2rem;
+    border-radius: 0.3rem;
+    align-items: center;
+    transition: 0.3s;
+    cursor: pointer;
+    color: white;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+
+.view {
+    background-color: #f3f3f899;
+    display: flex;
+    width: 3.5rem;
+    height: 3.2rem;
+    border-radius: 0 1rem 1rem 0;
+    align-items: center;
+    transition: 0.3s;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.view:hover {
+    background-color: #dfdfe499;
+    transition: 0.5s;
+    width: 4rem;
+    align-items: center;
+    height: 3.2rem;
+}
+
+.view ion-icon{
+    align-self: center !important;
+    font-size: 1.5rem;
+    font-weight: bolder;
+    justify-self: center;
+    justify-content: center;
+}
+
+.right_info {
+    display: flex;
+    gap: 1rem;
+}
+
+::-webkit-scrollbar {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(224, 224, 224);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-corner {
+    background: rgb(224, 224, 224);
+    border-radius: 10px;
+}
+
+.filter {
+    background-color: #F4F4F8;
+    border-radius: 10px;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    cursor: pointer;
+    width: 3rem;
+    height: 2.8rem;
+    transition: 0.5s;
+}
+
+.filter:hover {
+    background-color: #ececec;
+    transition: 0.5s;
+}
