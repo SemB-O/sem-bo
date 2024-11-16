@@ -34,8 +34,8 @@ class LoginView(LoginView):
 class RegisterView(View):
     template_name = 'create/register_user.html'
 
-    def get(self, request, selected_plan, *args, **kwargs):
-        form = UserRegisterForm(initial={'plan': selected_plan}, use_required_attribute=False)
+    def get(self, request, *args, **kwargs):
+        form = UserRegisterForm(use_required_attribute=False)
         occupations = Occupation.objects.all()
 
         plans = Plan.objects.all()
@@ -44,7 +44,6 @@ class RegisterView(View):
         context = {
             'form': form,
             'occupations': occupations,
-            'selected_plan': request.GET.get('selected_plan'),
             'plans_json': plans_json,
         }
 

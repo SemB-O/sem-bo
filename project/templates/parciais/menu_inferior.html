@@ -24,12 +24,6 @@
             </span>
             <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2 {% if request.path == procedure_list_url %}checked-page{% endif %}">Procedimentos</span>
         </div></a>
-        <a href="{% url 'medical_record' %}"><div class="item rounded-md bg-white shadow-md text-center">
-            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined">
-                list_alt
-            </span>
-            <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-sm mt-2">Prontuários</span>
-        </div></a>
         <a href="{% url 'procedure_favorite' %}">
             <div class="item rounded-md bg-white shadow-md text-center">
                 <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined {% if request.path == procedure_favorite_url %}checked-page{% endif %}">

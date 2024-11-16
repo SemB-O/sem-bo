@@ -136,14 +136,6 @@
                 {% endif %}
                 <div id="occupation-error" class="ml-2 mt-1 text-sm text-red-600" style="display: none;"></div>
             </div>
-
-            <div>
-                <label for="id_plan" class="form-label">Plano</label>
-                {{ form.plan }}
-                {% if form.plan.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.plan.errors }}</div>
-                {% endif %}
-            </div>
         
             <button id="save-button" class="button_login w-full py-2 px-4 rounded-md">Registrar</button>
         </form>
@@ -168,30 +160,6 @@
                 allowClear: true,
                 width: '100%'
             });
-
-            function validateOccupations() {
-                let selectedPlan = $('.plan-select option:selected').text();
-                let occupations = $('.occupation-select').val();
-                let OccupationError = $('#occupation-error');
-
-                let maxOccupations = 0;
-
-                if (selectedPlan === 'Plano Essencial') {
-                    maxOccupations = 1;
-                } else if (selectedPlan === 'Plano Essencial +') {
-                    maxOccupations = 3;
-                }
-
-                if (occupations && occupations.length > maxOccupations) {
-                    OccupationError.text(`O ${selectedPlan} permite selecionar até ${maxOccupations} ocupação(ões).`).fadeIn();
-                    return false;
-                } else {
-                    OccupationError.hide();
-                    return true;
-                }
-            }
-
-            validateOccupations();
 
             $('.plan-select').on('change', function() {
                 validateOccupations();

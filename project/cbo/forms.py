@@ -35,30 +35,20 @@ class UserRegisterForm(UserCreationForm):
         
         return medic_occupations
     
-    plan = forms.ModelChoiceField(
-        queryset=Plan.objects.all(),
-        widget=forms.Select(
-            attrs={
-                'class': 'plan-select w-full px-4 py-2 rounded-md focus:outline-none',
-                'data-placeholder': 'Selecione seu Plano'
-            }
-        ),
-    )
-
     occupation = forms.ModelMultipleChoiceField(
         queryset=filter_occupations(None), 
         widget=forms.SelectMultiple(
             attrs={
                 'class': 'occupation-select w-full px-4 py-2 rounded-md focus:outline-none',
                 'id': 'occupation-select',
-                'data-placeholder': 'Selecione uma ou mais ocupações de acordo com seu Plano'
+                'data-placeholder': 'Selecione uma ou mais ocupações'
             },
         ),
     )
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'password1', 'password2', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration', 'occupation', 'plan']
+        fields = ['email', 'first_name', 'last_name', 'password1', 'password2', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration', 'occupation']
         widgets = {
             'email': forms.EmailInput(attrs={
                 'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
@@ -111,7 +101,7 @@ class UserRegisterForm(UserCreationForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(UserRegistrationForm, self).__init__(*args, **kwargs)
+        super(UserRegisterForm, self).__init__(*args, **kwargs)
         self.fields['password1'].widget.attrs.update({
             'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
             'placeholder': 'Digite sua Senha'
@@ -123,14 +113,10 @@ class UserRegisterForm(UserCreationForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        plan = cleaned_data.get('plan')
         occupations = cleaned_data.get('occupation')
 
-        if plan and occupations:
-            if plan.name == 'Plano Essencial' and len(occupations) > 1:
-                raise ValidationError('O Plano Essencial permite selecionar apenas uma ocupação.')
-            elif plan.name == 'Plano Essencial +' and len(occupations) > 3:
-                raise ValidationError('O Plano Essencial + permite selecionar até 3 ocupações.')
+        if occupations and len(occupations) > 3:
+            raise ValidationError('Você pode selecionar no máximo 3 ocupações.')
 
         return cleaned_data
 
