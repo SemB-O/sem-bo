@@ -13,7 +13,7 @@ from django.utils.encoding import force_bytes, force_str
 from cbo.tokens import account_activation_token
 from django.conf import settings
 from django.urls import reverse_lazy
-from ..forms import EmailAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
+from ..forms.user import EmailAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
 from ..models import Occupation, Plan, FavoriteFolder, User
 
 

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from ..models import FavoriteProcedure, Procedure, FavoriteFolder, Record
-from ..forms import FavoriteFolderForm
+from ..forms.favorite import FavoriteFolderForm
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')

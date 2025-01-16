@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render
 from ..models import Cid, Procedure
-from ..forms import RecordMedicalForm
+from ..forms.record_medical import RecordMedicalForm
 
 
 class MedicalRecordView(View):

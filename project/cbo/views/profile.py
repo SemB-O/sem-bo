@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.contrib import messages
-from ..forms import UserEditForm
+from ..forms.user import UserEditForm
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
