@@ -147,7 +147,14 @@ class UserEditForm(forms.ModelForm):
 
 
 class PasswordResetEmailForm(forms.Form):
-    email = forms.EmailField(label='Email')
+    email = forms.EmailField(
+        label='Email',
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+            'placeholder': 'Digite seu email',
+            'autocomplete': 'email',
+        })
+    )
 
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -187,8 +194,7 @@ class SetPasswordForm(forms.Form):
             raise ValidationError(_("As senhas não correspondem."))
         return confirm_new_password
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
+    def save(self, user, commit=True):
         user.set_password(self.cleaned_data["new_password"])
         if commit:
             user.save()

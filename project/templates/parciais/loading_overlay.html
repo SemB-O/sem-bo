@@ -1,0 +1,14 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden" id="loadingOverlaySmart">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center flex flex-col items-center">
+        <div class="border-t-4 w-16 h-16 rounded-full animate-spin mb-4 border-[#43D1EB]"></div>
+        <p class="text-lg font-semibold text-gray-700">Processando...</p>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('form').on('submit', function () {
+            $('#loadingOverlaySmart').removeClass('hidden');
+        });
+    });
+</script>

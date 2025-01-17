@@ -97,16 +97,17 @@ class LogoutView(LogoutView):
     next_page = reverse_lazy('login')
 
 
-class PasswordResetView(View):
+class PasswordResetView(TemplateView):
     template_name = 'password_reset/password_reset.html'
-
-    def get(self, request):
-        form = PasswordResetEmailForm()
-        return render(
-            request=request,
-            template_name=self.template_name,
-            context={"form": form}
-        )
+    
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = PasswordResetEmailForm()
+        return context
 
     def post(self, request):
         form = PasswordResetEmailForm(request.POST)
@@ -157,18 +158,20 @@ class PasswordResetConfirmView(TemplateView):
         
         return context
 
-    def post(self, request, uidb64, token):
-        User = get_user_model()
+    def get_user_from_uid(self, uidb64):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
+            return get_user_model().objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
+            return None
+
+    def post(self, request, uidb64, token):
+        user = self.get_user_from_uid(uidb64)
 
         if user is not None and account_activation_token.check_token(user, token):
-            form = SetPasswordForm(user, request.POST)
+            form = SetPasswordForm(request.POST)
             if form.is_valid():
-                form.save()
+                form.save(user)
                 messages.success(request, 'Sua senha foi alterada com sucesso!')
                 return redirect('login')
             else:
