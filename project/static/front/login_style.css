@@ -1,27 +1,5 @@
 body {
-    margin: 0;
-    max-height: 100vh;
     font-family: 'Poppins', sans-serif;
-    color: #000;
-    background-color: #FFFFFF;
-    box-sizing: border-box;
-    display: grid;
-    grid-template-rows: 1fr 2fr 1fr;
-    justify-items: center;
-}
-
-.logo {
-    width: 22%;
-    position: relative;
-    top: 5rem;
-}
-
-.logo a {
-    width: 100%;
-}
-
-.logo a img {
-    width: 100%;
 }
 
 .chosen-container {
@@ -60,25 +38,6 @@ form div input {
 form div select {
     background-color: #F2F2F7;
     cursor: pointer;
-}
-
-.button_login {
-    background-color: #0F0F0F !important;
-    color: white;
-}
-
-.login {
-    width: 45%;
-}
-
-.login h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 2.2rem;
-    font-weight: bold;
-}
-
-.reset_password {
-    justify-content: right;
 }
 
 .date-picker-container {
