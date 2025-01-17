@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
+from django.utils.translation import gettext as _
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
 
@@ -155,7 +156,41 @@ class PasswordResetEmailForm(forms.Form):
         return email
     
 
-class SetPasswordForm(SetPasswordForm):
+class SetPasswordForm(forms.Form):
+    new_password = forms.CharField(
+        label=_("Nova senha"),
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+            'placeholder': 'Nova senha',
+            'autocomplete': 'new-password',
+        }),
+        strip=False,
+    )
+    confirm_new_password = forms.CharField(
+        label=_("Confirme a nova senha"),
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+            'placeholder': 'Confirme a nova senha',
+            'autocomplete': 'new-password',
+        }),
+        strip=False,
+    )
+
     class Meta:
         model = get_user_model()
-        fields = ['new_password1', 'new_password2']
+        fields = ['new_password', 'confirm_new_password']
+
+    def clean_confirm_new_password(self):
+        new_password = self.cleaned_data.get("new_password")
+        confirm_new_password = self.cleaned_data.get("confirm_new_password")
+        if new_password and confirm_new_password and new_password != confirm_new_password:
+            raise ValidationError(_("As senhas não correspondem."))
+        return confirm_new_password
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["new_password"])
+        if commit:
+            user.save()
+        return user
+

@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views import View
+from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.core.mail import EmailMessage
@@ -13,6 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from cbo.tokens import account_activation_token
 from django.conf import settings
 from django.urls import reverse_lazy
+from django.db.models import Q
 from ..forms.user import EmailAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
 from ..models import Occupation, Plan, FavoriteFolder, User
 
@@ -73,7 +75,7 @@ class RegisterView(View):
             return redirect('login')
         else:
             return render(request, self.template_name, {'form': form})
-        
+
     def activateEmail(self, request, user, to_email):
         mail_subject = "Ativação da sua conta Sem B.O"
         message = render_to_string('email/email_verification.html', {
@@ -96,7 +98,7 @@ class LogoutView(LogoutView):
 
 
 class PasswordResetView(View):
-    template_name = 'password_reset/email_password_reset.html'
+    template_name = 'password_reset/password_reset.html'
 
     def get(self, request):
         form = PasswordResetEmailForm()
@@ -118,7 +120,7 @@ class PasswordResetView(View):
                     'uid': urlsafe_base64_encode(force_bytes(associetad_user.pk)),
                     'token': account_activation_token.make_token(associetad_user),
                     'protocol': 'https' if request.is_secure() else 'http',
-                    'domain': '192.168.0.108:8000'
+                    'domain': settings.DOMAIN
                 })
                 email = EmailMessage(mail_subject, message, to=[associetad_user.email])
                 email.content_subtype = 'html' 
@@ -128,29 +130,32 @@ class PasswordResetView(View):
                     messages.error(request, 'Seu email não consta no nosso sistema! <b>Por favor, digite um email válido!</b>')
 
             return redirect('login')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+            return redirect('password_reset')
 
 
-class PasswordResetConfirmView(View):
-    template_name = 'password_reset/password_reset.html'
+class PasswordResetConfirmView(TemplateView):
+    template_name = 'password_reset/email_password_reset.html'
 
-    def get(self, request, uidb64, token):
-        User = get_user_model()
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-            form = SetPasswordForm(user)
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
 
-            return render(
-                request=request,
-                template_name=self.template_name,
-                context = {
-                    "form": form,
-                    "uidb64": uidb64,
-                    "token": token,
-                }
-            )
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        uidb64 = self.kwargs.get('uidb64')
+        token = self.kwargs.get('token')
+        form = SetPasswordForm()
+
+        context.update({
+            'form': form,
+            'uidb64': uidb64,
+            'token': token
+        })
+        
+        return context
 
     def post(self, request, uidb64, token):
         User = get_user_model()
@@ -174,7 +179,6 @@ class PasswordResetConfirmView(View):
         else:
             messages.error(request, 'Esse link de redefinição de senha é inválido ou expirou.')
         return redirect('login')
-    
 
 def activate(request, uidb64, token):
     User =  get_user_model()
