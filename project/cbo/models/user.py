@@ -20,7 +20,6 @@ class User(AbstractUser, BaseModel):
     email_verified = models.BooleanField(default=False)
     email_verification_token = models.UUIDField(
         default=uuid.uuid4, editable=False)
-    
     username = None
     date_joined = None
 
@@ -39,14 +38,6 @@ class User(AbstractUser, BaseModel):
             self.set_password(self.password)
 
         super(User, self).save(*args, **kwargs)
-
-    def clean(self):
-        super().clean()
-        if self.username:
-            raise ValidationError("Username não é permitido.")
-
-        # if self.date_of_birth > timezone.now().date():
-        #     raise ValidationError("A data de nascimento não pode ser maior que o dia atual.")
 
     def __str__(self):
         return self.first_name + self.last_name

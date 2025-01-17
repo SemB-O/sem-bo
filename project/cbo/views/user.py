@@ -1,5 +1,7 @@
 import json
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
+from django.views.generic.edit import FormView
+from django.contrib.auth import authenticate, login
 from django.views import View
 from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect
@@ -15,22 +17,29 @@ from cbo.tokens import account_activation_token
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.db.models import Q
-from ..forms.user import EmailAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
+from ..forms.user import LoginAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
 from ..models import Occupation, Plan, FavoriteFolder, User
 
 
-class LoginView(LoginView):
+class LoginView(FormView):
     template_name = 'front/login.html'
-    authentication_form = EmailAuthenticationForm
+    form_class = LoginAuthenticationForm
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        return HttpResponseRedirect(reverse_lazy('home'))
+        email = form.cleaned_data['email']
+        password = form.cleaned_data['password']
+
+        user = authenticate(self.request, username=email, password=password)
+        if user is not None:
+            login(self.request, user)
+            return redirect('home')
+        else:
+            messages.error(self.request, 'Credenciais inválidas. Tente novamente.')
+            return redirect('login')
 
     def form_invalid(self, form):
-        response = super().form_invalid(form)
-        messages.error(self.request, 'Credenciais inválidas. Tente novamente.')
-        return HttpResponseRedirect(reverse_lazy('login'))
+        messages.error(self.request, 'Erro no formulário. Verifique os dados.')
+        return redirect('login')
 
 
 class RegisterView(View):

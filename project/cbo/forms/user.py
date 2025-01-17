@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import gettext as _
 from django.contrib.auth.forms import UserCreationForm
@@ -7,9 +8,27 @@ from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
 
 
-class EmailAuthenticationForm(AuthenticationForm):
-    def clean_username(self):
-        return self.cleaned_data['username']
+class LoginAuthenticationForm(forms.Form):
+    email = forms.EmailField(
+        label='Email',
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-md focus:outline-none border-gray-300',
+            'placeholder': 'Digite seu email',
+            'autocomplete': 'email',
+        })
+    )
+    password = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-md focus:outline-none border-gray-300',
+            'placeholder': 'Digite sua senha',
+            'autocomplete': 'current-password',
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = User
