@@ -1,5 +1,6 @@
 from cbo.models._base import BaseModel
 from django.db import models
+from .plan_point_availability import PlanPointAvailability
 
 
 class Plan(BaseModel):
@@ -10,7 +11,7 @@ class Plan(BaseModel):
         'PlanPoint', related_name='plans', through='PlanPointAvailability')
 
     def all_points(self):
-        return self.points.all()
+        return PlanPointAvailability.objects.filter(plan=self)
 
     def available_points(self):
         return self.points.filter(plan_point__available=True)
