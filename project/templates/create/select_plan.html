@@ -10,18 +10,23 @@ Sem B.O
 {% endblock %}
 
 {% block content %}
-<section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0">
+<section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_2fr] justify-items-center py-6 md:py-0">
     <div></div>
     <div class="flex flex-col gap-2">
-        <div class="text-center py-12 px-8 md:px-0 md:py-8">
+        <div class="text-center py-12 px-8 md:px-0 md:py-8 md:mb-4">
             <h1 class="text-6xl md:text-7xl">Escolha <b><span class="text-[#43D1EB]">seu Plano</span></b></h1>
             <p class="text-gray-600">Escolha o plano que mais se adequa às suas necessidades!</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl px-4 md:mb-4">
             {% for plan in plans %}
-            <div class="bg-white border border-gray-200 rounded-xl shadow-lg p-6 flex flex-col text-center gap-4">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-lg p-6 flex flex-col text-center gap-4 {% if forloop.counter == 2 %} md:scale-110 {% endif %}">
                 <h2 class="text-2xl font-bold text-left text-gray-800">{{ plan.name }}</h2>
                 <p class="text-left text-gray-600">{{ plan.description }}</p>
+                <div class="flex">
+                    <p class="text-xl text-left font-bold text-gray-800 mb-4" style="margin-top: 0.5rem;">R$</p>
+                    <p class="text-5xl text-left font-bold text-gray-800 mb-4">{{ plan.price }}</p>
+                    <p class="text-xl text-left font-bold text-gray-800 mb-4 pt-2">/mês</p>
+                </div>
                 <ul class="text-sm text-left text-gray-600 space-y-2">
                     {% for point_availability in plan.all_points %}
                         <li class="flex border-b border-gray-300 pb-2">
@@ -57,4 +62,24 @@ Sem B.O
         </div>
     </div>
 </section>
+
+<script>
+    function submitRegister(button) {
+        let selectedPlanId = $(button).closest('form').find('.plan-id').text().trim();
+        $.ajax({
+            type: 'POST',
+            url: '{% url "select_plan" %}',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                selected_plan_id: selectedPlanId
+            },
+            success: function(response) {
+                window.location.href = response.redirect_url;
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+</script>
 {% endblock %}

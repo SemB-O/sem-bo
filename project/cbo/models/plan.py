@@ -7,6 +7,7 @@ class Plan(BaseModel):
     name = models.CharField(max_length=150)
     max_occupations = models.PositiveIntegerField()
     description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     points = models.ManyToManyField(
         'PlanPoint', related_name='plans', through='PlanPointAvailability')
 
