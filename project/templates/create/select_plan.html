@@ -5,10 +5,6 @@
 Sem B.O
 {% endblock %}
 
-{% block head %}
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-{% endblock %}
-
 {% block content %}
 <section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_2fr] justify-items-center py-6 md:py-0">
     <div></div>
@@ -62,24 +58,4 @@ Sem B.O
         </div>
     </div>
 </section>
-
-<script>
-    function submitRegister(button) {
-        let selectedPlanId = $(button).closest('form').find('.plan-id').text().trim();
-        $.ajax({
-            type: 'POST',
-            url: '{% url "select_plan" %}',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                selected_plan_id: selectedPlanId
-            },
-            success: function(response) {
-                window.location.href = response.redirect_url;
-            },
-            error: function(xhr, status, error) {
-                console.error(error);
-            }
-        });
-    }
-</script>
 {% endblock %}

@@ -11,5 +11,21 @@
 {% endblock %}
 
 {% include 'parciais/loading_overlay.html' %}
+
+<script>
+    $(document).ready(function () {
+        $(".toggle-password").click(function () {
+            let input = $(this).siblings("input");
+
+            if (input.attr("type") === "password") {
+                input.attr("type", "text");
+                $(this).text("visibility_off");
+            } else {
+                input.attr("type", "password");
+                $(this).text("visibility");
+            }
+        });
+    });
+</script>
 </body>
 </html>

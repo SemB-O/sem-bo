@@ -1,160 +1,126 @@
+{% extends 'base_auth.html' %}
 {%  load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sem B.O</title>
-    <link rel="stylesheet" href="{% static 'front/register_style.css' %}">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+{% block title %}
+Sem B.O
+{% endblock %}
 
-</head>
+{% block head %}
 
-<body>
+<link rel="stylesheet" href="{% static 'front/register_style.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
-    <div class="loading-overlay" id="loadingOverlaySmart">
-        <div class="loading-content">
-            <div class="loading-spinner" style="margin-left: 60px !important;"></div>
-            <p>Processando o cadastro...</p>
+{% endblock %}
+
+{% block content %}
+
+<section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
+    <div></div>
+    <div class="flex flex-col gap-2 justify-center items-center px-6 md:px-0 w-full md:w-2/3">
+        <div class="sticky text-center py-2">
+            <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
+            <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
         </div>
-    </div>
 
-    <div class="login rounded">
-        <div class="logo flex justify-center">
-            <a href="{% url 'home' %}">
-                <img src="{% static 'assets/logo.png' %}">
-            </a>
-        </div>
-        <!-- <h2 class="mb-2 text-left">Registre-se</h2> -->
-
-        <form class="form-register" method="post">
+        <form class="w-full" method="post">
             {% csrf_token %}
-            <div>
-                <label for="id_email" class="form-label">Seu Email</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.email.errors }}</div>
-                {% endif %}
-            </div>
-        
-            <div>
-                <label for="id_first_name" class="form-label">Nome</label>
-                {{ form.first_name }}
-                {% if form.first_name.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.first_name.errors }}</div>
-                {% endif %}
-            </div>
-        
-            <div>
-                <label for="id_last_name" class="form-label">Sobrenome</label>
-                {{ form.last_name }}
-                {% if form.last_name.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.last_name.errors }}</div>
-                {% endif %}
-            </div>
-        
-            <div>
-                <label for="id_password1" class="form-label">Senha</label>
-                <div class="relative">
-                    {{ form.password1 }}
-                    <span toggle="#id_password1" class="material-symbols-outlined toggle-password absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer eye-icon">
-                        visibility
-                    </span>
+            
+            <div class="step flex flex-col gap-4" id="step-1">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
+                    <p class="text-gray-600">Suas informações pessoais!</p>
                 </div>
-                <div id="password1-requirements" class="password-requirements" style="display: none;">
-                    <p class="text-sm py-1 px-4 mb-2 mt-2 rounded bg-blue-100 text-blue-800">Sua senha precisa ter pelo menos 8 caracteres, sendo números e letras. Ela não deve ser muito semelhante ao seu nome.</p>
+                <div>
+                    <label for="id_first_name">Nome</label>
+                    {{ form.first_name }}
                 </div>
-                {% if form.password1.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.password1.errors }}</div>
-                {% endif %}              
-            </div>
-        
-            <div>
-                <label for="id_password2" class="form-label">Confirmar Senha</label>
-                <div class="relative">
-                    {{ form.password2 }}
-                    <span toggle="#id_password2" class="material-symbols-outlined toggle-password absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer eye-icon">
-                        visibility
-                    </span>
+                <div>
+                    <label for="id_last_name">Sobrenome</label>
+                    {{ form.last_name }}
                 </div>
-                <div id="password2-error" class="ml-2 mt-1 text-sm text-red-600" style="display: none;"></div>
-                {% if form.password2.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.password2.errors }}</div>
-                {% endif %}
+                <div>
+                    <label for="id_CPF">CPF</label>
+                    {{ form.CPF }}
+                </div>
+                <div>
+                    <label for="id_telephone">Telefone</label>
+                    {{ form.telephone }}
+                </div>
+                <div>
+                    <label for="id_date_of_birth">Data de Nascimento</label>
+                    {{ form.date_of_birth }}
+                </div>
+                <button type="button" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
             </div>
-        
-            <div>
-                <label for="id_CPF" class="form-label">CPF</label>
-                {{ form.CPF }}
-                {% if form.CPF.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.CPF.errors }}</div>
-                {% endif %}
+            
+            <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
+                    <p class="text-gray-600">Suas informações profissionais!</p>
+                </div>
+                <div>
+                    <label for="id_occupational_registration">Registro Ocupacional</label>
+                    {{ form.occupational_registration }}
+                </div>
+                <div>
+                    <label for="id_plan">Plano</label>
+                    {{ form.plan }}
+                </div>
+                <div>
+                    <label for="occupation-select">Ocupação</label>
+                    {{ form.occupation }}
+                </div>
+                <div class="flex gap-2 my-2">
+                    <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
+                    <button type="button" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                </div>
             </div>
-        
-            <div>
-                <label for="id_telephone" class="form-label">Telefone</label>
-                {{ form.telephone }}
-                {% if form.telephone.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.telephone.errors }}</div>
-                {% endif %}
+            
+            <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
+                    <p class="text-gray-600">Suas informações de login!</p>
+                </div>
+                <div>
+                    <label for="id_email">E-mail</label>
+                    {{ form.email }}
+                </div>
+                <div>
+                    <label for="id_password1">Senha</label>
+                    <div class="relative">
+                        {{ form.password1 }}
+                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                            visibility
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <label for="id_password2">Confirmar Senha</label>
+                    <div class="relative">
+                        {{ form.password2 }}
+                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                            visibility
+                        </span>
+                    </div>
+                </div>
+                <div class="flex gap-2 my-2">
+                    <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
+                    <button type="button" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                </div>
             </div>
-        
-            <div>
-                <label for="id_date_of_birth" class="form-label">Data de Nascimento</label>
-                {{ form.date_of_birth }}
-                {% if form.date_of_birth.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.date_of_birth.errors }}</div>
-                {% endif %}
-            </div>
-        
-            <div>
-                <label for="id_occupational_registration" class="form-label">Registro Ocupacional</label>
-                {{ form.occupational_registration }}
-                {% if form.occupational_registration.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.occupational_registration.errors }}</div>
-                {% endif %}
-            </div>
-        
-            <div>
-                <label for="occupation-select" class="form-label">Ocupação</label>
-                {{ form.occupation }}
-                {% if form.occupation.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.occupation.errors }}</div>
-                {% endif %}
-                <div id="occupation-error" class="ml-2 mt-1 text-sm text-red-600" style="display: none;"></div>
-            </div>
-
-            <div>
-                <label for="id_plan" class="form-label">Plano</label>
-                {{ form.plan }}
-                {% if form.plan.errors %}
-                    <div class="ml-2 mt-1 text-sm text-red-600">{{ form.plan.errors }}</div>
-                {% endif %}
-            </div>
-        
-            <button id="save-button" class="button_login w-full py-2 px-4 rounded-md">Registrar</button>
         </form>
-        <div class="footer-register">
-            <div class="register flex justify-center">
-                <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
-            </div>
-        </div>
     </div>
-
-    <div id="plans_info" hidden>{{ plans_json }}</div>
+    <div class="flex justify-center py-8">
+        <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
+    </div>
+</section>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script>
@@ -305,5 +271,38 @@
         });
     </script>
 
-</body>
-</html>
+    <script>
+        $(document).ready(function () {
+            let currentStep = 1;
+            const totalSteps = $('.step').length;
+
+            function showStep(step) {
+                $('.step').hide();
+                $(`#step-${step}`).fadeIn();
+            }
+
+            $('.next-step').on('click', function () {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            });
+
+            $('.previous-step').on('click', function () {
+                if (currentStep > 1) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            });
+
+            $('form').on('submit', function (e) {
+                // Adicione lógica de validação aqui se necessário
+                console.log("Formulário enviado!");
+            });
+
+            // Exibir o primeiro passo ao carregar a página
+            showStep(currentStep);
+        });
+    </script>
+
+{% endblock %}
