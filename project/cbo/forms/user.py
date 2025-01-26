@@ -52,12 +52,12 @@ class UserRegisterForm(UserCreationForm):
             medic_occupations |= occupations.filter(name__icontains=keyword)
         
         return medic_occupations
-    
+
     plan = forms.ModelChoiceField(
         queryset=Plan.objects.all(),
         widget=forms.Select(
             attrs={
-                'class': 'plan-select w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField plan-select w-full px-4 py-2 rounded-md focus:outline-none',
                 'data-placeholder': 'Selecione seu Plano'
             }
         ),
@@ -67,7 +67,7 @@ class UserRegisterForm(UserCreationForm):
         queryset=filter_occupations(None), 
         widget=forms.SelectMultiple(
             attrs={
-                'class': 'occupation-select w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField occupation-select w-full px-4 py-2 rounded-md focus:outline-none',
                 'id': 'occupation-select',
                 'data-placeholder': 'Selecione uma ou mais ocupações de acordo com seu Plano'
             },
@@ -79,50 +79,50 @@ class UserRegisterForm(UserCreationForm):
         fields = ['email', 'first_name', 'last_name', 'password1', 'password2', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration', 'occupation', 'plan']
         widgets = {
             'email': forms.EmailInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Digite seu Email',
                 'required': 'false'
             }),
             'first_name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Digite seu Nome',
                 'required': 'false'
             }),
             'last_name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Digite seu Sobrenome',
                 'required': 'false'
             }),
             'password1': forms.PasswordInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Digite sua Senha',
                 'required': 'false'
             }),
             'password2': forms.PasswordInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Confirme sua senha',
                 'required': 'false'
             }),
             'CPF': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'id': 'id_CPF',
                 'placeholder': 'Digite seu CPF',
                 'required': 'false'
             }),
             'telephone': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'id': 'id_telephone',
                 'placeholder': 'Digite seu Telefone',
                 'required': 'false'
             }),
             'date_of_birth': forms.DateInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Digite sua Data de nascimento',
                 'type': 'date',
                 'required': 'false'
             }),
             'occupational_registration': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
                 'placeholder': 'Digite seu Registro ocupacional',
                 'required': 'false'
             }),
@@ -131,11 +131,11 @@ class UserRegisterForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(UserRegisterForm, self).__init__(*args, **kwargs)
         self.fields['password1'].widget.attrs.update({
-            'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+            'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
             'placeholder': 'Digite sua Senha'
         })
         self.fields['password2'].widget.attrs.update({
-            'class': 'w-full px-4 py-2 rounded-md focus:outline-none',
+            'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
             'placeholder': 'Confirme sua Senha'
         })
 

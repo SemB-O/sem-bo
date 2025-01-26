@@ -57,7 +57,8 @@ Sem B.O
                     <label for="id_date_of_birth">Data de Nascimento</label>
                     {{ form.date_of_birth }}
                 </div>
-                <button type="button" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
+                <div class="error-message text-sm text-red-600 hidden"></div>
+                <button type="button" id="first-step" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
             </div>
             
             <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
@@ -77,9 +78,10 @@ Sem B.O
                     <label for="occupation-select">Ocupação</label>
                     {{ form.occupation }}
                 </div>
+                <div class="error-message text-sm text-red-600 hidden"></div>
                 <div class="flex gap-2 my-2">
                     <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                    <button type="button" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                    <button type="button" id="second-step" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
                 </div>
             </div>
             
@@ -110,9 +112,10 @@ Sem B.O
                         </span>
                     </div>
                 </div>
+                <div class="error-message text-sm text-red-600 hidden"></div>
                 <div class="flex gap-2 my-2">
                     <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                    <button type="button" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                    <button type="button" id="third-step" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
                 </div>
             </div>
         </form>
@@ -281,26 +284,69 @@ Sem B.O
                 $(`#step-${step}`).fadeIn();
             }
 
-            $('.next-step').on('click', function () {
-                if (currentStep < totalSteps) {
-                    currentStep++;
-                    showStep(currentStep);
+            $(".next-step").on("click", function () {
+                const currentStep = $(this).closest(".step");
+                const requiredFields = currentStep.find(".requiredField");
+                const messageContainer = currentStep.find(".error-message");
+                let allFieldsValid = true;
+
+                requiredFields.each(function () {
+                    const field = $(this);
+                    if (field.hasClass("select2-hidden-accessible")) {
+                        const value = field.val();
+                        const select2Container = field.next(".select-8-selection--single");
+                        const select2Selection = select2Container.find(".select-8-selection--multiple");
+                        console.log(select2Container, select2Selection)
+
+                        if (!value || (Array.isArray(value) && value.length === 0) || (typeof value === "string" && value.trim() === "")) {
+                            allFieldsValid = false;
+                            select2Selection.css({
+                                "border-color": "red !important",
+                                "background-color": "#ffe5e5 !important"
+                            });
+                        } else {
+                            select2Selection.css({
+                                "border-color": "",
+                                "background-color": ""
+                            });
+                        }
+                    } else {
+                        if (!field.val().trim()) {
+                            allFieldsValid = false;
+                            field.addClass("border-red-500 bg-red-50 focus:outline-none focus:ring focus:ring-red-300");
+                        } else {
+                            field.removeClass("border-red-500 bg-red-50 focus:outline-none focus:ring focus:ring-red-300");
+                        }
+                    }
+                });
+
+                if (allFieldsValid) {
+                    const nextStep = currentStep.next(".step");
+                    if (nextStep.length) {
+                        currentStep.hide();
+                        nextStep.show();
+                    }
+                } else {
+                    if (messageContainer.length) {
+                        messageContainer.text("Por favor, preencha todos os campos obrigatórios antes de continuar.").removeClass("hidden");
+                    }
                 }
             });
 
-            $('.previous-step').on('click', function () {
-                if (currentStep > 1) {
-                    currentStep--;
-                    showStep(currentStep);
+            $(".previous-step").on("click", function () {
+                const currentStep = $(this).closest(".step");
+                const prevStep = currentStep.prev(".step");
+
+                if (prevStep.length) {
+                    currentStep.hide();
+                    prevStep.show();
                 }
             });
 
             $('form').on('submit', function (e) {
-                // Adicione lógica de validação aqui se necessário
                 console.log("Formulário enviado!");
             });
 
-            // Exibir o primeiro passo ao carregar a página
             showStep(currentStep);
         });
     </script>
