@@ -43,7 +43,14 @@ jobs:
           sudo systemctl start docker &&
           sudo systemctl enable docker
         "
-      
+        
+    - name: Install NGINX on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+          sudo apt update -y &&
+          sudo apt install -y nginx
+        "
+
     - name: Clean Environment on EC2
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
