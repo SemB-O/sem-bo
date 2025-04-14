@@ -1,0 +1,101 @@
+name: Deploy to Development 
+
+on:
+  push:
+    branches:
+      - 'develop'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    environment: Development
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Configure SSH access to EC2 instance
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
+
+    - name: Prepare directory on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "mkdir -p /home/ubuntu/app && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
+
+    - name: Install Docker on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+          sudo apt-get update -y &&
+          sudo apt-get install -y docker.io &&
+          sudo systemctl start docker &&
+          sudo systemctl enable docker
+        "
+      
+    - name: Clean Environment on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+          sudo su -c '
+            echo \"Checking running containers...\"
+            CONTAINERS=\$(docker ps -q) && \
+            if [ -n \"\$CONTAINERS\" ]; then \
+              echo \"Killing containers: \$CONTAINERS\"; \
+              docker kill \$CONTAINERS; \
+            fi && \
+            echo \"Pruning unused Docker resources...\"; \
+            docker system prune -a -f --volumes && \
+            echo \"Removing app directory...\"; \
+            if [ -d /home/ubuntu/app ]; then \
+              rm -rf /home/ubuntu/app/* || echo \"Failed to remove some files in /home/ubuntu/app\"; \
+            else \
+              echo \"/home/ubuntu/app does not exist\"; \
+            fi
+          '
+        "
+
+    - name: Clone repository to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r * .[^.]* ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/app/
+
+    - name: Generate and Copy Environment File to EC2
+      shell: bash
+      run: |
+        echo "Generating .env file with secrets and vars..."
+
+        echo '${{ toJson(secrets) }}' | jq -r 'to_entries | map(select(.key != "github_token" and .key != "SSH_PRIVATE_KEY")) | .[] | "\(.key)=\(.value)"' >> .env
+        echo '${{ toJson(vars) }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' >> .env
+
+        echo "Copying .env file to EC2..."
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa .env ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/app/.env
+
+        echo "File .env successfully copied to EC2!"
+
+    - name: Build Docker Containers on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+          cd /home/ubuntu/app &&
+          sudo docker build --no-cache -t my-app . &&
+          sudo docker create --name my-app-container my-app &&
+          sudo docker run -d -p 8000:8000 --env-file .env my-app
+        "
+
+    - name: Restart Nginx on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+          sudo cp /home/ubuntu/app/nginx.conf /etc/nginx/nginx.conf &&
+          sudo nginx -t &&
+          sudo systemctl restart nginx &&
+          sudo systemctl status nginx || echo 'Nginx not running!'
+        "
