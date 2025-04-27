@@ -8,6 +8,5 @@ RUN pip install -r requirements.txt
 
 ADD ./project /project
 
-CMD gunicorn    --bind 0.0.0.0:8000      \
-                --reload project.wsgi:application
+CMD gunicorn --bind 0.0.0.0:8000 project.wsgi:application
 
