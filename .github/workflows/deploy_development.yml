@@ -49,18 +49,18 @@ jobs:
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
           sudo su -c '
             echo \"Checking running containers...\"
-            CONTAINERS=\$(docker ps -q) && \
-            if [ -n \"\$CONTAINERS\" ]; then \
-              echo \"Killing containers: \$CONTAINERS\"; \
-              docker kill \$CONTAINERS; \
-            fi && \
-            echo \"Pruning unused Docker resources...\"; \
-            docker system prune -a -f --volumes && \
-            echo \"Removing app directory...\"; \
-            if [ -d /home/ubuntu/app ]; then \
-              rm -rf /home/ubuntu/app/* || echo \"Failed to remove some files in /home/ubuntu/app\"; \
-            else \
-              echo \"/home/ubuntu/app does not exist\"; \
+            CONTAINERS=\$(docker ps -q)
+            if [ -n \"\$CONTAINERS\" ]; then
+              echo \"Killing containers: \$CONTAINERS\"
+              docker kill \$CONTAINERS
+            fi
+            echo \"Pruning unused Docker resources...\"
+            docker system prune -a -f --volumes
+            echo \"Removing app directory...\"
+            if [ -d /home/ubuntu/app ]; then
+              rm -rf /home/ubuntu/app/* /home/ubuntu/app/.[!.]* /home/ubuntu/app/..?* || echo \"Failed to remove some files in /home/ubuntu/app\"
+            else
+              echo \"/home/ubuntu/app does not exist\"
             fi
           '
         "
