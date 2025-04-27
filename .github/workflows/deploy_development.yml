@@ -43,13 +43,6 @@ jobs:
           sudo systemctl start docker &&
           sudo systemctl enable docker
         "
-        
-    - name: Install NGINX on EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
-          sudo apt update -y &&
-          sudo apt install -y nginx
-        "
 
     - name: Clean Environment on EC2
       run: |
@@ -96,13 +89,4 @@ jobs:
           sudo docker build --no-cache -t my-app . &&
           sudo docker create --name my-app-container my-app &&
           sudo docker run -d -p 80:8000 --env-file .env my-app
-        "
-
-    - name: Restart Nginx on EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
-          sudo cp /home/ubuntu/app/nginx.conf /etc/nginx/nginx.conf &&
-          sudo nginx -t &&
-          sudo systemctl restart nginx &&
-          sudo systemctl status nginx || echo 'Nginx not running!'
         "
