@@ -88,5 +88,5 @@ jobs:
           cd /home/ubuntu/app &&
           sudo docker build --no-cache -t my-app . &&
           sudo docker create --name my-app-container my-app &&
-          sudo docker run -d -p 80:8000 --env-file .env my-app
+          sudo docker run -d -p 8000:8000 --env-file .env my-app
         "
