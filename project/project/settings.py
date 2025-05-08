@@ -193,9 +193,9 @@ if ENVIRONMENT != 'local':
                 'class': 'watchtower.CloudWatchLogHandler',
                 'log_group': f'sem-bo/{ENVIRONMENT}',      
                 'create_log_group': True,
-                'create_log_stream': True,
                 'use_queues': True,
                 'boto3_client': CLOUDWATCH_CLIENT,
+                'send_interval': 30,
             },
         },
         'root': {
