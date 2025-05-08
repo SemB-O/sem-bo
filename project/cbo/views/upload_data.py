@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.shortcuts import render, redirect
 from ..process_files import DataImporter
+from django.db import transaction
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -12,6 +13,7 @@ class UploadDataView(View):
     def get(self, request):
         return render(request, self.template_name)
 
+    @transaction.atomic
     def post(self, request):
         arquivos = request.FILES.getlist('arquivos_txt')
 
