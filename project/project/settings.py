@@ -191,8 +191,8 @@ if ENVIRONMENT != 'local':
             'cloudwatch': {
                 'level': 'DEBUG',
                 'class': 'watchtower.CloudWatchLogHandler',
-                'log_group': f'{ENVIRONMENT}/sem-bo',      
-                'stream_name': f'{ENVIRONMENT}/sem/bo',   
+                'log_group': 'sem-bo',      
+                'stream_name': f'{ENVIRONMENT}', 
                 'create_log_group': True,
                 'create_log_stream': True,
                 'use_queues': True,
