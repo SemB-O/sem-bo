@@ -16,6 +16,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -157,6 +158,36 @@ PASSWORD_RESET_TIMEOUT = 14400
 
 #Midia
 MEDIA_URL = '/media/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'cloudwatch': {
+            'level': 'DEBUG',
+            'class': 'watchtower.CloudWatchLogHandler',
+            'log_group': f'{ENVIRONMENT}',      
+            'stream_name': f'{ENVIRONMENT}',   
+            'create_log_group': True,
+            'create_log_stream': True,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'cloudwatch'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'cloudwatch'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 #STRORAGE
 # Check if AWS_STORAGE_BUCKET_NAME is defined

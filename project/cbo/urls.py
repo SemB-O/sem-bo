@@ -1,8 +1,8 @@
 from django.urls import path, include
-from .views import upload_data, home, search_view, user, profile, chat, procedure, favorite, plan, medical_record, cid
+from .views import home, search_view, upload_files, user, profile, chat, procedure, favorite, plan, medical_record, cid
 
 urlpatterns = [
-    path('upload_files/', upload_data.UploadDataView.as_view(), name='upload_files'),
+    path('upload_files/', upload_files.UploadFilesView.as_view(), name='upload_files'),
     path('', home.Home.as_view(), name='home'),
     path('search/', search_view.SearchView.as_view(), name='search'),
     path('login/', user.LoginView.as_view(), name='login'),
