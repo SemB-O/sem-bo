@@ -191,8 +191,7 @@ if ENVIRONMENT != 'local':
             'cloudwatch': {
                 'level': 'DEBUG',
                 'class': 'watchtower.CloudWatchLogHandler',
-                'log_group': 'sem-bo',      
-                'stream_name': f'{ENVIRONMENT}', 
+                'log_group': f'sem-bo/{ENVIRONMENT}',      
                 'create_log_group': True,
                 'create_log_stream': True,
                 'use_queues': True,
@@ -204,15 +203,20 @@ if ENVIRONMENT != 'local':
             'level': 'DEBUG',
         },
         'loggers': {
+            '': {
+                'handlers': ['console', 'cloudwatch'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
             'django': {
                 'handlers': ['console', 'cloudwatch'],
                 'level': 'DEBUG',
                 'propagate': True,
             },
-            '': {
+            'upload_files_view': {
                 'handlers': ['console', 'cloudwatch'],
                 'level': 'DEBUG',
-                'propagate': True,
+                'propagate': False,
             },
         },
     }
