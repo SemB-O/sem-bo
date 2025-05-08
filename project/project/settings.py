@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from boto3 import Session
+import boto3
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -160,59 +160,64 @@ PASSWORD_RESET_TIMEOUT = 14400
 #Midia
 MEDIA_URL = '/media/'
 
-#AWS CREDENTIALS
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') 
-AWS_REGION = os.getenv('AWS_REGION') 
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+if ENVIRONMENT != 'local':
+    #AWS CREDENTIALS
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') 
+    AWS_REGION = os.getenv('AWS_REGION') 
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-#BOTO3 SESSION
-BOTO3_SESSION = Session(
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_REGION  
-)
+    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_REGION:
+        raise ValueError("AWS credentials are not set in environment variables.")
 
-#LOGGERS CLOUDWATCH
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+    #BOTO3 SESSION
+    CLOUDWATCH_CLIENT = boto3.client(
+        'logs',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        region_name=AWS_REGION
+    )
+
+    #LOGGERS CLOUDWATCH
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+            'cloudwatch': {
+                'level': 'DEBUG',
+                'class': 'watchtower.CloudWatchLogHandler',
+                'log_group': f'sem-bo/{ENVIRONMENT}',      
+                'stream_name': f'sem-bo/{ENVIRONMENT}',   
+                'create_log_group': True,
+                'create_log_stream': True,
+                'boto3_client': CLOUDWATCH_CLIENT,
+            },
         },
-        'cloudwatch': {
-            'level': 'DEBUG',
-            'class': 'watchtower.CloudWatchLogHandler',
-            'log_group': f'sem-bo/{ENVIRONMENT}',      
-            'stream_name': f'sem-bo/{ENVIRONMENT}',   
-            'create_log_group': True,
-            'create_log_stream': True,
-            'boto3_session': BOTO3_SESSION,
-        },
-    },
-    'root': {
-        'handlers': ['console', 'cloudwatch'],
-        'level': 'DEBUG',
-    },
-    'loggers': {
-        'django': {
+        'root': {
             'handlers': ['console', 'cloudwatch'],
             'level': 'DEBUG',
-            'propagate': True,
         },
-    },
-}
+        'loggers': {
+            'django': {
+                'handlers': ['console', 'cloudwatch'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+        },
+    }
 
-#STORAGE S3
-# Check if AWS_STORAGE_BUCKET_NAME is defined
+    #STORAGE 4S3
+    # Check if AWS_STORAGE_BUCKET_NAME is defined
 
-USE_S3 = os.getenv('USE_S3') == 'TRUE'
-if USE_S3:
-    STATICFILES_LOCATION = 'static'
-    STATICFILES_STORAGE = 'cbo.utils.storages.S3StaticStorage'
+    USE_S3 = os.getenv('USE_S3') == 'TRUE'
+    if USE_S3:
+        STATICFILES_LOCATION = 'static'
+        STATICFILES_STORAGE = 'cbo.utils.storages.S3StaticStorage'
 
-    MEDIAFILES_LOCATION = 'media'
-    DEFAULT_FILE_STORAGE = 'cbo.utils.storages.S3MediaStorage'
+        MEDIAFILES_LOCATION = 'media'
+        DEFAULT_FILE_STORAGE = 'cbo.utils.storages.S3MediaStorage'
