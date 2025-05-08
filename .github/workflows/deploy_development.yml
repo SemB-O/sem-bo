@@ -93,9 +93,8 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} '
           cd /home/ubuntu/app &&
-          sudo docker create --name my-app-container my-app &&
-          sudo docker start my-app-container
-    
+          sudo docker run -d -p 8000:8000 --env-file .env --name my-app-container my-app
+
           sleep 5
     
           STATUS=$(sudo docker inspect -f "{{.State.Running}}" my-app-container)
