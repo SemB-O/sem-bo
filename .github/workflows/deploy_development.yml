@@ -82,11 +82,28 @@ jobs:
 
         echo "File .env successfully copied to EC2!"
 
-    - name: Build Docker Containers on EC2
+        - name: Build Docker Containers on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+            cd /home/ubuntu/app &&
+            sudo docker build --no-cache -t my-app .
+          "
+      
+    - name: Run Docker Container on EC2 with health check
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} '
           cd /home/ubuntu/app &&
-          sudo docker build --no-cache -t my-app . &&
           sudo docker create --name my-app-container my-app &&
-          sudo docker run -d -p 8000:8000 --env-file .env my-app
-        "
+          sudo docker start my-app-container
+    
+          sleep 5
+    
+          STATUS=$(sudo docker inspect -f "{{.State.Running}}" my-app-container)
+    
+          if [ "$STATUS" != "true" ]; then
+            echo "Container failed after start. Logs:"
+            sudo docker logs my-app-container
+            exit 1
+          fi
+        '
+    
