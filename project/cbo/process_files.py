@@ -186,6 +186,34 @@ class DataImporter:
 
             cid.save()
 
+    def import_procedure_has_cid_data(file):
+        content = file.read()
+        content_str = content.decode('iso-8859-1')
+        for linha in content_str.split('\n'):
+            co_procedimento = linha[0:10].strip()
+            co_cid = linha[10:14].strip()
+            st_principal = linha[14:15].strip()
+            dt_competencia = linha[15:21].strip()
+
+            if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
+                continue
+
+            procedure, created = Procedure.objects.get_or_create(
+                procedure_code=co_procedimento,
+            )
+
+            cid, created = Cid.objects.get_or_create(
+                cid_code=co_cid,
+            )
+
+            procedure_has_cid = ProcedureHasCid(
+                st_principal=st_principal,
+                competence_date=dt_competencia,
+                procedure=procedure,
+                cid=cid
+            )
+            procedure_has_cid.save()
+
     @transaction.atomic
     def import_procedure_has_occupation_data(file):
         try:

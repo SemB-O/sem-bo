@@ -31,20 +31,28 @@ class UploadFilesView(View):
                 logger.info(f"Processing file: {file.name}")
 
                 if 'tb_procedimento' in file.name:
+                    logger.debug(f'Importing procedure data from file: {file.name}')
                     DataImporter.import_procedure_data(file)
                 elif 'tb_ocupacao' in file.name:
+                    logger.debug(f'Importing occupation data from file: {file.name}')
                     DataImporter.import_occupation_data(file)
                 elif 'tb_registro' in file.name:
+                    logger.debug(f'Importing record data from file: {file.name}')
                     DataImporter.import_record_data(file)
                 elif 'tb_cid' in file.name:
+                    logger.debug(f'Importing CID data from file: {file.name}')
                     DataImporter.import_cid_data(file)
                 elif 'rl_procedimento_cid' in file.name:
+                    logger.debug(f'Importing procedure-to-CID relation from file: {file.name}')
                     DataImporter.import_procedure_has_cid_data(file)
                 elif 'rl_procedimento_ocupacao' in file.name:
+                    logger.debug(f'Importing procedure-to-occupation relation from file: {file.name}')
                     DataImporter.import_procedure_has_occupation_data(file)
                 elif 'rl_procedimento_registro' in file.name:
+                    logger.debug(f'Importing procedure-to-record relation from file: {file.name}')
                     DataImporter.import_procedure_has_record_data(file)
                 elif 'tb_descricao' in file.name:
+                    logger.debug(f'Importing description data from file: {file.name}')
                     DataImporter.import_description_data(file)
 
                 file_process_time = time.time() - start_file_time
