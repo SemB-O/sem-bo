@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.db import transaction
 import logging
 
-
 import_procedure_has_occupation_logger = logging.getLogger('import_procedure_has_occupation')
+
 
 class DataImporter:
     def __init__(self, encoding='iso-8859-1'):

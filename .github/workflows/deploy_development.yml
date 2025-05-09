@@ -35,6 +35,14 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "mkdir -p /home/ubuntu/app && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
 
+    - name: Clean up old packages and caches
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
+          sudo apt-get autoremove -y &&
+          sudo apt-get clean -y &&
+          sudo rm -rf /var/lib/apt/lists/*
+        "
+
     - name: Install Docker on EC2
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
@@ -44,7 +52,7 @@ jobs:
           sudo systemctl enable docker
         "
 
-    - name: Clean Environment on EC2
+    - name: Prune Docker Resources and Clean App Directory
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
           sudo su -c '
