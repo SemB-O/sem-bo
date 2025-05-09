@@ -35,7 +35,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "mkdir -p /home/ubuntu/app && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
 
-    - name: Force clean disk for fresh deploy
+    - name: Clean up disk space (logs, cache, temp files)
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
           echo 'Disk usage before cleanup:' &&
