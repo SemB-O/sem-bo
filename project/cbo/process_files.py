@@ -244,38 +244,6 @@ class DataImporter:
             import_procedure_has_occupation_logger.exception(f"Error during data import: {str(e)}")
             raise
 
-    def import_procedure_has_occupation_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_ocupacao = linha[10:16].strip()
-            dt_competencia = linha[16:22].strip()
-
-            if not all([co_procedimento, co_ocupacao, dt_competencia]):
-                continue
-
-            if len(co_procedimento) > 10:
-                co_procedimento = co_procedimento[:10]
-
-            if len(co_ocupacao) > 6:
-                co_ocupacao = co_ocupacao[:6]
-
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
-
-            occupation, created = Occupation.objects.get_or_create(
-                occupation_code=co_ocupacao,
-            )
-
-            procedure_has_occupation = ProcedureHasOccupation(
-                competence_date=dt_competencia,
-                procedure=procedure,
-                occupation=occupation
-            )
-            procedure_has_occupation.save()
-
     def import_procedure_has_record_data(file):
         content = file.read()
         content_str = content.decode('iso-8859-1')
