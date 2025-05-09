@@ -218,6 +218,11 @@ if ENVIRONMENT != 'local':
                 'level': 'DEBUG',
                 'propagate': False,
             },
+            'import_procedure_has_occupation': {
+                'handlers': ['console', 'cloudwatch'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
         },
     }
 

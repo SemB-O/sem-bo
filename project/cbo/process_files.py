@@ -1,6 +1,11 @@
 from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord
 from .models.description import Description
 from django.utils import timezone
+from django.db import transaction
+import logging
+
+
+import_procedure_has_occupation_logger = logging.getLogger('import_procedure_has_occupation')
 
 class DataImporter:
     def __init__(self, encoding='iso-8859-1'):
@@ -181,33 +186,63 @@ class DataImporter:
 
             cid.save()
 
-    def import_procedure_has_cid_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_cid = linha[10:14].strip()
-            st_principal = linha[14:15].strip()
-            dt_competencia = linha[15:21].strip()
+    @transaction.atomic
+    def import_procedure_has_occupation_data(file):
+        try:
+            import_procedure_has_occupation_logger.info("Starting import of procedure and occupation data.")
 
-            if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
-                continue
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            import_procedure_has_occupation_logger.debug("File decoded successfully.")
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
+            procedure_code_set = set()
+            occupation_code_set = set()
+            relationship_data_set = set()
 
-            cid, created = Cid.objects.get_or_create(
-                cid_code=co_cid,
-            )
+            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    import_procedure_has_occupation_logger.debug(f"Line {idx} is empty, skipping.")
+                    continue
 
-            procedure_has_cid = ProcedureHasCid(
-                st_principal=st_principal,
-                competence_date=dt_competencia,
-                procedure=procedure,
-                cid=cid
-            )
-            procedure_has_cid.save()
+                procedure_code = line[0:10].strip()[:10]
+                occupation_code = line[10:16].strip()[:6]
+                competence_date = line[16:22].strip()
+
+                if not all([procedure_code, occupation_code, competence_date]):
+                    import_procedure_has_occupation_logger.warning(f"Line {idx} contains incomplete data, skipping: {line}")
+                    continue
+
+                procedure_code_set.add(procedure_code)
+                occupation_code_set.add(occupation_code)
+                relationship_data_set.add((procedure_code, occupation_code, competence_date))
+
+            import_procedure_has_occupation_logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            import_procedure_has_occupation_logger.info(f"Found {len(occupation_code_set)} unique occupations.")
+            import_procedure_has_occupation_logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
+
+            new_procedures = [Procedure(procedure_code=code) for code in procedure_code_set]
+            new_occupations = [Occupation(occupation_code=code) for code in occupation_code_set]
+            new_relationships = [
+                ProcedureHasOccupation(
+                    competence_date=competence_date,
+                    procedure_id=procedure_code,
+                    occupation_id=occupation_code
+                )
+                for procedure_code, occupation_code, competence_date in relationship_data_set
+            ]
+
+            Procedure.objects.bulk_create(new_procedures, ignore_conflicts=True)
+            import_procedure_has_occupation_logger.info("Procedures successfully inserted.")
+
+            Occupation.objects.bulk_create(new_occupations, ignore_conflicts=True)
+            import_procedure_has_occupation_logger.info("Occupations successfully inserted.")
+
+            ProcedureHasOccupation.objects.bulk_create(new_relationships)
+            import_procedure_has_occupation_logger.info("Relationships successfully inserted.")
+
+        except Exception as e:
+            import_procedure_has_occupation_logger.exception(f"Error during data import: {str(e)}")
+            raise
 
     def import_procedure_has_occupation_data(file):
         content = file.read()
