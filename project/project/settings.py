@@ -160,70 +160,74 @@ PASSWORD_RESET_TIMEOUT = 14400
 #Midia
 MEDIA_URL = '/media/'
 
-if ENVIRONMENT != 'local':
-    #AWS CREDENTIALS
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') 
-    AWS_REGION = os.getenv('AWS_REGION') 
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+#AWS CREDENTIALS
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') 
+AWS_REGION = os.getenv('AWS_REGION') 
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_REGION:
-        raise ValueError("AWS credentials are not set in environment variables.")
+#BOTO3 SESSION
+CLOUDWATCH_CLIENT = boto3.client(
+    'logs',
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_REGION
+) if  AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY else None
 
-    #BOTO3 SESSION
-    CLOUDWATCH_CLIENT = boto3.client(
-        'logs',
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        region_name=AWS_REGION
-    )
-
-    #LOGGERS CLOUDWATCH
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-            },
-            'cloudwatch': {
-                'level': 'DEBUG',
-                'class': 'cbo.logging_handlers.LoggerNameStreamHandler',
-                'log_group': f'sem-bo/{ENVIRONMENT}',      
-                'create_log_group': True,
-                'use_queues': True,
-                'boto3_client': CLOUDWATCH_CLIENT,
-                'send_interval': 30,
-            },
+#LOGGERS CLOUDWATCH
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{name}] [{levelname}] {message}',
+            'style': '{',
         },
-        'loggers': {
-            'django': {
-                'handlers': ['console', 'cloudwatch'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'upload_files_view': {
-                'handlers': ['console', 'cloudwatch'],
-                'level': 'DEBUG',
-                'propagate': False,
-            },
-            'import_procedure_has_occupation': {
-                'handlers': ['console', 'cloudwatch'],
-                'level': 'DEBUG',
-                'propagate': False,
-            },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
-    }
+        'cloudwatch': {
+            'level': 'DEBUG',
+            'class': 'watchtower.CloudWatchLogHandler',
+            'log_group': f'sem-bo/{ENVIRONMENT}',      
+            'create_log_group': True,
+            'use_queues': True,
+            'send_interval': 15,
+            'formatter': 'verbose',
+            'boto3_client': CLOUDWATCH_CLIENT,
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'cloudwatch'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console', 'cloudwatch'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
 
-    #STORAGE 4S3
-    # Check if AWS_STORAGE_BUCKET_NAME is defined
+if not CLOUDWATCH_CLIENT:
+    LOGGING['handlers'].pop('cloudwatch', None)
+    for logger in LOGGING['loggers'].values():
+        if 'cloudwatch' in logger['handlers']:
+            logger['handlers'].remove('cloudwatch')
 
-    USE_S3 = os.getenv('USE_S3') == 'TRUE'
-    if USE_S3:
-        STATICFILES_LOCATION = 'static'
-        STATICFILES_STORAGE = 'cbo.utils.storages.S3StaticStorage'
+#STORAGE 4S3
+# Check if AWS_STORAGE_BUCKET_NAME is defined
+USE_S3 = os.getenv('USE_S3') == 'TRUE'
+if USE_S3:
+    STATICFILES_LOCATION = 'static'
+    STATICFILES_STORAGE = 'cbo.utils.storages.S3StaticStorage'
 
-        MEDIAFILES_LOCATION = 'media'
-        DEFAULT_FILE_STORAGE = 'cbo.utils.storages.S3MediaStorage'
+    MEDIAFILES_LOCATION = 'media'
+    DEFAULT_FILE_STORAGE = 'cbo.utils.storages.S3MediaStorage'

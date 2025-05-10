@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db import transaction
 import logging
 
-import_procedure_has_occupation_logger = logging.getLogger('import_procedure_has_occupation')
+logger = logging.getLogger(__name__)
 
 
 class DataImporter:
@@ -217,11 +217,11 @@ class DataImporter:
     @transaction.atomic
     def import_procedure_has_occupation_data(file):
         try:
-            import_procedure_has_occupation_logger.info("Starting import of procedure and occupation data.")
+            logger.info("Starting import of procedure and occupation data.")
 
             file_content = file.read()
             decoded_content = file_content.decode('iso-8859-1')
-            import_procedure_has_occupation_logger.debug("File decoded successfully.")
+            logger.debug("File decoded successfully.")
 
             procedure_code_set = set()
             occupation_code_set = set()
@@ -229,7 +229,7 @@ class DataImporter:
 
             for idx, line in enumerate(decoded_content.split('\n'), start=1):
                 if not line.strip():
-                    import_procedure_has_occupation_logger.debug(f"Line {idx} is empty, skipping.")
+                    logger.debug(f"Line {idx} is empty, skipping.")
                     continue
 
                 procedure_code = line[0:10].strip()[:10]
@@ -237,16 +237,16 @@ class DataImporter:
                 competence_date = line[16:22].strip()
 
                 if not all([procedure_code, occupation_code, competence_date]):
-                    import_procedure_has_occupation_logger.warning(f"Line {idx} contains incomplete data, skipping: {line}")
+                    logger.warning(f"Line {idx} contains incomplete data, skipping: {line}")
                     continue
 
                 procedure_code_set.add(procedure_code)
                 occupation_code_set.add(occupation_code)
                 relationship_data_set.add((procedure_code, occupation_code, competence_date))
 
-            import_procedure_has_occupation_logger.info(f"Found {len(procedure_code_set)} unique procedures.")
-            import_procedure_has_occupation_logger.info(f"Found {len(occupation_code_set)} unique occupations.")
-            import_procedure_has_occupation_logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
+            logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            logger.info(f"Found {len(occupation_code_set)} unique occupations.")
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
 
             new_procedures = [Procedure(procedure_code=code) for code in procedure_code_set]
             new_occupations = [Occupation(occupation_code=code) for code in occupation_code_set]
@@ -260,16 +260,16 @@ class DataImporter:
             ]
 
             Procedure.objects.bulk_create(new_procedures, ignore_conflicts=True)
-            import_procedure_has_occupation_logger.info("Procedures successfully inserted.")
+            logger.info("Procedures successfully inserted.")
 
             Occupation.objects.bulk_create(new_occupations, ignore_conflicts=True)
-            import_procedure_has_occupation_logger.info("Occupations successfully inserted.")
+            logger.info("Occupations successfully inserted.")
 
             ProcedureHasOccupation.objects.bulk_create(new_relationships)
-            import_procedure_has_occupation_logger.info("Relationships successfully inserted.")
+            logger.info("Relationships successfully inserted.")
 
         except Exception as e:
-            import_procedure_has_occupation_logger.exception(f"Error during data import: {str(e)}")
+            logger.exception(f"Error during data import: {str(e)}")
             raise
 
     def import_procedure_has_record_data(file):

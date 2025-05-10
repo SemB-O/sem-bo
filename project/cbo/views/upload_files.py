@@ -7,7 +7,8 @@ from django.shortcuts import render, redirect
 from ..process_files import DataImporter
 from django.db import transaction
 
-logger = logging.getLogger('upload_files_view')
+logger = logging.getLogger(__name__)
+
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 class UploadFilesView(View):
