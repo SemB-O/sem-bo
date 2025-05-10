@@ -48,7 +48,7 @@ class UploadFilesView(View):
                     DataImporter.import_procedure_has_cid_data(file)
                 elif 'rl_procedimento_ocupacao' in file.name:
                     logger.debug(f'Importing procedure-to-occupation relation from file: {file.name}')
-                    DataImporter.import_procedure_has_occupation_data(file)
+                    DataImporter.import_procedure_has_occupation_data(file, logger)
                 elif 'rl_procedimento_registro' in file.name:
                     logger.debug(f'Importing procedure-to-record relation from file: {file.name}')
                     DataImporter.import_procedure_has_record_data(file)

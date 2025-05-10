@@ -215,7 +215,7 @@ class DataImporter:
             procedure_has_cid.save()
 
     @transaction.atomic
-    def import_procedure_has_occupation_data(file):
+    def import_procedure_has_occupation_data(file, logger):
         try:
             logger.info("Starting import of procedure and occupation data.")
 
