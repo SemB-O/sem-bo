@@ -174,8 +174,6 @@ CLOUDWATCH_CLIENT = boto3.client(
     region_name=AWS_REGION
 ) if  AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY else None
 
-
-        
 #LOGGERS CLOUDWATCH
 LOGGING = {
     'version': 1,
@@ -197,7 +195,7 @@ LOGGING = {
             'class': 'cbo.logging_handlers.LoggerNameAsStreamHandler',
             'log_group': f'sem-bo/{ENVIRONMENT}',      
             'create_log_group': True,
-            'use_queues': True,
+            'use_queues': False,
             'send_interval': 15,
             'formatter': 'verbose',
             'boto3_client': CLOUDWATCH_CLIENT,

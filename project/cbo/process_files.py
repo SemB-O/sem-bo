@@ -215,7 +215,7 @@ class DataImporter:
             procedure_has_cid.save()
 
     @transaction.atomic
-    def import_procedure_has_occupation_data(file, logger):
+    def import_procedure_has_occupation_data(file):
         try:
             logger.info("Starting import of procedure and occupation data.")
 
@@ -259,13 +259,13 @@ class DataImporter:
                 for procedure_code, occupation_code, competence_date in relationship_data_set
             ]
 
-            Procedure.objects.bulk_create(new_procedures, ignore_conflicts=True)
+            Procedure.objects.bulk_create(new_procedures, batch_size=500, ignore_conflicts=True)
             logger.info("Procedures successfully inserted.")
 
-            Occupation.objects.bulk_create(new_occupations, ignore_conflicts=True)
+            Occupation.objects.bulk_create(new_occupations, batch_size=500, ignore_conflicts=True)
             logger.info("Occupations successfully inserted.")
 
-            ProcedureHasOccupation.objects.bulk_create(new_relationships)
+            ProcedureHasOccupation.objects.bulk_create(new_relationships, batch_size=500,)
             logger.info("Relationships successfully inserted.")
 
         except Exception as e:
