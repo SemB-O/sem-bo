@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db import transaction
 
 logger = logging.getLogger(__name__)
+logger.info("Test: Starting data import process...")
 
 
 class DataImporter:
@@ -215,6 +216,7 @@ class DataImporter:
             procedure_has_cid.save()
 
     @transaction.atomic
+    @staticmethod
     def import_procedure_has_occupation_data(file):
         try:
             logger.info("Starting import of procedure and occupation data.")
