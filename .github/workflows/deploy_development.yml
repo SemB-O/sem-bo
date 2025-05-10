@@ -31,10 +31,6 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
 
-    - name: Prepare directory on EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "mkdir -p /home/ubuntu/app && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
-
     - name: Clean up disk space (logs, cache, temp files)
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} "
@@ -84,9 +80,13 @@ jobs:
           '
         "
 
+    - name: Prepare directory on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "mkdir -p /home/ubuntu/app && sudo chown -R ubuntu:ubuntu /home/ubuntu/app"
+
     - name: Clone repository to EC2
       run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r * .[^.]* ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/app/
+        rsync -avz -e "ssh -i ~/.ssh/id_rsa" --exclude='.git' * .[^.]* ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/app/
 
     - name: Generate and Copy Environment File to EC2
       shell: bash
@@ -97,7 +97,7 @@ jobs:
         echo '${{ toJson(vars) }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' >> .env
 
         echo "Copying .env file to EC2..."
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa .env ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/app/.env
+        rsync -avz -e "ssh -i ~/.ssh/id_rsa" .env ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/app/.env
 
         echo "File .env successfully copied to EC2!"
 
