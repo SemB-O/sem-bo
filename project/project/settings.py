@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
 from pathlib import Path
 import os
 import boto3
+import watchtower
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -175,6 +175,15 @@ CLOUDWATCH_CLIENT = boto3.client(
     region_name=AWS_REGION
 ) if  AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY else None
 
+class LoggerNameAsStreamHandler(watchtower.CloudWatchLogHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def emit(self, record):
+        logger_name = record.name
+        self.log_stream_name = logger_name
+        super().emit(record)
+        
 #LOGGERS CLOUDWATCH
 LOGGING = {
     'version': 1,
@@ -193,7 +202,7 @@ LOGGING = {
         },
         'cloudwatch': {
             'level': 'DEBUG',
-            'class': 'watchtower.CloudWatchLogHandler',
+            'class': 'LoggerNameAsStreamHandler',
             'log_group': f'sem-bo/{ENVIRONMENT}',      
             'create_log_group': True,
             'use_queues': True,
