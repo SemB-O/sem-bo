@@ -246,11 +246,16 @@ class DataImporter:
                 relationship_data_set.add((procedure_code, occupation_code, competence_date))
 
             logger.info(f"Found {len(procedure_code_set)} unique procedures.")
-            logger.info(f"Found {len(occupation_code_set)} unique occupations.")
-            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
-
             new_procedures = [Procedure(procedure_code=code) for code in procedure_code_set]
+            Procedure.objects.bulk_create(new_procedures, batch_size=500, ignore_conflicts=True)
+            logger.info("Procedures successfully inserted.")
+
             new_occupations = [Occupation(occupation_code=code) for code in occupation_code_set]
+            logger.info(f"Found {len(occupation_code_set)} unique occupations.")
+            Occupation.objects.bulk_create(new_occupations, batch_size=500, ignore_conflicts=True)
+            logger.info("Occupations successfully inserted.")
+
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
             new_relationships = [
                 ProcedureHasOccupation(
                     competence_date=competence_date,
@@ -259,13 +264,6 @@ class DataImporter:
                 )
                 for procedure_code, occupation_code, competence_date in relationship_data_set
             ]
-
-            Procedure.objects.bulk_create(new_procedures, batch_size=500, ignore_conflicts=True)
-            logger.info("Procedures successfully inserted.")
-
-            Occupation.objects.bulk_create(new_occupations, batch_size=500, ignore_conflicts=True)
-            logger.info("Occupations successfully inserted.")
-
             ProcedureHasOccupation.objects.bulk_create(new_relationships, batch_size=500,)
             logger.info("Relationships successfully inserted.")
 
