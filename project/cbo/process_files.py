@@ -203,14 +203,14 @@ class DataImporter:
 
             cid_data = {}
 
-            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
                 if not line.strip():
-                    logger.debug(f"Line {idx} is empty, skipping.")
+                    logger.debug(f"Line {index} is empty, skipping.")
                     continue
 
                 co_cid = line[0:4].strip() if len(line) >= 4 else ''
                 if not co_cid:
-                    logger.warning(f"Line {idx} missing CID code, skipping: {line}")
+                    logger.warning(f"Line {index} missing CID code, skipping: {line}")
                     continue
 
                 cid_data[co_cid] = {
@@ -265,33 +265,95 @@ class DataImporter:
             logger.exception(f"Error during CID data import: {str(e)}")
             raise
 
+    @transaction.atomic
+    @staticmethod
     def import_procedure_has_cid_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_cid = linha[10:14].strip()
-            st_principal = linha[14:15].strip()
-            dt_competencia = linha[15:21].strip()
+        try:
+            logger.info("Starting import of procedure has CID data.")
 
-            if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
-                continue
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
+            procedure_code_set = set()
+            cid_code_set = set()
+            relationship_data_set = set()
 
-            cid, created = Cid.objects.get_or_create(
-                cid_code=co_cid,
-            )
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
 
-            procedure_has_cid = ProcedureHasCid(
-                st_principal=st_principal,
-                competence_date=dt_competencia,
-                procedure=procedure,
-                cid=cid
-            )
-            procedure_has_cid.save()
+                co_procedimento = line[0:10].strip()
+                co_cid = line[10:14].strip()
+                st_principal = line[14:15].strip()
+                dt_competencia = line[15:21].strip()
+
+                if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
+                    continue
+
+                procedure_code_set.add(co_procedimento)
+                cid_code_set.add(co_cid)
+                relationship_data_set.add((co_procedimento, co_cid, st_principal, dt_competencia))
+
+            logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            logger.info(f"Found {len(cid_code_set)} unique CIDs.")
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
+
+            existing_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in existing_procedures}
+
+            existing_cids = Cid.objects.filter(cid_code__in=cid_code_set)
+            cid_map = {cid.cid_code: cid for cid in existing_cids}
+
+            logger.info(f"Found {len(procedure_map)} existing procedures in database.")
+            logger.info(f"Found {len(cid_map)} existing CIDs in database.")
+
+            missing_procedure_codes = procedure_code_set - procedure_map.keys()
+            new_procedures = [Procedure(procedure_code=code) for code in missing_procedure_codes]
+            if new_procedures:
+                Procedure.objects.bulk_create(new_procedures, batch_size=500)
+                logger.info(f"Created {len(new_procedures)} new procedures.")
+
+            all_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in all_procedures}
+
+            missing_cid_codes = cid_code_set - cid_map.keys()
+            new_cids = [Cid(cid_code=code) for code in missing_cid_codes]
+            if new_cids:
+                Cid.objects.bulk_create(new_cids, batch_size=500)
+                logger.info(f"Created {len(new_cids)} new CIDs.")
+
+            all_cids = Cid.objects.filter(cid_code__in=cid_code_set)
+            cid_map = {cid.cid_code: cid for cid in all_cids}
+
+            new_relationships = []
+            for co_procedimento, co_cid, st_principal, dt_competencia in relationship_data_set:
+                procedure = procedure_map.get(co_procedimento)
+                cid = cid_map.get(co_cid)
+
+                if procedure and cid:
+                    new_relationships.append(
+                        ProcedureHasCid(
+                            st_principal=st_principal,
+                            competence_date=dt_competencia,
+                            procedure=procedure,
+                            cid=cid
+                        )
+                    )
+                else:
+                    logger.warning(f"Procedure or CID not found for relationship: {co_procedimento}, {co_cid}")
+
+            if new_relationships:
+                ProcedureHasCid.objects.bulk_create(new_relationships, batch_size=500)
+                logger.info(f"Inserted {len(new_relationships)} procedure-CID relationships.")
+
+            logger.info("ProcedureHasCid import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during procedure has CID data import: {str(e)}")
+            raise
 
     @transaction.atomic
     @staticmethod
@@ -307,9 +369,9 @@ class DataImporter:
             occupation_code_set = set()
             relationship_data_set = set()
 
-            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
                 if not line.strip():
-                    logger.debug(f"Line {idx} is empty, skipping.")
+                    logger.debug(f"Line {index} is empty, skipping.")
                     continue
 
                 procedure_code = line[0:10].strip()[:10]
@@ -317,7 +379,7 @@ class DataImporter:
                 competence_date = line[16:22].strip()
 
                 if not all([procedure_code, occupation_code, competence_date]):
-                    logger.warning(f"Line {idx} contains incomplete data, skipping: {line}")
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
                     continue
 
                 procedure_code_set.add(procedure_code)
@@ -350,38 +412,100 @@ class DataImporter:
             logger.exception(f"Error during data import: {str(e)}")
             raise
 
+    @transaction.atomic
+    @staticmethod
     def import_procedure_has_record_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_registro = linha[10:12].strip()
-            dt_competencia = linha[12:18].strip()
+        try:
+            logger.info("Starting import of procedure has record data.")
 
-            if not all([co_procedimento, co_registro, dt_competencia]):
-                continue
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            if len(co_procedimento) > 10:
-                co_procedimento = co_procedimento[:10]
+            procedure_code_set = set()
+            record_code_set = set()
+            relationship_data_set = set()
 
-            if len(co_registro) > 2:
-                co_registro = co_registro[:2]
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
+                co_procedimento = line[0:10].strip()
+                co_registro = line[10:12].strip()
+                dt_competencia = line[12:18].strip()
 
-            record, created = Record.objects.get_or_create(
-                record_code=co_registro,
-            )
+                if not all([co_procedimento, co_registro, dt_competencia]):
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
+                    continue
 
-            procedure_has_record = ProcedureHasRecord(
-                competence_date=dt_competencia,
-                procedure=procedure,
-                record=record
-            )
-            procedure_has_record.save()     
+                if len(co_procedimento) > 10:
+                    co_procedimento = co_procedimento[:10]
 
+                if len(co_registro) > 2:
+                    co_registro = co_registro[:2]
+
+                procedure_code_set.add(co_procedimento)
+                record_code_set.add(co_registro)
+                relationship_data_set.add((co_procedimento, co_registro, dt_competencia))
+
+            logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            logger.info(f"Found {len(record_code_set)} unique records.")
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
+
+            existing_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in existing_procedures}
+
+            existing_records = Record.objects.filter(record_code__in=record_code_set)
+            record_map = {rec.record_code: rec for rec in existing_records}
+
+            logger.info(f"Found {len(procedure_map)} existing procedures.")
+            logger.info(f"Found {len(record_map)} existing records.")
+
+            missing_procedure_codes = procedure_code_set - procedure_map.keys()
+            new_procedures = [Procedure(procedure_code=code) for code in missing_procedure_codes]
+            if new_procedures:
+                Procedure.objects.bulk_create(new_procedures, batch_size=500)
+                logger.info(f"Created {len(new_procedures)} new procedures.")
+
+            all_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in all_procedures}
+
+            missing_record_codes = record_code_set - record_map.keys()
+            new_records = [Record(record_code=code) for code in missing_record_codes]
+            if new_records:
+                Record.objects.bulk_create(new_records, batch_size=500)
+                logger.info(f"Created {len(new_records)} new records.")
+
+            all_records = Record.objects.filter(record_code__in=record_code_set)
+            record_map = {rec.record_code: rec for rec in all_records}
+
+            new_relationships = []
+            for co_procedimento, co_registro, dt_competencia in relationship_data_set:
+                procedure = procedure_map.get(co_procedimento)
+                record = record_map.get(co_registro)
+
+                if procedure and record:
+                    new_relationships.append(
+                        ProcedureHasRecord(
+                            competence_date=dt_competencia,
+                            procedure=procedure,
+                            record=record
+                        )
+                    )
+                else:
+                    logger.warning(f"Procedure or Record not found for relationship: {co_procedimento}, {co_registro}")
+
+            if new_relationships:
+                ProcedureHasRecord.objects.bulk_create(new_relationships, batch_size=500)
+                logger.info(f"Inserted {len(new_relationships)} procedure-record relationships.")
+
+            logger.info("ProcedureHasRecord import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during procedure has record data import: {str(e)}")
+            raise
+    
     def import_description_data(file):
         content = file.read()
         content_str = content.decode('iso-8859-1')
