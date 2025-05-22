@@ -203,14 +203,14 @@ class DataImporter:
 
             cid_data = {}
 
-            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
                 if not line.strip():
-                    logger.debug(f"Line {idx} is empty, skipping.")
+                    logger.debug(f"Line {index} is empty, skipping.")
                     continue
 
                 co_cid = line[0:4].strip() if len(line) >= 4 else ''
                 if not co_cid:
-                    logger.warning(f"Line {idx} missing CID code, skipping: {line}")
+                    logger.warning(f"Line {index} missing CID code, skipping: {line}")
                     continue
 
                 cid_data[co_cid] = {
@@ -279,9 +279,9 @@ class DataImporter:
             cid_code_set = set()
             relationship_data_set = set()
 
-            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
                 if not line.strip():
-                    logger.debug(f"Line {idx} is empty, skipping.")
+                    logger.debug(f"Line {index} is empty, skipping.")
                     continue
 
                 co_procedimento = line[0:10].strip()
@@ -290,7 +290,7 @@ class DataImporter:
                 dt_competencia = line[15:21].strip()
 
                 if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
-                    logger.warning(f"Line {idx} contains incomplete data, skipping: {line}")
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
                     continue
 
                 procedure_code_set.add(co_procedimento)
@@ -369,9 +369,9 @@ class DataImporter:
             occupation_code_set = set()
             relationship_data_set = set()
 
-            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
                 if not line.strip():
-                    logger.debug(f"Line {idx} is empty, skipping.")
+                    logger.debug(f"Line {index} is empty, skipping.")
                     continue
 
                 procedure_code = line[0:10].strip()[:10]
@@ -379,7 +379,7 @@ class DataImporter:
                 competence_date = line[16:22].strip()
 
                 if not all([procedure_code, occupation_code, competence_date]):
-                    logger.warning(f"Line {idx} contains incomplete data, skipping: {line}")
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
                     continue
 
                 procedure_code_set.add(procedure_code)
