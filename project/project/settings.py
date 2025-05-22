@@ -180,7 +180,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[{name}] [{levelname}] {message}',
+            'format': '[{name}] [{funcName}] [{levelname}] {message}',
             'style': '{',
         },
     },
