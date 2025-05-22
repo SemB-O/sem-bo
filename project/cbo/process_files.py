@@ -11,91 +11,151 @@ class DataImporter:
     def __init__(self, encoding='iso-8859-1'):
         self.encoding = encoding
 
+    @transaction.atomic
+    @staticmethod
     def import_procedure_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
+        try:
+            logger.info("Starting import of procedure data.")
 
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip() if len(linha) >= 10 else ''
-            no_procedimento = linha[10:260].strip() if len(linha) >= 260 else ''
-            tp_complexidade = linha[260].strip() if len(linha) >= 260 else ''
-            tp_sexo = linha[261].strip() if len(linha) >= 261 else ''
-            qt_maxima_execucao = int(linha[262:266].strip()) if len(linha) >= 266 else 0
-            qt_dias_permanencia = int(linha[267:270].strip()) if len(linha) >= 270 else 0
-            qt_pontos = int(linha[271:274].strip()) if len(linha) >= 274 else 0
-            vl_idade_minima = int(linha[275:278].strip()) if len(linha) >= 278 else 0
-            vl_idade_maxima = int(linha[279:282].strip()) if len(linha) >= 282 else 0
-            vl_sh = int(linha[283:292].strip()) if len(linha) >= 292 else 0
-            vl_sa = int(linha[293:302].strip()) if len(linha) >= 302 else 0
-            vl_sp = int(linha[303:312].strip()) if len(linha) >= 312 else 0
-            qt_tempo_permanencia = int(linha[320:324].strip()) if len(linha) >= 324 else 0
-            dt_competencia = linha[324:330].strip() if len(linha) >= 330 else ''
-            created_at = timezone.now()
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-                defaults={
-                    'name': no_procedimento,
-                    'complexity_type': tp_complexidade,
-                    'sex_type': tp_sexo,
-                    'maximum_execution_amount': qt_maxima_execucao,
-                    'stay_day_number': qt_dias_permanencia,
-                    'points_number': qt_pontos,
-                    'minimum_age_value': vl_idade_minima,
-                    'maximum_age_value': vl_idade_maxima,
-                    'SH_value': vl_sh,
-                    'SA_value': vl_sa,
-                    'SP_value': vl_sp,
-                    'stay_time_number': qt_tempo_permanencia,
-                    'competence_date': dt_competencia,
-                    'created_at': created_at
+            procedure_data = {}
+
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
+
+                co_procedimento = line[0:10].strip() if len(line) >= 10 else ''
+                if not co_procedimento:
+                    logger.warning(f"Line {index} missing procedure code, skipping: {line}")
+                    continue
+
+                procedure_data[co_procedimento] = {
+                    'name': line[10:260].strip() if len(line) >= 260 else '',
+                    'complexity_type': line[260].strip() if len(line) >= 260 else '',
+                    'sex_type': line[261].strip() if len(line) >= 261 else '',
+                    'maximum_execution_amount': int(line[262:266].strip()) if len(line) >= 266 else 0,
+                    'stay_day_number': int(line[267:270].strip()) if len(line) >= 270 else 0,
+                    'points_number': int(line[271:274].strip()) if len(line) >= 274 else 0,
+                    'minimum_age_value': int(line[275:278].strip()) if len(line) >= 278 else 0,
+                    'maximum_age_value': int(line[279:282].strip()) if len(line) >= 282 else 0,
+                    'SH_value': int(line[283:292].strip()) if len(line) >= 292 else 0,
+                    'SA_value': int(line[293:302].strip()) if len(line) >= 302 else 0,
+                    'SP_value': int(line[303:312].strip()) if len(line) >= 312 else 0,
+                    'stay_time_number': int(line[320:324].strip()) if len(line) >= 324 else 0,
+                    'competence_date': line[324:330].strip() if len(line) >= 330 else '',
+                    'created_at': timezone.now()
                 }
+
+            logger.info(f"Parsed {len(procedure_data)} procedures from file.")
+
+            existing_procedures = Procedure.objects.filter(
+                procedure_code__in=procedure_data.keys()
             )
+            logger.info(f"Found {existing_procedures.count()} existing procedures in database.")
 
-            if not created:
-                procedure.name = no_procedimento
-                procedure.complexity_type = tp_complexidade
-                procedure.sex_type = tp_sexo
-                procedure.maximum_execution_amount = qt_maxima_execucao
-                procedure.stay_day_number = qt_dias_permanencia
-                procedure.points_number = qt_pontos
-                procedure.minimum_age_value = vl_idade_minima
-                procedure.maximum_age_value = vl_idade_maxima
-                procedure.SH_value = vl_sh
-                procedure.SA_value = vl_sa
-                procedure.SP_value = vl_sp
-                procedure.stay_time_number = qt_tempo_permanencia
-                procedure.competence_date = dt_competencia
-                procedure.created_at = created_at
+            to_update = []
+            existing_codes = set()
 
-            procedure.save()
+            for procedure in existing_procedures:
+                existing_codes.add(procedure.procedure_code)
+                data = procedure_data[procedure.procedure_code]
 
+                updated = False
+                for field, value in data.items():
+                    if getattr(procedure, field) != value:
+                        setattr(procedure, field, value)
+                        updated = True
+
+                if updated:
+                    to_update.append(procedure)
+
+            to_create = [
+                Procedure(procedure_code=code, **data)
+                for code, data in procedure_data.items()
+                if code not in existing_codes
+            ]
+
+            if to_create:
+                Procedure.objects.bulk_create(to_create, batch_size=500)
+                logger.info(f"Created {len(to_create)} new procedures.")
+
+            if to_update:
+                fields_to_update = list(procedure_data[next(iter(procedure_data))].keys())
+                Procedure.objects.bulk_update(to_update, fields_to_update, batch_size=500)
+                logger.info(f"Updated {len(to_update)} existing procedures.")
+
+            logger.info("Procedure import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during procedure data import: {str(e)}")
+            raise
+
+    @transaction.atomic
+    @staticmethod
     def import_occupation_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
+        try:
+            logger.info("Starting import of occupation data.")
 
-        for linha in content_str.split('\n'):
-            if len(linha) >= 6:
-                co_ocupacao = linha[0:6].strip()
-            else:
-                co_ocupacao = ''
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            if len(linha) >= 156:
-                no_ocupacao = linha[6:156].strip()
-            else:
-                no_ocupacao = ''
+            occupation_data = {}
 
-            occupation, created = Occupation.objects.get_or_create(
-                occupation_code=co_ocupacao,
-                defaults={
-                    'name': no_ocupacao,
-                }
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
+
+                co_ocupacao = line[0:6].strip() if len(line) >= 6 else ''
+                no_ocupacao = line[6:156].strip() if len(line) >= 156 else ''
+
+                if not co_ocupacao:
+                    logger.warning(f"Line {index} missing occupation code, skipping: {line}")
+                    continue
+
+                occupation_data[co_ocupacao] = no_ocupacao
+
+            logger.info(f"Parsed {len(occupation_data)} occupation entries from file.")
+
+            existing_occupations = Occupation.objects.filter(
+                occupation_code__in=occupation_data.keys()
             )
+            logger.info(f"Found {existing_occupations.count()} existing occupations in database.")
 
-            if not created:
-                occupation.name = no_ocupacao
+            to_update = []
+            existing_codes = set()
 
-            occupation.save()
+            for occupation in existing_occupations:
+                existing_codes.add(occupation.occupation_code)
+                new_name = occupation_data[occupation.occupation_code]
+                if occupation.name != new_name and new_name:
+                    occupation.name = new_name
+                    to_update.append(occupation)
+
+            to_create = [
+                Occupation(occupation_code=code, name=name)
+                for code, name in occupation_data.items()
+                if code not in existing_codes
+            ]
+
+            if to_create:
+                Occupation.objects.bulk_create(to_create, batch_size=500)
+                logger.info(f"Created {len(to_create)} new occupations.")
+
+            if to_update:
+                Occupation.objects.bulk_update(to_update, ['name'], batch_size=500)
+                logger.info(f"Updated {len(to_update)} existing occupations.")
+
+            logger.info("Occupation import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during occupation data import: {str(e)}")
+            raise
 
     def import_record_data(file):
         content = file.read()
