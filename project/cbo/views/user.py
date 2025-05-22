@@ -55,7 +55,7 @@ class RegisterView(View):
         context = {
             'form': form,
             'occupations': occupations,
-            'selected_plan': request.GET.get('selected_plan'),
+            'selected_plan': selected_plan,
             'plans_json': plans_json,
         }
 
@@ -63,27 +63,41 @@ class RegisterView(View):
 
     def post(self, request, *args, **kwargs):
         form = UserRegisterForm(request.POST, use_required_attribute=False)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
 
-            selected_occupations = form.cleaned_data['occupation']
-            for occupation in selected_occupations:
-                user.occupations.add(occupation)
-            user.save()
+        try:
+            if not form.is_valid():
+                raise ValueError("Invalid form submission")
 
-            default_folder, _ = FavoriteFolder.objects.get_or_create(
-                user=user,
-                name="Geral",
-                description="Meus Favoritos"
-            )
-
+            user = self._create_user(form)
+            self._assign_occupations(user, form.cleaned_data['occupation'])
+            self._create_default_folder(user)
             self.activateEmail(request, user, form.cleaned_data.get('email'))
 
             return redirect('login')
-        else:
-            return render(request, self.template_name, {'form': form})
+
+        except Exception as e:
+            return render(request, self.template_name, {
+                'form': form,
+                'form_error': str(e),
+            })
+
+    def _create_user(self, form):
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
+        return user
+
+    def _assign_occupations(self, user, occupations):
+        for occupation in occupations:
+            user.occupations.add(occupation)
+        user.save()
+
+    def _create_default_folder(self, user):
+        FavoriteFolder.objects.get_or_create(
+            user=user,
+            name="General",
+            description="My Favorites"
+        )
 
     def activateEmail(self, request, user, to_email):
         mail_subject = "Ativação da sua conta Sem B.O"

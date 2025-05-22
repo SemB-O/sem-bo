@@ -28,8 +28,8 @@ Sem B.O
             <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
             <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
         </div>
-
-        <form class="w-full" method="post">
+        {{ selected_plan }}
+        <form class="w-full" action="{% url 'register' selected_plan=selected_plan %}" method="post">
             {% csrf_token %}
             
             <div class="step flex flex-col gap-4" id="step-1">
@@ -115,7 +115,7 @@ Sem B.O
                 <div class="error-message text-sm text-red-600 hidden"></div>
                 <div class="flex gap-2 my-2">
                     <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                    <button type="button" id="third-step" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                    <button type="submit" class="w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition">Cadastrar</button>
                 </div>
             </div>
         </form>
@@ -296,7 +296,6 @@ Sem B.O
                         const value = field.val();
                         const select2Container = field.next(".select-8-selection--single");
                         const select2Selection = select2Container.find(".select-8-selection--multiple");
-                        console.log(select2Container, select2Selection)
 
                         if (!value || (Array.isArray(value) && value.length === 0) || (typeof value === "string" && value.trim() === "")) {
                             allFieldsValid = false;
@@ -341,10 +340,6 @@ Sem B.O
                     currentStep.hide();
                     prevStep.show();
                 }
-            });
-
-            $('form').on('submit', function (e) {
-                console.log("Formulário enviado!");
             });
 
             showStep(currentStep);
