@@ -191,60 +191,79 @@ class DataImporter:
 
             record.save()
 
+    @transaction.atomic
+    @staticmethod
     def import_cid_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
+        try:
+            logger.info("Starting import of CID data.")
 
-        for linha in content_str.split('\n'):
-            if len(linha) >= 4:
-                co_cid = linha[0:4].strip()
-            else:
-                co_cid = ''
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            if len(linha) >= 104:
-                no_cid = linha[4:104].strip()
-            else:
-                no_cid = ''
+            cid_data = {}
 
-            if len(linha) >= 105:
-                tp_agravo = linha[104:105].strip()
-            else:
-                tp_agravo = ''
+            for idx, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {idx} is empty, skipping.")
+                    continue
 
-            if len(linha) >= 106:
-                tp_sexo = linha[105:106].strip()
-            else:
-                tp_sexo = ''
+                co_cid = line[0:4].strip() if len(line) >= 4 else ''
+                if not co_cid:
+                    logger.warning(f"Line {idx} missing CID code, skipping: {line}")
+                    continue
 
-            if len(linha) >= 107:
-                tp_estadio = linha[106:107].strip()
-            else:
-                tp_estadio = ''
-
-            if len(linha) >= 111:
-                vl_campos_irradiados = int(linha[110:114].strip())
-            else:
-                vl_campos_irradiados = 0
-
-            cid, created = Cid.objects.get_or_create(
-                cid_code=co_cid,
-                defaults={
-                    'name': no_cid,
-                    'grievance_type': tp_agravo,
-                    'sex_type': tp_sexo,
-                    'stadium_stype': tp_estadio,
-                    'irradiated_fields_value': vl_campos_irradiados,
+                cid_data[co_cid] = {
+                    'name': line[4:104].strip() if len(line) >= 104 else '',
+                    'grievance_type': line[104:105].strip() if len(line) >= 105 else '',
+                    'sex_type': line[105:106].strip() if len(line) >= 106 else '',
+                    'stadium_stype': line[106:107].strip() if len(line) >= 107 else '',
+                    'irradiated_fields_value': int(line[110:114].strip()) if len(line) >= 111 and line[110:114].strip().isdigit() else 0
                 }
+
+            logger.info(f"Parsed {len(cid_data)} CID entries from file.")
+
+            existing_cids = Cid.objects.filter(
+                cid_code__in=cid_data.keys()
             )
+            logger.info(f"Found {existing_cids.count()} existing CIDs in database.")
 
-            if not created:
-                cid.name = no_cid
-                cid.grievance_type = tp_agravo
-                cid.sex_type = tp_sexo
-                cid.stadium_stype = tp_estadio
-                cid.irradiated_fields_value = vl_campos_irradiados
+            to_update = []
+            existing_codes = set()
 
-            cid.save()
+            for cid in existing_cids:
+                existing_codes.add(cid.cid_code)
+                data = cid_data[cid.cid_code]
+
+                updated = False
+                for field, value in data.items():
+                    if getattr(cid, field) != value:
+                        setattr(cid, field, value)
+                        updated = True
+
+                if updated:
+                    to_update.append(cid)
+
+            to_create = [
+                Cid(cid_code=code, **data)
+                for code, data in cid_data.items()
+                if code not in existing_codes
+            ]
+
+            if to_create:
+                Cid.objects.bulk_create(to_create, batch_size=500)
+                logger.info(f"Created {len(to_create)} new CIDs.")
+
+            if to_update:
+                fields_to_update = list(cid_data[next(iter(cid_data))].keys())
+                Cid.objects.bulk_update(to_update, fields_to_update, batch_size=500)
+                logger.info(f"Updated {len(to_update)} existing CIDs.")
+
+            logger.info("CID import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during CID data import: {str(e)}")
+            raise
 
     def import_procedure_has_cid_data(file):
         content = file.read()
