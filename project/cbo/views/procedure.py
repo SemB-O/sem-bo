@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse
 from django.shortcuts import render
-from ..models import Procedure, FavoriteFolder, FavoriteProcedure, Record
+from ..models import Procedure, FavoriteProceduresFolder, FavoriteProceduresFolderHasProcedure, Record
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -31,7 +31,7 @@ class DetailView(DetailView):
         favorites = procedure.is_favorite(user)
         
         context['procedure'] = procedure
-        context['favorite_folders'] = FavoriteFolder.objects.filter(user=user)
+        context['favorite_folders'] = FavoriteProceduresFolder.objects.filter(user=user)
         context['favorite'] = favorites
         context['procedure_urls'] = {procedure.procedure_code: reverse('procedure_detail', args=[procedure.procedure_code])}
         return context
@@ -73,8 +73,8 @@ class ListView(ListView):
 
         user = request.user
 
-        favorite_procedures_codes = FavoriteProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
-        favorite_folders = FavoriteFolder.objects.filter(user=user)
+        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
+        favorite_folders = FavoriteProceduresFolder.objects.filter(user=user)
 
         for procedure in procedures:
             procedure.favorite = procedure.procedure_code in favorite_procedures_codes

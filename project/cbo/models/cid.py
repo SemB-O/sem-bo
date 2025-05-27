@@ -1,5 +1,6 @@
 from cbo.models._base import BaseModel
 from django.db import models
+from cbo.camel_to_snake import get_snake_case_table_name
 
 
 class Cid(BaseModel):
@@ -17,3 +18,4 @@ class Cid(BaseModel):
         indexes = [
             models.Index(fields=['cid_code', 'name']),
         ]
+        db_table = get_snake_case_table_name(__qualname__) 

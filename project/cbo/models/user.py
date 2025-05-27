@@ -2,9 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext 
 from django.db import models
 from cbo.models.managers import UserManager
-from django.core.exceptions import ValidationError
 import uuid
 from cbo.models._base import BaseModel
+from cbo.camel_to_snake import get_snake_case_table_name
 
 
 class User(AbstractUser, BaseModel):
@@ -14,7 +14,11 @@ class User(AbstractUser, BaseModel):
     date_of_birth = models.DateField(
         null=False, blank=False, default='2000-01-01')
     occupational_registration = models.CharField(max_length=15)
-    occupations = models.ManyToManyField('Occupation', related_name='users')
+    occupations = models.ManyToManyField(
+        'Occupation',
+        through='UserHasOccupation',
+        related_name='users'
+    )
     plan = models.ForeignKey(
         'Plan', on_delete=models.SET_NULL, null=True, related_name='users')
     email_verified = models.BooleanField(default=False)
@@ -32,6 +36,7 @@ class User(AbstractUser, BaseModel):
         indexes = [
             models.Index(fields=['first_name', 'occupational_registration']),
         ]
+        db_table = get_snake_case_table_name(__qualname__) 
 
     def save(self, *args, **kwargs):
         if not self.password.startswith(('pbkdf2_sha256$', 'bcrypt', 'argon2')):

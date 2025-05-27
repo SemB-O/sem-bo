@@ -21,7 +21,6 @@ urlpatterns = [
     path('search_favorites/', favorite.FavoriteProceduresListView.as_view(), name='search_favorites'),
     path('add_new_favorite_folder/', favorite.CreateFolderView.as_view(), name='add_new_favorite_folder'),
     path('select_plan/', plan.PlanView.as_view(), name='select_plan'),
-    path('medical_record/', medical_record.MedicalRecordView.as_view(), name='medical_record'),
     path('procedure-autocomplete/', procedure.ProcedureAutocomplete.as_view(), name='procedure-autocomplete'),
     path('cid-autocomplete/', cid.CidAutocomplete.as_view(), name='cid-autocomplete'),
     path('password_reset/', user.PasswordResetView.as_view(), name='password_reset'),

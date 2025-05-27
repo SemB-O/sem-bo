@@ -1,9 +1,9 @@
 from django import forms
-from ..models import FavoriteFolder
+from ..models import FavoriteProceduresFolder
 
 
-class FavoriteFolderForm(forms.ModelForm):
+class FavoriteProceduresFolderForm(forms.ModelForm):
     class Meta:
-        model = FavoriteFolder
+        model = FavoriteProceduresFolder
         fields = ['name', 'description']
 

@@ -18,7 +18,7 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from django.db.models import Q
 from ..forms.user import LoginAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
-from ..models import Occupation, Plan, FavoriteFolder, User
+from ..models import Occupation, Plan, FavoriteProceduresFolder, User
 
 
 class LoginView(FormView):
@@ -93,7 +93,7 @@ class RegisterView(View):
         user.save()
 
     def _create_default_folder(self, user):
-        FavoriteFolder.objects.get_or_create(
+        FavoriteProceduresFolder.objects.get_or_create(
             user=user,
             name="General",
             description="My Favorites"

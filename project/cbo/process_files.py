@@ -1,6 +1,6 @@
 import logging
 from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord
-from .models.description import Description
+from .models.descricao import Description
 from django.utils import timezone
 from django.db import transaction
 
