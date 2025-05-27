@@ -61,25 +61,27 @@ class RegisterView(View):
 
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, selected_plan, *args, **kwargs):
         form = UserRegisterForm(request.POST, use_required_attribute=False)
 
-        try:
-            if not form.is_valid():
-                raise ValueError("Invalid form submission")
-
-            user = self._create_user(form)
-            self._assign_occupations(user, form.cleaned_data['occupation'])
-            self._create_default_folder(user)
-            self.activateEmail(request, user, form.cleaned_data.get('email'))
-
-            return redirect('login')
-
-        except Exception as e:
+        if form.is_valid():
+            try:
+                user = self._create_user(form)
+                self._assign_occupations(user, form.cleaned_data['occupation'])
+                self._create_default_folder(user)
+                self.activateEmail(request, user, form.cleaned_data.get('email'))
+                return redirect('login')
+            except Exception as e:
+                return render(request, self.template_name, {
+                    'form': form,
+                    'form_error': f"An unexpected error occurred: {str(e)}"
+                })
+        else:
             return render(request, self.template_name, {
                 'form': form,
-                'form_error': str(e),
+                'selected_plan': selected_plan,
             })
+
 
     def _create_user(self, form):
         user = form.save(commit=False)

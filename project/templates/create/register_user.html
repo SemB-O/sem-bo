@@ -28,7 +28,6 @@ Sem B.O
             <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
             <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
         </div>
-        {{ selected_plan }}
         <form class="w-full" action="{% url 'register' selected_plan=selected_plan %}" method="post">
             {% csrf_token %}
             
@@ -40,22 +39,37 @@ Sem B.O
                 <div>
                     <label for="id_first_name">Nome</label>
                     {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p class="text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_last_name">Sobrenome</label>
                     {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p class="text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_CPF">CPF</label>
                     {{ form.CPF }}
+                    {% if form.CPF.errors %}
+                        <p class="text-sm text-red-600">{{ form.CPF.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_telephone">Telefone</label>
                     {{ form.telephone }}
+                    {% if form.telephone.errors %}
+                        <p class="text-sm text-red-600">{{ form.telephone.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_date_of_birth">Data de Nascimento</label>
                     {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}
+                        <p class="text-sm text-red-600">{{ form.date_of_birth.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div class="error-message text-sm text-red-600 hidden"></div>
                 <button type="button" id="first-step" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
@@ -69,14 +83,23 @@ Sem B.O
                 <div>
                     <label for="id_occupational_registration">Registro Ocupacional</label>
                     {{ form.occupational_registration }}
+                    {% if form.occupational_registration.errors %}
+                        <p class="text-sm text-red-600">{{ form.occupational_registration.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_plan">Plano</label>
                     {{ form.plan }}
+                    {% if form.plan.errors %}
+                        <p class="text-sm text-red-600">{{ form.plan.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="occupation-select">Ocupação</label>
                     {{ form.occupation }}
+                    {% if form.occupation.errors %}
+                        <p class="text-sm text-red-600">{{ form.occupation.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div class="error-message text-sm text-red-600 hidden"></div>
                 <div class="flex gap-2 my-2">
@@ -93,6 +116,9 @@ Sem B.O
                 <div>
                     <label for="id_email">E-mail</label>
                     {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_password1">Senha</label>
@@ -102,6 +128,9 @@ Sem B.O
                             visibility
                         </span>
                     </div>
+                    {% if form.password1.errors %}
+                        <p class="text-sm text-red-600">{{ form.password1.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="id_password2">Confirmar Senha</label>
@@ -111,6 +140,9 @@ Sem B.O
                             visibility
                         </span>
                     </div>
+                    {% if form.password2.errors %}
+                        <p class="text-sm text-red-600">{{ form.password2.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div class="error-message text-sm text-red-600 hidden"></div>
                 <div class="flex gap-2 my-2">
@@ -119,6 +151,7 @@ Sem B.O
                 </div>
             </div>
         </form>
+
     </div>
     <div class="flex justify-center py-8">
         <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
@@ -343,6 +376,51 @@ Sem B.O
             });
 
             showStep(currentStep);
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            let step1Fields = ['id_first_name', 'id_last_name', 'id_CPF', 'id_telephone', 'id_date_of_birth'];
+            let step2Fields = ['id_occupational_registration', 'id_plan', 'id_occupation'];
+            let step3Fields = ['id_email', 'id_password1', 'id_password2'];
+
+            let foundErrorStep = null;
+
+            function hasError(fieldId) {
+                let el = document.getElementById(fieldId);
+                return el && el.classList.contains('border-red-500');
+            }
+
+            for (let id of step1Fields) {
+                if (hasError(id)) {
+                    foundErrorStep = 1;
+                    break;
+                }
+            }
+
+            if (!foundErrorStep) {
+                for (let id of step2Fields) {
+                    if (hasError(id)) {
+                        foundErrorStep = 2;
+                        break;
+                    }
+                }
+            }
+
+            if (!foundErrorStep) {
+                for (let id of step3Fields) {
+                    if (hasError(id)) {
+                        foundErrorStep = 3;
+                        break;
+                    }
+                }
+            }
+
+            if (foundErrorStep) {
+                $('.step').hide();
+                $('#step-' + foundErrorStep).show();
+            }
         });
     </script>
 
