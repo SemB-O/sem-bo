@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
-from ..models import Procedure, Record, FavoriteFolder
+from ..models import Procedure, Record, FavoriteProceduresFolder
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -17,7 +17,7 @@ class Home(ListView):
 
         user = self.request.user
         context['user'] = user
-        context['favorite_folders'] = FavoriteFolder.objects.filter(user=user)
+        context['favorite_folders'] = FavoriteProceduresFolder.objects.filter(user=user)
 
         return context
 

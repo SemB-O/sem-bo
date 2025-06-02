@@ -1,6 +1,6 @@
 from cbo.models._base import BaseModel
 from django.db import models
-
+from cbo.camel_to_snake import get_snake_case_table_name
 
 class Record(BaseModel):
     record_code = models.CharField(max_length=2, primary_key=True)
@@ -14,3 +14,4 @@ class Record(BaseModel):
         indexes = [
             models.Index(fields=['record_code', 'name']),
         ]
+        db_table = get_snake_case_table_name(__qualname__) 

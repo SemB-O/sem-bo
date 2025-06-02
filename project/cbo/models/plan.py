@@ -1,7 +1,7 @@
 from cbo.models._base import BaseModel
 from django.db import models
-from .plan_point_availability import PlanPointAvailability
-
+from .plan_has_plan_benift import PlanHasPlanBenefit
+from cbo.camel_to_snake import get_snake_case_table_name
 
 class Plan(BaseModel):
     name = models.CharField(max_length=150)
@@ -9,16 +9,19 @@ class Plan(BaseModel):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     points = models.ManyToManyField(
-        'PlanPoint', related_name='plans', through='PlanPointAvailability')
+        'PlanBenefit', related_name='plans', through='PlanHasPlanBenefit')
 
     def all_points(self):
-        return PlanPointAvailability.objects.filter(plan=self)
+        return PlanHasPlanBenefit.objects.filter(plan=self)
 
     def available_points(self):
-        return self.points.filter(plan_point__available=True)
+        return self.points.filter(plan_benift__available=True)
 
     def unavailable_points(self):
-        return self.points.filter(plan_point__available=False)
+        return self.points.filter(plan_benift__available=False)
+
+    class Meta:
+        db_table = get_snake_case_table_name(__qualname__) 
 
     def __str__(self):
         return self.name

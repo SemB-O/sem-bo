@@ -7,8 +7,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
-from ..models import FavoriteProcedure, Procedure, FavoriteFolder, Record
-from ..forms.favorite import FavoriteFolderForm
+from ..models import FavoriteProceduresFolderHasProcedure, Procedure, FavoriteProceduresFolder, Record
+from ..forms.favorite import FavoriteProceduresFolderForm
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -19,14 +19,14 @@ class FavoriteView(ListView):
 
     def get_queryset(self):
         user = self.request.user
-        favorite_procedures_codes = FavoriteProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
+        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
 
         return Procedure.objects.filter(procedure_code__in=favorite_procedures_codes).order_by('-favoriteprocedure__created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        favorite_folders = FavoriteFolder.objects.filter(user=user)
+        favorite_folders = FavoriteProceduresFolder.objects.filter(user=user)
         
         for folder in favorite_folders:
             folder.procedures = Procedure.objects.filter(
@@ -46,7 +46,7 @@ class FavoriteView(ListView):
         return context
     
     def post(self, request, *args, **kwargs):
-        form = FavoriteFolderForm(request.POST)
+        form = FavoriteProceduresFolderForm(request.POST)
         if form.is_valid():
             folder = form.save(commit=False)
             folder.user = request.user
@@ -65,7 +65,7 @@ class FavoriteProceduresListView(View):
     def get(self, request, *args, **kwargs):
         user = request.user
 
-        favorite_procedures = FavoriteProcedure.objects.filter(user=user).values_list('procedure', flat=True)
+        favorite_procedures = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure', flat=True)
 
         procedures_list = Procedure.objects.filter(
             Q(pk__in=favorite_procedures)
@@ -94,7 +94,7 @@ class FavoriteProceduresListView(View):
         except EmptyPage:
             procedures = paginator.page(paginator.num_pages)
 
-        favorite_folders = FavoriteFolder.objects.filter(user=user)
+        favorite_folders = FavoriteProceduresFolder.objects.filter(user=user)
         data = []
         for folder in favorite_folders:
             folder_procedures = Procedure.objects.filter(favoriteprocedure__folder=folder)
@@ -132,16 +132,16 @@ class ToggleFavoriteView(View):
             user = request.user
             is_favorite = False
             
-            FavoriteProcedure.objects.filter(
+            FavoriteProceduresFolderHasProcedure.objects.filter(
                 user=user,
                 procedure_id=procedure_id
             ).exclude(folder_id__in=selected_folders_ids).delete()
 
-            favorite_folders = FavoriteProcedure.objects.filter(user=user, procedure_id=procedure_id)
+            favorite_folders = FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure_id=procedure_id)
 
             for folder_id in selected_folders_ids:
                 try:
-                    favorite, created = FavoriteProcedure.objects.get_or_create(
+                    favorite, created = FavoriteProceduresFolderHasProcedure.objects.get_or_create(
                         user=user,
                         procedure_id=procedure_id,
                         folder_id=folder_id
@@ -158,7 +158,7 @@ class ToggleFavoriteView(View):
 
 class CreateFolderView(View):
     def post(self, request):
-        form = FavoriteFolderForm(request.POST)
+        form = FavoriteProceduresFolderForm(request.POST)
         if form.is_valid():
             folder = form.save(commit=False)
             folder.user = request.user
@@ -174,13 +174,13 @@ class CheckFavoriteView(View):
         user = request.user
 
         if procedure_id:
-            favorites = FavoriteProcedure.objects.filter(user=user, procedure_id=procedure_id)
+            favorites = FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure_id=procedure_id)
             favorite_folders = []
             is_favorite = False
 
             for favorite in favorites:
-                if favorite.folder:
-                    favorite_folders.append(favorite.folder.id)
+                if favorite.favorite_procedures_folder:
+                    favorite_folders.append(favorite.favorite_procedures_folder.id)
             
             if favorite_folders:
                 is_favorite = True
@@ -192,8 +192,8 @@ class CheckFavoriteView(View):
 
 class EditFolderView(View):
     def post(self, request, folder_id):
-        folder = get_object_or_404(FavoriteFolder, id=folder_id)
-        form = FavoriteFolderForm(request.POST, instance=folder)
+        folder = get_object_or_404(FavoriteProceduresFolder, id=folder_id)
+        form = FavoriteProceduresFolderForm(request.POST, instance=folder)
         if form.is_valid():
             form.save()
             messages.success(request, 'Pasta de favoritos editada com sucesso')
@@ -207,7 +207,7 @@ class EditFolderView(View):
 
 class DeleteFolderView(View):
     def post(self, request, folder_id):
-        folder = get_object_or_404(FavoriteFolder, id=folder_id)
+        folder = get_object_or_404(FavoriteProceduresFolder, id=folder_id)
         folder.delete()
         return JsonResponse({'message': 'Pasta de favoritos excluída com sucesso'}, status=200)
     

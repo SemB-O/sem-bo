@@ -1,5 +1,6 @@
 from cbo.models._base import BaseModel
 from django.db import models
+from cbo.camel_to_snake import get_snake_case_table_name
 
 
 class Procedure(BaseModel):
@@ -19,12 +20,13 @@ class Procedure(BaseModel):
     competence_date = models.CharField(max_length=6, null=True)
 
     def __str__(self):
-        return self.name
+        return getattr(self, 'name', '')
 
     class Meta:
         indexes = [
             models.Index(fields=['procedure_code', 'name']),
         ]
+        db_table = get_snake_case_table_name(__qualname__) 
 
     def get_records_names(self):
         records = []
@@ -35,8 +37,8 @@ class Procedure(BaseModel):
         return "N/A"
 
     def is_favorite(self, user):
-        from cbo.models.favorite_procedure import FavoriteProcedure
-        return FavoriteProcedure.objects.filter(user=user, procedure=self).exists()
+        from project.cbo.models.favorite_procedures_folder_has_procedure import FavoriteProceduresFolderHasProcedure
+        return FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure=self).exists()
     
     def get_related_occupations(self, user):
         if user and user.occupations.exists():
