@@ -12,8 +12,8 @@ class User(AbstractUser, BaseModel):
     email = models.EmailField(gettext("email address"), unique=True)
     telephone = models.CharField(max_length=15)
     date_of_birth = models.DateField(
-        null=False, blank=False, default='2000-01-01')
-    occupational_registration = models.CharField(max_length=15)
+        null=False, blank=False)
+    occupational_registration = models.CharField(max_length=15, null=True)
     occupations = models.ManyToManyField(
         'Occupation',
         through='UserHasOccupation',
@@ -21,6 +21,7 @@ class User(AbstractUser, BaseModel):
     )
     plan = models.ForeignKey(
         'Plan', on_delete=models.SET_NULL, null=True, related_name='users')
+    
     email_verified = models.BooleanField(default=False)
     email_verification_token = models.UUIDField(
         default=uuid.uuid4, editable=False)

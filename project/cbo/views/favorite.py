@@ -21,7 +21,7 @@ class FavoriteView(ListView):
         user = self.request.user
         favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
 
-        return Procedure.objects.filter(procedure_code__in=favorite_procedures_codes).order_by('-favoriteprocedure__created_at')
+        return Procedure.objects.filter(procedure_code__in=favorite_procedures_codes)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

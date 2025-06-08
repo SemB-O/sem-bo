@@ -47,7 +47,6 @@ class DataImporter:
                     'SP_value': int(line[303:312].strip()) if len(line) >= 312 else 0,
                     'stay_time_number': int(line[320:324].strip()) if len(line) >= 324 else 0,
                     'competence_date': line[324:330].strip() if len(line) >= 330 else '',
-                    'created_at': timezone.now()
                 }
 
             logger.info(f"Parsed {len(procedure_data)} procedures from file.")

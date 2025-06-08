@@ -5,7 +5,7 @@ from ..models import Plan
 
 class PlanView(View):
     def get(self, request):
-        plans = Plan.objects.all().order_by('-update_at')
+        plans = Plan.objects.all()
         return render(request, 'create/select_plan.html', {'plans': plans})
 
     def post(self, request):

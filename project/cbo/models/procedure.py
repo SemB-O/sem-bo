@@ -37,7 +37,7 @@ class Procedure(BaseModel):
         return "N/A"
 
     def is_favorite(self, user):
-        from project.cbo.models.favorite_procedures_folder_has_procedure import FavoriteProceduresFolderHasProcedure
+        from cbo.models.favorite_procedures_folder_has_procedure import FavoriteProceduresFolderHasProcedure
         return FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure=self).exists()
     
     def get_related_occupations(self, user):

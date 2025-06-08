@@ -32,7 +32,6 @@ DOMAIN = os.getenv('DOMAIN', 'localhost:8000')
 ALLOWED_HOSTS = ['0.0.0.0', '192.168.0.108', 'localhost', '127.0.0.1', DOMAIN, '*']
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,7 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_crontab',
     'cbo',
+    'rest_framework',
+    'drf_spectacular',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -124,7 +129,6 @@ LANGUAGE_CODE = 'pt-br'  # Defina o idioma padrão
 TIME_ZONE = 'America/Sao_Paulo'  # Defina o fuso horário padrão
 
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
