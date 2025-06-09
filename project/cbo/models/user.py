@@ -27,6 +27,7 @@ class User(AbstractUser, BaseModel):
         default=uuid.uuid4, editable=False)
     username = None
     date_joined = None
+    
 
     objects = UserManager()
 
