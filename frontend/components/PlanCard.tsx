@@ -15,10 +15,11 @@ export default function PlanCard({ title, description, price, onPress }: PlanCar
         <Text className="text-2xl font-bold text-gray-900 mb-1">{title}</Text>
         <Text className="text-xs text-gray-500 mb-6">{description}</Text>
 
-        <Text className="text-base text-gray-900">
-          R$ <Text className="text-5xl font-extrabold">{price}</Text>
-          <Text>/mês</Text>
-        </Text>
+        <View className="flex-row items-end space-x-1">
+          <Text className="text-base text-gray-900">R$</Text>
+          <Text className="text-5xl font-extrabold text-gray-900">{price}</Text>
+          <Text className="text-xl font-bold text-gray-900">/mês</Text>
+        </View>
       </View>
 
       <Pressable
