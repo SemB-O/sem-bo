@@ -16,197 +16,187 @@ Sem B.O
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
+<script>
+    $(document).ready(function () {
+        $('select.select2').select2({
+            width: '100%',
+        });
+    });      
+</script>
 {% endblock %}
 
 {% block content %}
-    <section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
-        <div></div>
-        <section class="m-0 min-h-screen text-black bg-white box-border flex flex-col items-center py-6 md:justify-center w-full">
-            <div class="sticky text-center py-2">
-                <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
-                <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
+<style>
+    .select2-container .select2-selection--single,
+    .select2-container .select2-selection--multiple {
+      margin-top: 0.25rem;
+      display: flex;                        /* ← muda para flex */
+      align-items: center;                 /* ← centraliza verticalmente */
+      width: 100%;
+      border-radius: 0.375rem;
+      border: 1px solid #d1d5db;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      font-size: 0.875rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-color: #F2F2F7 !important;
+      min-height: 2.25rem;
+      padding: 0 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .select2-container--focus .select2-selection {
+        border-color: black !important;  /* focus:border-blue-500 */
+        box-shadow: 0 0 0 1px black;      /* focus:ring-blue-500 */
+    }
+
+</style>
+<section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
+    <div></div>
+    <div class="flex flex-col gap-2 justify-center items-center px-6 md:px-0 w-full md:w-2/3">
+        <div class="sticky text-center py-2">
+            <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
+            <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
+        </div>
+        <form class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4" action="{% url 'register' selected_plan=selected_plan %}" method="post">
+            {% csrf_token %}
+            
+            <div class="step flex flex-col gap-4" id="step-1">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
+                    <p class="text-gray-600">Suas informações pessoais!</p>
+                </div>
+                <div>
+                    {{ form.first_name.as_field_group }}
+                </div>
+                <div>
+                    {{ form.last_name.as_field_group }}
+                </div>
+                <div>
+                    {{ form.CPF.as_field_group }}
+                </div>
+                <div>
+                    {{ form.telephone.as_field_group }}
+                </div>
+                <div>
+                    {{ form.date_of_birth.as_field_group }}
+                </div>
+                <div class="error-message text-sm text-red-600 hidden"></div>
+                <button type="button" id="first-step" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
+            </div> 
+            
+            <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
+                    <p class="text-gray-600">Suas informações profissionais!</p>
+                </div>
+                <div>
+                    <label for="id_occupational_registration">Registro Ocupacional</label>
+                    {{ form.occupational_registration }}
+                    {% if form.occupational_registration.errors %}
+                        <p class="text-sm text-red-600">{{ form.occupational_registration.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="occupation-select">Ocupação</label>
+                    {{ form.occupation }}
+                    {% if form.occupation.errors %}
+                        <p class="text-sm text-red-600">{{ form.occupation.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="error-message text-sm text-red-600 hidden"></div>
+                <div class="flex gap-2 my-2">
+                    <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
+                    <button type="button" id="second-step" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                </div>
             </div>
-            <form class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4" action="{% url 'register' selected_plan=selected_plan %}" method="post">
-                {% csrf_token %}
-
-                <div class="step flex flex-col gap-4" id="step-1">
-                    <div class="text-left hidden md:block">
-                        <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
-                        <p class="text-gray-600">Suas informações pessoais!</p>
-                    </div>
-                    <div>
-                        <label for="id_first_name">Nome</label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                            <p class="text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="id_last_name">Sobrenome</label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                            <p class="text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="id_CPF">CPF</label>
-                        {{ form.CPF }}
-                        {% if form.CPF.errors %}
-                            <p class="text-sm text-red-600">{{ form.CPF.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="id_telephone">Telefone</label>
-                        {{ form.telephone }}
-                        {% if form.telephone.errors %}
-                            <p class="text-sm text-red-600">{{ form.telephone.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="id_date_of_birth">Data de Nascimento</label>
-                        {{ form.date_of_birth }}
-                        {% if form.date_of_birth.errors %}
-                            <p class="text-sm text-red-600">{{ form.date_of_birth.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="error-message text-sm text-red-600 hidden"></div>
-                    <button type="button" id="first-step" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
+            
+            <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
+                    <p class="text-gray-600">Suas informações de login!</p>
                 </div>
-                
-                <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
-                    <div class="text-left hidden md:block">
-                        <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
-                        <p class="text-gray-600">Suas informações profissionais!</p>
-                    </div>
-                    <div>
-                        <label for="id_occupational_registration">Registro Ocupacional</label>
-                        {{ form.occupational_registration }}
-                        {% if form.occupational_registration.errors %}
-                            <p class="text-sm text-red-600">{{ form.occupational_registration.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="occupation-select">Ocupação</label>
-                        {{ form.occupation }}
-                        {% if form.occupation.errors %}
-                            <p class="text-sm text-red-600">{{ form.occupation.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="error-message text-sm text-red-600 hidden"></div>
-                    <div class="flex gap-2 my-2">
-                        <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                        <button type="button" id="second-step" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
+                <div>
+                    {{ form.email.as_field_group }}
+                </div>
+                <div>
+                    {{ form.password1.label_tag }}
+                    <div class="relative">
+                        {{ form.password1 }}
+                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                            visibility
+                        </span>
                     </div>
                 </div>
-                
-                <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
-                    <div class="text-left hidden md:block">
-                        <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
-                        <p class="text-gray-600">Suas informações de login!</p>
-                    </div>
-                    <div>
-                        <label for="id_email">E-mail</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <p class="text-sm text-red-600">{{ form.email.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="id_password1">Senha</label>
-                        <div class="relative">
-                            {{ form.password1 }}
-                            <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                                visibility
-                            </span>
-                        </div>
-                        {% if form.password1.errors %}
-                            <p class="text-sm text-red-600">{{ form.password1.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label for="id_password2">Confirmar Senha</label>
-                        <div class="relative">
-                            {{ form.password2 }}
-                            <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                                visibility
-                            </span>
-                        </div>
-                        {% if form.password2.errors %}
-                            <p class="text-sm text-red-600">{{ form.password2.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="error-message text-sm text-red-600 hidden"></div>
-                    <div class="flex gap-2 my-2">
-                        <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                        <button type="submit" class="w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition">Cadastrar</button>
+                <div>
+                    {{ form.password2.label_tag }}
+                    <div class="relative">
+                        {{ form.password2 }}
+                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                            visibility
+                        </span>
                     </div>
                 </div>
-            </form>
+                <div class="error-message text-sm text-red-600 hidden"></div>
+                <div class="flex gap-2 my-2">
+                    <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
+                    <button type="submit" class="w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition">Cadastrar</button>
+                </div>
+            </div>
+        </form>
 
-        </div>
-        <div class="flex justify-center py-8">
-            <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
-        </div>
-    </section>
+    </div>
+    <div class="flex justify-center py-8">
+        <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
+    </div>
+</section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.plan-select').select2({
-                allowClear: true,
-                width: '100%'
-            });
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function validateOccupations() {
+            let selectedPlan = $('.plan-select option:selected').text();
+            let occupations = $('.occupation-select').val();
+            let OccupationError = $('#occupation-error');
 
-            $('.occupation-select').select2({
-                allowClear: true,
-                width: '100%'
-            });
+            let maxOccupations = 0;
 
-            function validateOccupations() {
-                let selectedPlan = $('.plan-select option:selected').text();
-                let occupations = $('.occupation-select').val();
-                let OccupationError = $('#occupation-error');
-
-                let maxOccupations = 0;
-
-                if (selectedPlan === 'Plano Essencial') {
-                    maxOccupations = 1;
-                } else if (selectedPlan === 'Plano Essencial +') {
-                    maxOccupations = 3;
-                }
-
-                if (occupations && occupations.length > maxOccupations) {
-                    OccupationError.text(`O ${selectedPlan} permite selecionar até ${maxOccupations} ocupação(ões).`).fadeIn();
-                    return false;
-                } else {
-                    OccupationError.hide();
-                    return true;
-                }
+            if (selectedPlan === 'Plano Essencial') {
+                maxOccupations = 1;
+            } else if (selectedPlan === 'Plano Essencial +') {
+                maxOccupations = 3;
             }
 
+            if (occupations && occupations.length > maxOccupations) {
+                OccupationError.text(`O ${selectedPlan} permite selecionar até ${maxOccupations} ocupação(ões).`).fadeIn();
+                return false;
+            } else {
+                OccupationError.hide();
+                return true;
+            }
+        }
+
+        validateOccupations();
+
+        $('.plan-select').on('change', function() {
             validateOccupations();
-
-            $('.plan-select').on('change', function() {
-                validateOccupations();
-                $('.occupation-select').val(null).trigger('change');
-            });
-
-            $('.occupation-select').on('select2:select select2:unselect', function() {
-                validateOccupations();
-            });
-
-            $('.occupation-select').on('change', function() {
-                validateOccupations();
-            });
-
-            $('form').on('submit', function(e) {
-                if (!validateOccupations()) {
-                    e.preventDefault();
-                }
-            });
+            $('.occupation-select').val(null).trigger('change');
         });
-    </script>
+
+        $('.occupation-select').on('select2:select select2:unselect', function() {
+            validateOccupations();
+        });
+
+        $('.occupation-select').on('change', function() {
+            validateOccupations();
+        });
+
+        $('form').on('submit', function(e) {
+            if (!validateOccupations()) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
 
     <script>
         $(document).ready(function(){
@@ -374,7 +364,7 @@ Sem B.O
     <script>
         $(document).ready(function () {
             let step1Fields = ['id_first_name', 'id_last_name', 'id_CPF', 'id_telephone', 'id_date_of_birth'];
-            let step2Fields = ['id_occupational_registration', 'id_plan', 'id_occupation'];
+            let step2Fields = ['id_occupational_registration', 'id_occupation'];
             let step3Fields = ['id_email', 'id_password1', 'id_password2'];
 
             let foundErrorStep = null;

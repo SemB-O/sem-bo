@@ -7,151 +7,185 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
 
+DEFAULT_CLASS = 'mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2'
+
 
 class LoginAuthenticationForm(forms.Form):
     email = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-md focus:outline-none border-gray-300',
-            'placeholder': 'Digite seu email',
+            'class': DEFAULT_CLASS,
+            'placeholder': 'seuemail@exemplo.com',
             'autocomplete': 'email',
         })
     )
     password = forms.CharField(
         label='Senha',
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-md focus:outline-none border-gray-300',
-            'placeholder': 'Digite sua senha',
+            'class': DEFAULT_CLASS,
+            'placeholder': '********',
             'autocomplete': 'current-password',
         })
     )
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
 
     class Meta:
         model = User
         fields = ['email', 'password']
 
 
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
+
+        if not email or not password:
+            return  
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            self.add_error('email', 'O email que você inseriu não está conectado a uma conta.')
+            return
+
+        user = authenticate(username=email, password=password)
+        if user is None:
+            self.add_error('password', 'A senha que você inseriu está incorreta.')
+        else:
+            cleaned_data['user'] = user  
+
+        return cleaned_data
+    
 class UserRegisterForm(UserCreationForm):
-    def filter_occupations(self):
-        occupations = Occupation.objects.all()
-        
-        medical_keywords = [
-            'Médico', 'Cirurgião', 'Enfermeiro', 'Dentista', 'Farmacêutico',
-            'Fisioterapeuta', 'Nutricionista', 'Psicólogo', 'Psiquiatra', 'Radiologista',
-            'Oncologista', 'Cardiologista', 'Ginecologista', 'Pediatra', 'Ortopedista',
-            'Fonoaudiólogo', 'Terapeuta', 'Ortoptista', 'Psicomotricista', 'Saúde', 'Neuro'
-        ]
-        
-        medic_occupations = occupations.none()
-
-        for keyword in medical_keywords:
-            medic_occupations |= occupations.filter(name__icontains=keyword)
-        
-        return medic_occupations
-
-    plan = forms.ModelChoiceField(
-        queryset=Plan.objects.all(),
-        widget=forms.Select(
-            attrs={
-                'class': 'requiredField plan-select w-full px-4 py-2 rounded-md focus:outline-none',
-                'data-placeholder': 'Selecione seu Plano'
-            }
-        ),
-    )
-
-    occupation = forms.ModelMultipleChoiceField(
-        queryset=filter_occupations(None), 
-        widget=forms.SelectMultiple(
-            attrs={
-                'class': 'requiredField occupation-select w-full px-4 py-2 rounded-md focus:outline-none',
-                'id': 'occupation-select',
-                'data-placeholder': 'Selecione uma ou mais ocupações de acordo com seu Plano'
-            },
-        ),
-    )
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'password1', 'password2', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration', 'occupation', 'plan']
+        fields = [
+            'email', 
+            'first_name', 
+            'last_name', 
+            'password1', 
+            'password2', 
+            'CPF', 
+            'telephone', 
+            'date_of_birth', 
+            'occupational_registration', 
+            'occupations'
+        ]
         widgets = {
             'email': forms.EmailInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
-                'placeholder': 'Digite seu Email',
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'seuemail@exemplo.com',
                 'required': 'false'
             }),
             'first_name': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Nome',
                 'required': 'false'
             }),
             'last_name': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Sobrenome',
                 'required': 'false'
             }),
             'password1': forms.PasswordInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite sua Senha',
                 'required': 'false'
             }),
             'password2': forms.PasswordInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Confirme sua senha',
                 'required': 'false'
             }),
             'CPF': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_CPF',
                 'placeholder': 'Digite seu CPF',
                 'required': 'false'
             }),
             'telephone': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_telephone',
-                'placeholder': 'Digite seu Telefone',
+                'placeholder': 'Digite seu Celular',
                 'required': 'false'
             }),
             'date_of_birth': forms.DateInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite sua Data de nascimento',
                 'type': 'date',
                 'required': 'false'
             }),
             'occupational_registration': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Registro ocupacional',
                 'required': 'false'
             }),
         }
 
     def __init__(self, *args, **kwargs):
+        self.plan = kwargs.pop('plan', None)
         super(UserRegisterForm, self).__init__(*args, **kwargs)
+        self.set_occupations_field_based_on_plan(self.plan)        
+
         self.fields['password1'].widget.attrs.update({
-            'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+            'class': 'requiredField ' + DEFAULT_CLASS,
             'placeholder': 'Digite sua Senha'
         })
         self.fields['password2'].widget.attrs.update({
-            'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+            'class': 'requiredField ' + DEFAULT_CLASS,
             'placeholder': 'Confirme sua Senha'
         })
 
-    def clean(self):
-        cleaned_data = super().clean()
-        plan = cleaned_data.get('plan')
-        occupations = cleaned_data.get('occupation')
+    def set_occupations_field_based_on_plan(self, plan):
+        occupation_queryset = Occupation.objects.medical_only()
 
-        if plan and occupations:
-            if plan.name == 'Plano Essencial' and len(occupations) > 1:
-                raise ValidationError('O Plano Essencial permite selecionar apenas uma ocupação.')
-            elif plan.name == 'Plano Essencial +' and len(occupations) > 3:
-                raise ValidationError('O Plano Essencial + permite selecionar até 3 ocupações.')
+        if plan and getattr(plan, 'max_occupations', 1) > 1:
+            self.fields['occupations'] = forms.ModelMultipleChoiceField(
+                queryset=occupation_queryset,
+                required=True,
+                widget=forms.SelectMultiple(attrs={
+                    'class': f'select2 requiredField {DEFAULT_CLASS}',
+                    'id': 'occupation-select',
+                    'data-placeholder': 'Selecione uma ou mais ocupações de acordo com seu Plano',
+                })
+            )
+        else:
+            self.fields['occupations'] = forms.ModelChoiceField(
+                queryset=occupation_queryset,
+                required=True,
+                widget=forms.Select(attrs={
+                    'class': f'select2 requiredField {DEFAULT_CLASS}',
+                    'id': 'occupation-select',
+                    'data-placeholder': 'Selecione uma ocupação de acordo com seu Plano',
+                })
+            )
 
-        return cleaned_data
+    def clean_occupations(self):
+        occupations = self.cleaned_data.get('occupations')
 
+        if occupations and self.plan:
+            max_allowed = self.plan.max_occupations
+            if len(occupations) > max_allowed:
+                raise forms.ValidationError(
+                    f'Você pode selecionar no máximo {max_allowed} ocupações para este plano.'
+                )
+
+        return occupations
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.plan = self.plan
+        # user.is_active = False
+        
+        if commit:
+            user.save()
+
+            occupations = self.cleaned_data.get('occupation')
+            for occupation in occupations:
+                user.occupations.add(occupation)
+
+            self.save_m2m()
+        return user
 
 class UserEditForm(forms.ModelForm):  
     class Meta:

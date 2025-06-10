@@ -10,9 +10,12 @@ from cbo.camel_to_snake import get_snake_case_table_name
 class User(AbstractUser, BaseModel):
     CPF = models.CharField(max_length=15)
     email = models.EmailField(gettext("email address"), unique=True)
-    telephone = models.CharField(max_length=15)
+    telephone = models.CharField(max_length=15, verbose_name='Celular')
     date_of_birth = models.DateField(
-        null=False, blank=False)
+        null=False, 
+        blank=False,
+        verbose_name='Data de Nascimento'    
+    )
     occupational_registration = models.CharField(max_length=15, null=True)
     occupations = models.ManyToManyField(
         'Occupation',

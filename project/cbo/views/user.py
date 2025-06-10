@@ -24,39 +24,31 @@ from ..models import Occupation, Plan, FavoriteProceduresFolder, User
 class LoginView(FormView):
     template_name = 'front/login.html'
     form_class = LoginAuthenticationForm
+    success_url = reverse_lazy('home') 
 
     def form_valid(self, form):
-        email = form.cleaned_data['email']
-        password = form.cleaned_data['password']
-
-        user = authenticate(self.request, username=email, password=password)
-        if user is not None:
+        user = form.cleaned_data.get('user') 
+        if user:
             login(self.request, user)
-            return redirect('home')
-        else:
-            messages.error(self.request, 'Credenciais inválidas. Tente novamente.')
-            return redirect('login')
+        return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Erro no formulário. Verifique os dados.')
-        return redirect('login')
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class RegisterView(View):
     template_name = 'create/register_user.html'
 
     def get(self, request, selected_plan, *args, **kwargs):
-        form = UserRegisterForm(initial={'plan': selected_plan}, use_required_attribute=False)
-        occupations = Occupation.objects.all()
-
-        plans = Plan.objects.all()
-        plans_json = json.dumps(list(plans.values('id', 'name', 'max_occupations', 'description')))
+        plan_obj = Plan.objects.filter(id=selected_plan).first() 
+        form = UserRegisterForm(
+            use_required_attribute=False,
+            plan=plan_obj  
+        )
 
         context = {
             'form': form,
-            'occupations': occupations,
             'selected_plan': selected_plan,
-            'plans_json': plans_json,
         }
 
         return render(request, self.template_name, context)
@@ -64,35 +56,26 @@ class RegisterView(View):
     def post(self, request, selected_plan, *args, **kwargs):
         form = UserRegisterForm(request.POST, use_required_attribute=False)
 
+        plan_obj = Plan.objects.filter(id=selected_plan).first() 
+        form = UserRegisterForm(
+            data=request.POST,
+            use_required_attribute=False,
+            plan=plan_obj  
+        )
+
         if form.is_valid():
             try:
-                user = self._create_user(form)
-                self._assign_occupations(user, form.cleaned_data['occupation'])
+                user = form.save()
                 self._create_default_folder(user)
-                self.activateEmail(request, user, form.cleaned_data.get('email'))
+                # self.activateEmail(request, user, form.cleaned_data.get('email'))
                 return redirect('login')
             except Exception as e:
-                return render(request, self.template_name, {
-                    'form': form,
-                    'form_error': f"An unexpected error occurred: {str(e)}"
-                })
-        else:
-            return render(request, self.template_name, {
-                'form': form,
-                'selected_plan': selected_plan,
-            })
+                pass
 
-
-    def _create_user(self, form):
-        user = form.save(commit=False)
-        user.is_active = False
-        user.save()
-        return user
-
-    def _assign_occupations(self, user, occupations):
-        for occupation in occupations:
-            user.occupations.add(occupation)
-        user.save()
+        return render(request, self.template_name, {
+            'form': form,
+            'selected_plan': selected_plan,
+        })
 
     def _create_default_folder(self, user):
         FavoriteProceduresFolder.objects.get_or_create(
