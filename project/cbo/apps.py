@@ -8,3 +8,4 @@ class CboConfig(AppConfig):
     def ready(self):
         from django.contrib.auth.management import commands as auth_commands
         from django.core.management import call_command
+        import cbo.signals 

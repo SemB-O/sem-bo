@@ -1,3 +1,0 @@
-from .occupation_list import OccupationAccountOnboardingListSerializer
-from .plan_list import PlanAccountOnboardingListSerializer
-from .user_create import UserAccountOnboardingCreateSerializer

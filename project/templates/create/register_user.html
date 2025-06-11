@@ -1,12 +1,9 @@
 {% extends 'base_auth.html' %}
 {%  load static %}
-
 {% block title %}
 Sem B.O
 {% endblock %}
-
 {% block head %}
-
 <link rel="stylesheet" href="{% static 'front/register_style.css' %}">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css">
@@ -17,393 +14,473 @@ Sem B.O
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $('select.select2').select2({
-            width: '100%',
-        });
-    });      
+   $(document).ready(function () {
+       $('select.select2').select2({
+           width: '100%',
+       });
+   });      
 </script>
 {% endblock %}
-
 {% block content %}
 <style>
-    .select2-container .select2-selection--single,
-    .select2-container .select2-selection--multiple {
-      margin-top: 0.25rem;
-      display: flex;                        /* ← muda para flex */
-      align-items: center;                 /* ← centraliza verticalmente */
-      width: 100%;
-      border-radius: 0.375rem;
-      border: 1px solid #d1d5db;
-      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      font-size: 0.875rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background-color: #F2F2F7 !important;
-      min-height: 2.25rem;
-      padding: 0 0.5rem;
-      box-sizing: border-box;
-    }
-
-    .select2-container--focus .select2-selection {
-        border-color: black !important;  /* focus:border-blue-500 */
-        box-shadow: 0 0 0 1px black;      /* focus:ring-blue-500 */
-    }
-
+   .select2-container .select2-selection--single,
+   .select2-container .select2-selection--multiple {
+   margin-top: 0.25rem;
+   display: flex;                        /* ← muda para flex */
+   align-items: center;                 /* ← centraliza verticalmente */
+   width: 100%;
+   border-radius: 0.375rem;
+   border: 1px solid #d1d5db;
+   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+   font-size: 0.875rem;
+   transition: border-color 0.2s, box-shadow 0.2s;
+   background-color: #F2F2F7 !important;
+   min-height: 2.25rem;
+   padding: 0 0.5rem;
+   box-sizing: border-box;
+   }
+   .select2-container--focus .select2-selection {
+   border-color: black !important;  /* focus:border-blue-500 */
+   box-shadow: 0 0 0 1px black;      /* focus:ring-blue-500 */
+   }
 </style>
 <section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
-    <div></div>
-    <div class="flex flex-col gap-2 justify-center items-center px-6 md:px-0 w-full md:w-2/3">
-        <div class="sticky text-center py-2">
-            <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
-            <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
-        </div>
-        <form class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4" action="{% url 'register' selected_plan=selected_plan %}" method="post">
-            {% csrf_token %}
-            
-            <div class="step flex flex-col gap-4" id="step-1">
-                <div class="text-left hidden md:block">
-                    <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
-                    <p class="text-gray-600">Suas informações pessoais!</p>
-                </div>
-                <div>
-                    {{ form.first_name.as_field_group }}
-                </div>
-                <div>
-                    {{ form.last_name.as_field_group }}
-                </div>
-                <div>
-                    {{ form.CPF.as_field_group }}
-                </div>
-                <div>
-                    {{ form.telephone.as_field_group }}
-                </div>
-                <div>
-                    {{ form.date_of_birth.as_field_group }}
-                </div>
-                <div class="error-message text-sm text-red-600 hidden"></div>
-                <button type="button" id="first-step" class="next-step w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2">Próximo</button>
-            </div> 
-            
-            <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
-                <div class="text-left hidden md:block">
-                    <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
-                    <p class="text-gray-600">Suas informações profissionais!</p>
-                </div>
-                <div>
-                    <label for="id_occupational_registration">Registro Ocupacional</label>
-                    {{ form.occupational_registration }}
-                    {% if form.occupational_registration.errors %}
-                        <p class="text-sm text-red-600">{{ form.occupational_registration.errors.0 }}</p>
-                    {% endif %}
-                </div>
-                <div>
-                    <label for="occupation-select">Ocupação</label>
-                    {{ form.occupations }}
-                    {% if form.occupations.errors %}
-                        <p class="text-sm text-red-600">{{ form.occupations.errors.0 }}</p>
-                    {% endif %}
-                </div>
-                <div class="error-message text-sm text-red-600 hidden"></div>
-                <div class="flex gap-2 my-2">
-                    <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                    <button type="button" id="second-step" class="next-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Próximo</button>
-                </div>
+   <div></div>
+   <div class="flex flex-col gap-2 justify-center items-center px-6 md:px-0 w-full md:w-2/3">
+      <div class="sticky text-center py-2">
+         <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
+         <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
+      </div>
+      <form id="onboarding-form" class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4" action="{% url 'register' selected_plan=selected_plan %}" method="post">
+         {% csrf_token %}
+         <div class="step flex flex-col gap-4" id="step-1">
+            <div class="text-left hidden md:block">
+               <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
+               <p class="text-gray-600">Suas informações pessoais!</p>
             </div>
-            
-            <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
-                <div class="text-left hidden md:block">
-                    <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
-                    <p class="text-gray-600">Suas informações de login!</p>
-                </div>
-                <div>
-                    {{ form.email.as_field_group }}
-                </div>
-                <div>
-                    {{ form.password1.label_tag }}
-                    <div class="relative">
-                        {{ form.password1 }}
-                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                            visibility
-                        </span>
-                    </div>
-                </div>
-                <div>
-                    {{ form.password2.label_tag }}
-                    <div class="relative">
-                        {{ form.password2 }}
-                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                            visibility
-                        </span>
-                    </div>
-                </div>
-                <div class="error-message text-sm text-red-600 hidden"></div>
-                <div class="flex gap-2 my-2">
-                    <button type="button" class="previous-step w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition ">Anterior</button>
-                    <button type="submit" class="w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition">Cadastrar</button>
-                </div>
+            <div>
+               {{ form.first_name.as_field_group }}
             </div>
-        </form>
-
-    </div>
-    <div class="flex justify-center py-8">
-        <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
-    </div>
+            <div>
+               {{ form.last_name.as_field_group }}
+            </div>
+            <div>
+               {{ form.CPF.as_field_group }}
+            </div>
+            <div>
+               {{ form.telephone.as_field_group }}
+            </div>
+            <div>
+               {{ form.date_of_birth.as_field_group }}
+            </div>
+            <button type="button" id="first-step"
+               class="next-step relative w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+               <span>Próximo</span>
+               <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </button>
+         </div>
+         <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
+            <div class="text-left hidden md:block">
+               <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
+               <p class="text-gray-600">Suas informações profissionais!</p>
+            </div>
+            <div>
+               {{ form.occupational_registration.as_field_group }}
+            </div>
+            <div>
+               {{ form.occupations.as_field_group }}
+            </div>
+            <div class="error-message text-sm text-red-600 hidden"></div>
+            <div class="flex gap-2 my-2">
+               <button type="button"
+                  class="previous-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  <span>Anterior</span>
+                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+               </button>
+               <button type="button" id="second-step"
+                  class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  <span>Próximo</span>
+                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+               </button>
+            </div>
+         </div>
+         <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
+            <div class="text-left hidden md:block">
+               <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
+               <p class="text-gray-600">Suas informações de login!</p>
+            </div>
+            <div>
+               {{ form.email.as_field_group }}
+            </div>
+            <div>
+               {{ form.password1.label_tag }}
+               <div class="relative">
+                  {{ form.password1 }}
+                  <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                  visibility
+                  </span>
+               </div>
+            </div>
+            <div>
+               {{ form.password2.label_tag }}
+               <div class="relative">
+                  {{ form.password2 }}
+                  <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                  visibility
+                  </span>
+               </div>
+            </div>
+            <div class="flex gap-2 my-2">
+               <button type="button"
+                  class="previous-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  <span>Anterior</span>
+                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+               </button>
+               <button type="submit"
+                  class="submit-form relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  <span>Cadastrar</span>
+                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+               </button>
+            </div>
+         </div>
+      </form>
+   </div>
+   <div class="flex justify-center py-8">
+      <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
+   </div>
 </section>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
-    $(document).ready(function() {
-        function validateOccupations() {
-            let selectedPlan = $('.plan-select option:selected').text();
-            let occupations = $('.occupation-select').val();
-            let OccupationError = $('#occupation-error');
-
-            let maxOccupations = 0;
-
-            if (selectedPlan === 'Plano Essencial') {
-                maxOccupations = 1;
-            } else if (selectedPlan === 'Plano Essencial +') {
-                maxOccupations = 3;
-            }
-
-            if (occupations && occupations.length > maxOccupations) {
-                OccupationError.text(`O ${selectedPlan} permite selecionar até ${maxOccupations} ocupação(ões).`).fadeIn();
-                return false;
-            } else {
-                OccupationError.hide();
-                return true;
-            }
-        }
-
-        validateOccupations();
-
-        $('.plan-select').on('change', function() {
-            validateOccupations();
-            $('.occupation-select').val(null).trigger('change');
-        });
-
-        $('.occupation-select').on('select2:select select2:unselect', function() {
-            validateOccupations();
-        });
-
-        $('.occupation-select').on('change', function() {
-            validateOccupations();
-        });
-
-        $('form').on('submit', function(e) {
-            if (!validateOccupations()) {
-                e.preventDefault();
-            }
-        });
-    });
+   $(document).ready(function() {
+       function validateOccupations() {
+           let selectedPlan = $('.plan-select option:selected').text();
+           let occupations = $('.occupation-select').val();
+           let OccupationError = $('#occupation-error');
+   
+           let maxOccupations = 0;
+   
+           if (selectedPlan === 'Plano Essencial') {
+               maxOccupations = 1;
+           } else if (selectedPlan === 'Plano Essencial +') {
+               maxOccupations = 3;
+           }
+   
+           if (occupations && occupations.length > maxOccupations) {
+               OccupationError.text(`O ${selectedPlan} permite selecionar até ${maxOccupations} ocupação(ões).`).fadeIn();
+               return false;
+           } else {
+               OccupationError.hide();
+               return true;
+           }
+       }
+   
+       validateOccupations();
+   
+       $('.plan-select').on('change', function() {
+           validateOccupations();
+           $('.occupation-select').val(null).trigger('change');
+       });
+   
+       $('.occupation-select').on('select2:select select2:unselect', function() {
+           validateOccupations();
+       });
+   
+       $('.occupation-select').on('change', function() {
+           validateOccupations();
+       });
+   
+       $('form').on('submit', function(e) {
+           if (!validateOccupations()) {
+               e.preventDefault();
+           }
+       });
+   });
 </script>
-
-    <script>
-        $(document).ready(function(){
-            $('#id_telephone').mask('(00) 00000-0000');
-            $('#id_CPF').mask('000.000.000-00', {reverse: true});
-        });
-    </script>    
-
-    <script>
-        flatpickr("#id_date_of_birth", {
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "d/m/Y",
-            placeholder: "Data de nascimento",
-            onChange: function(selectedDates, dateStr, instance) {
-                instance.element.value = dateStr;
-            }
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $('#loadingOverlaySmart').hide();
-
-            $('#save-button').on('submit', function () {
-                $('#loadingOverlaySmart').show();
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $('#id_password2').on('change', function () {
-                let password1 = $('#id_password1').val();
-                let password2 = $(this).val();
-                let firstName = $('#id_first_name').val();
-                let password2Error = $('#password2-error');
-
-                let errors = [];
-
-                if (password1 !== password2) {
-                    errors.push('As senhas não correspondem.');
-                }
-
-                if (firstName !== '') {
-                    if (password2.toLowerCase().includes(firstName.toLowerCase())) {
-                        errors.push('A senha não deve ser muito semelhante ao seu nome.');
-                    }
-                }
-
-                if (password2.length < 8) {
-                    errors.push('A senha precisa ter pelo menos 8 caracteres.');
-                } else if (/^\d+$/.test(password2)) {
-                    errors.push('A senha não pode ser inteiramente numérica.');
-                }
-
-                if (errors.length > 0) {
-                    password2Error.text(errors.join(' ')).fadeIn();
-                } else {
-                    password2Error.hide();
-                }
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            $('#id_password1').on('focus', function() {
-                $('#password1-requirements').fadeIn();
-            });
-
-            $('#id_password1').on('focusout', function() {
-                $('#password1-requirements').fadeOut();
-            });
-        });
-    </script>
-
-    <script>
-        document.querySelectorAll('.toggle-password').forEach(item => {
-            item.addEventListener('click', function() {
-                let input = document.querySelector(this.getAttribute('toggle'));
-                if (input.getAttribute('type') === 'password') {
-                    input.setAttribute('type', 'text');
-                    this.textContent = 'visibility_off';
-                } else {
-                    input.setAttribute('type', 'password');
-                    this.textContent = 'visibility';
-                }
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            let currentStep = 1;
-            const totalSteps = $('.step').length;
-
-            function showStep(step) {
-                $('.step').hide();
-                $(`#step-${step}`).fadeIn();
-            }
-
-            $(".next-step").on("click", function () {
-                const currentStep = $(this).closest(".step");
-                const requiredFields = currentStep.find(".requiredField");
-                const messageContainer = currentStep.find(".error-message");
-                let allFieldsValid = true;
-
-                requiredFields.each(function () {
-                    const field = $(this);
-                    if (field.hasClass("select2-hidden-accessible")) {
-                        const value = field.val();
-                        const select2Container = field.next(".select-8-selection--single");
-                        const select2Selection = select2Container.find(".select-8-selection--multiple");
-
-                        if (!value || (Array.isArray(value) && value.length === 0) || (typeof value === "string" && value.trim() === "")) {
-                            allFieldsValid = false;
-                            select2Selection.css({
-                                "border-color": "red !important",
-                                "background-color": "#ffe5e5 !important"
-                            });
-                        } else {
-                            select2Selection.css({
-                                "border-color": "",
-                                "background-color": ""
-                            });
-                        }
-                    } else {
-                        if (!field.val().trim()) {
-                            allFieldsValid = false;
-                            field.addClass("border-red-500 bg-red-50 focus:outline-none focus:ring focus:ring-red-300");
-                        } else {
-                            field.removeClass("border-red-500 bg-red-50 focus:outline-none focus:ring focus:ring-red-300");
-                        }
-                    }
-                });
-
-                if (allFieldsValid) {
-                    const nextStep = currentStep.next(".step");
-                    if (nextStep.length) {
-                        currentStep.hide();
-                        nextStep.show();
-                    }
-                } else {
-                    if (messageContainer.length) {
-                        messageContainer.text("Por favor, preencha todos os campos obrigatórios antes de continuar.").removeClass("hidden");
-                    }
-                }
-            });
-
-            $(".previous-step").on("click", function () {
-                const currentStep = $(this).closest(".step");
-                const prevStep = currentStep.prev(".step");
-
-                if (prevStep.length) {
-                    currentStep.hide();
-                    prevStep.show();
-                }
-            });
-
-            showStep(currentStep);
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            let step1Fields = ['id_first_name', 'id_last_name', 'id_CPF', 'id_telephone', 'id_date_of_birth'];
-            let step2Fields = ['id_occupational_registration', 'id_occupation'];
-            let step3Fields = ['id_email', 'id_password1', 'id_password2'];
-
-            let foundErrorStep = null;
-
-            function hasError(fieldId) {
-                let el = document.getElementById(fieldId);
-                return el && el.classList.contains('border-red-500');
-            }
-
-            for (let id of step1Fields) {
-                if (hasError(id)) {
-                    foundErrorStep = 1;
-                    break;
-                }
-            }
-
-            if (!foundErrorStep) {
-                for (let id of step2Fields) {
-                    if (hasError(id)) {
-                        foundErrorStep = 2;
-                        break;
-                    }
-                }
-            }
-
-            if (!foundErrorStep) {
-                for (let id of step3Fields) {
-                    if (hasError(id)) {
-                        foundErrorStep = 3;
-                        break;
-                    }
-                }
-            }
-
-            if (foundErrorStep) {
-                $('.step').hide();
-                $('#step-' + foundErrorStep).show();
-            }
-        });
-    </script>
-
+<script>
+   $(document).ready(function(){
+       $('#id_telephone').mask('(00) 00000-0000');
+       $('#id_CPF').mask('000.000.000-00', {reverse: true});
+   });
+</script>    
+<script>
+   flatpickr("#id_date_of_birth", {
+       dateFormat: "Y-m-d",
+       altInput: true,
+       altFormat: "d/m/Y",
+       placeholder: "Data de nascimento",
+       onChange: function(selectedDates, dateStr, instance) {
+           instance.element.value = dateStr;
+       }
+   });
+</script>
+<script>
+   $(document).ready(function () {
+       $('#loadingOverlaySmart').hide();
+   
+       $('#save-button').on('submit', function () {
+           $('#loadingOverlaySmart').show();
+       });
+   });
+</script>
+<script>
+   class LoadingButtonHandler {
+       static setLoading($button) {
+           $button.prop('disabled', true);
+           $button.find('.spinner').removeClass('hidden');
+       }
+   
+       static unsetLoading($button) {
+           $button.prop('disabled', false);
+           $button.find('.spinner').addClass('hidden');
+       }
+   
+       static toggleLoading($button, isLoading) {
+           isLoading ? this.setLoading($button) : this.unsetLoading($button);
+       }
+   
+       static toggleAllButtons(clickedButton, isLoading = true, scope = document) {
+           const $scope = $(scope);
+           const $clickedButton = $(clickedButton);
+   
+           console.log($scope, $clickedButton)
+           const $allButtons = $scope.find('button');
+           console.log($allButtons)
+   
+           $allButtons.each(function () {
+               const $btn = $(this);
+               if (!$btn.is($clickedButton)) {
+                   $btn.prop('disabled', isLoading);
+               }
+           });
+   
+           LoadingButtonHandler.toggleLoading($clickedButton, isLoading);
+       }
+   }    
+</script>
+<script>
+   class StepNavigator {
+       static steps = $('.step');
+   
+       static showStep(stepIndex) {
+           this.steps.hide();
+           this.steps.eq(stepIndex).fadeIn();
+       }
+   
+       static next($currentStep) {
+           const currentIndex = this.steps.index($currentStep);
+           const nextIndex = currentIndex + 1;
+   
+           if (nextIndex < this.steps.length) {
+               this.showStep(nextIndex);
+           }
+       }
+   
+       static previous($currentStep) {
+           const currentIndex = this.steps.index($currentStep);
+           const prevIndex = currentIndex - 1;
+   
+           if (prevIndex >= 0) {
+               this.showStep(prevIndex);
+           }
+       }
+   
+       static advanceStepIfValid(advanceStepIfValidButton, goNextStep = true) {
+           const $step = $(advanceStepIfValidButton).closest('.step');
+           const stepIndex = StepNavigator.steps.index($step);
+           const stepNumber = stepIndex + 1;
+       
+           return OnboardingFormHandler.validateAndSaveStep(stepNumber, $step).then((isValid) => {
+               if (isValid && goNextStep) {
+                   StepNavigator.next($step);
+               }
+               return isValid;
+           });
+       }
+   
+       static setupListeners() {
+           const $nextButtons = $(".next-step");
+           const $previousButtons = $(".previous-step");
+           const $submitButtons = $("button[type='submit']");
+       
+           $nextButtons.on("click", function (e) {
+               e.preventDefault();
+               LoadingButtonHandler.toggleAllButtons(this, true);
+       
+               StepNavigator.advanceStepIfValid(this).then(() => {
+                   LoadingButtonHandler.toggleAllButtons(this, false);
+               });
+           });
+       
+           $previousButtons.on("click", function (e) {
+               e.preventDefault();
+               const $step = $(this).closest('.step');
+               StepNavigator.previous($step);
+           });
+       
+           $submitButtons.on("click", function (e) {
+               e.preventDefault();
+       
+               const userName = $('#id_first_name').val()?.trim() || 'Usuário';
+               LoadingButtonHandler.toggleAllButtons(this, true);
+       
+               StepNavigator.advanceStepIfValid(this, false).then((isValid) => {
+                   LoadingButtonHandler.toggleAllButtons(this, false);
+       
+                   if (isValid) {
+                       Swal.fire({
+                           icon: 'success',
+                           title: `Seja bem-vindo, ${userName}!`,
+                           text: `Seu registro foi finalizado com sucesso.`,
+                           confirmButtonText: 'Entrar',
+                           customClass: {
+                               confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
+                               popup: 'rounded-xl',
+                               icon: 'border-blue-500 text-blue-500'
+                           },
+                           buttonsStyling: false
+                       }).then((result) => {
+                           if (result.isConfirmed) {
+                               window.location.href = '/login';
+                           }
+                       });
+                   }
+               });
+           });
+       }
+       
+   }
+   
+   $(document).ready(function () {
+       StepNavigator.setupListeners();
+   });
+</script>
+<script>
+   class OnboardingFormHandler {
+   
+       static getPlanIdFromUrl() {
+           const match = window.location.pathname.match(/\/register\/(\d+)\//);
+           return match ? match[1] : null;
+       }
+   
+       static apiUrls = {
+           1: "{% url 'onboarding-user-validate-personal-info' %}",
+           2: "{% url 'onboarding-user-validate-professional-info' %}",
+           3: "{% url 'onboarding-user-create' %}",
+       };
+   
+       static fieldMapByStep = {
+           1: {
+               first_name: () => $('#id_first_name'),
+               last_name: () => $('#id_last_name'),
+               CPF: () => $('#id_CPF'),
+               telephone: () => $('#id_telephone'),
+               date_of_birth: () => {
+                   const $hiddenInput = $('#id_date_of_birth');
+                   const value = $hiddenInput.val();
+   
+                   return $hiddenInput.parent().find('input:not([type="hidden"])');
+               },
+           },
+           2: {
+               selected_plan: () => {
+                   const value = OnboardingFormHandler.getPlanIdFromUrl();
+                   return $('<input>').val(value); 
+               },
+               occupational_registration: () => $('#id_occupational_registration'),
+               occupations: () => $('#occupation-select'),
+           },
+           3: {
+               email: () => $('#id_email'),
+               password1: () => $('#id_password1'),
+               password2: () => $('#id_password2'),
+           }
+       };
+   
+       static getStepData(stepNumber) {
+           const fields = this.fieldMapByStep[stepNumber];
+           const data = {};
+   
+           for (const [key, getElement] of Object.entries(fields)) {
+               data[key] = getElement().val();
+           }
+   
+           return data;
+       }
+   
+       static clearErrors($step, stepNumber) {
+           $step.find('.error-message').addClass('hidden').text('');
+           const fields = this.fieldMapByStep[stepNumber];
+   
+           for (const getElement of Object.values(fields)) {
+               getElement().removeClass('border-red-500 bg-red-50')
+                           .addClass('border-gray-300');
+           }
+       }
+   
+       static showErrors($step, stepNumber, errors) {
+           const fields = this.fieldMapByStep[stepNumber];
+   
+           for (const [field, messages] of Object.entries(errors)) {
+               const getElement = fields[field];
+               if (!getElement) continue;
+   
+               const $field = getElement();
+               $field.removeClass('border-gray-300')
+                     .addClass('border-red-500 bg-red-50');
+   
+               const $container = $field.closest('div');
+               let $error = $container.find('.error-message');
+   
+               if (!$error.length) {
+                   $error = $('<div class="error-message text-sm text-red-600 mt-1"></div>').appendTo($container);
+               }
+   
+               $error.text(messages.join(', ')).removeClass('hidden');
+           }
+       }
+   
+       static validateAndSaveStep(stepNumber, $step) {
+           const isLastStep = stepNumber === Math.max(...Object.keys(this.fieldMapByStep).map(Number));
+           const url = this.apiUrls[stepNumber];
+       
+           const data = isLastStep
+           ? Object.assign({}, ...Object.keys(this.fieldMapByStep).map(step => this.getStepData(Number(step))))
+           : this.getStepData(stepNumber);
+   
+           this.clearErrors($step, stepNumber);
+       
+           return new Promise((resolve) => {
+               $.ajax({
+                   url: url,
+                   method: 'POST',
+                   contentType: 'application/json',
+                   data: JSON.stringify(data),
+                   success: function () {
+                       resolve(true);
+                   },
+                   error: (xhr) => {
+                       if (xhr.responseJSON && xhr.responseJSON.errors) {
+                           OnboardingFormHandler.showErrors($step, stepNumber, xhr.responseJSON.errors);
+                       } else {
+                           error: (xhr) => {
+                               debugger
+                               if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                   OnboardingFormHandler.showErrors($step, stepNumber, xhr.responseJSON.errors);
+                               } else {
+                                   Swal.fire({
+                                       icon: 'error',
+                                       title: 'Erro inesperado',
+                                       text: 'Ocorreu um erro ao validar os dados. Tente novamente.',
+                                       confirmButtonText: 'Ok'
+                                   });
+                               }
+                               resolve(false);
+                           }                        }
+                       resolve(false);
+                   }
+               });
+           });
+       }
+   }
+</script>
 {% endblock %}

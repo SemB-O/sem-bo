@@ -5,3 +5,31 @@
     list-style: none;
     padding-left: 0;
 }
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.relative input.border-red-500 {
+    padding-right: 2.5rem; /* espaço pro olhinho só quando há erro */
+}
+
+/* Género global: aplicar somente no modal com "icon-success" */
+.swal2-icon.swal2-success {
+    border-color: #54d6ee !important;
+    color: #54d6ee !important;
+  }
+  
+  /* Linhas do "tick" */
+  .swal2-icon.swal2-success .swal2-success-line-tip,
+  .swal2-icon.swal2-success .swal2-success-line-long {
+    background-color: #54d6ee !important;
+  }
+  
+  /* Anel circular */
+  .swal2-icon.swal2-success .swal2-success-ring {
+    border: 0.25em solid rgba(84, 214, 238, 0.3) !important;
+  }
+  
+

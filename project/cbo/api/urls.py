@@ -2,5 +2,5 @@
 from django.urls import path, include
 
 urlpatterns = [
-    path('account/', include('api.account.urls')),
+    path('account/', include('cbo.api.account.urls')),
 ]
