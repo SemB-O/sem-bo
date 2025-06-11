@@ -91,12 +91,17 @@ Sem B.O
                 </form>
                 
             </div>
-            <div class="profile-tabs w-full px-4 py-2 focus:outline-none bg-gray-100">
+            <!-- <div class="profile-tabs w-full px-4 py-2 focus:outline-none bg-gray-100">
                 <h4>Minha assinatura</h4>
-            </div>
-            <a href="{% url 'logout' %}"><div class="profile-tabs w-full px-4 py-2 focus:outline-none logout">
-                <h4>Logout</h4>
-            </div></a>
+            </div> -->
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-left">
+                    <div class="profile-tabs w-full px-4 py-2 focus:outline-none logout">
+                        <h4>Logout</h4>
+                    </div>
+                </button>
+            </form>
         </div>    
     </div>
     

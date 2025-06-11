@@ -1,5 +1,5 @@
 import json
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.views.generic.edit import FormView
 from django.contrib.auth import authenticate, login
 from django.views import View
@@ -101,8 +101,8 @@ class RegisterView(View):
             messages.error(request, f'Tivemos um problema ao enviar a validação para seu email ({to_email}), por favor cheque se você digitou seu email corretamente!')
 
 
-class LogoutView(LogoutView):
-    next_page = reverse_lazy('login')
+class LogoutView(DjangoLogoutView):
+    next_page = reverse_lazy('login') 
 
 
 class PasswordResetView(TemplateView):
