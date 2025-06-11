@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
+from collections.abc import Iterable
 
 DEFAULT_CLASS = 'mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2'
 
@@ -163,7 +164,7 @@ class UserRegisterForm(UserCreationForm):
     def clean_occupations(self):
         occupations = self.cleaned_data.get('occupations')
 
-        if occupations and self.plan:
+        if isinstance(occupations, Iterable) and self.plan:
             max_allowed = self.plan.max_occupations
             if len(occupations) > max_allowed:
                 raise forms.ValidationError(
