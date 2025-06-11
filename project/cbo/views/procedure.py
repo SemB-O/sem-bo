@@ -73,7 +73,9 @@ class ListView(ListView):
 
         user = request.user
 
-        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
+        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(
+            favorite_procedures_folder__user=user
+        ).values_list('procedure__procedure_code', flat=True)
         favorite_folders = FavoriteProceduresFolder.objects.filter(user=user)
 
         for procedure in procedures:

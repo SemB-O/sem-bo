@@ -19,7 +19,9 @@ class FavoriteView(ListView):
 
     def get_queryset(self):
         user = self.request.user
-        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
+        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(
+            favorite_procedures_folder__user=user
+        ).values_list('procedure__procedure_code', flat=True)
 
         return Procedure.objects.filter(procedure_code__in=favorite_procedures_codes)
 
@@ -56,7 +58,7 @@ class FavoriteView(ListView):
             messages.error(request, 'Ocorreu um erro ao criar a pasta de favoritos.')
         
         return redirect(request.path_info)
-    
+
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 class FavoriteProceduresListView(View):
