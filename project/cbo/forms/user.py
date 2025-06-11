@@ -7,6 +7,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
 from collections.abc import Iterable
+from datetime import date
+import re
+from django.core.exceptions import ValidationError
+from django.db import transaction
+
 
 DEFAULT_CLASS = 'mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2'
 
@@ -56,6 +61,20 @@ class LoginAuthenticationForm(forms.Form):
 
         return cleaned_data
     
+
+def validate_cpf(cpf: str) -> bool:
+    cpf = re.sub(r'\D', '', cpf)
+
+    if len(cpf) != 11 or cpf == cpf[0] * 11:
+        return False
+
+    for i in range(9, 11):
+        sum_val = sum(int(cpf[num]) * ((i + 1) - num) for num in range(0, i))
+        digit = ((sum_val * 10) % 11) % 10
+        if digit != int(cpf[i]):
+            return False
+    return True
+
 class UserRegisterForm(UserCreationForm):
 
     class Meta:
@@ -76,50 +95,41 @@ class UserRegisterForm(UserCreationForm):
             'email': forms.EmailInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'seuemail@exemplo.com',
-                'required': 'false'
             }),
             'first_name': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Nome',
-                'required': 'false'
             }),
             'last_name': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Sobrenome',
-                'required': 'false'
             }),
             'password1': forms.PasswordInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite sua Senha',
-                'required': 'false'
             }),
             'password2': forms.PasswordInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Confirme sua senha',
-                'required': 'false'
             }),
             'CPF': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_CPF',
                 'placeholder': 'Digite seu CPF',
-                'required': 'false'
             }),
             'telephone': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_telephone',
                 'placeholder': 'Digite seu Celular',
-                'required': 'false'
             }),
             'date_of_birth': forms.DateInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite sua Data de nascimento',
                 'type': 'date',
-                'required': 'false'
             }),
             'occupational_registration': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Registro ocupacional',
-                'required': 'false'
             }),
         }
 
@@ -136,12 +146,13 @@ class UserRegisterForm(UserCreationForm):
             'class': 'requiredField ' + DEFAULT_CLASS,
             'placeholder': 'Confirme sua Senha'
         })
-
+                    
     def set_occupations_field_based_on_plan(self, plan):
         occupation_queryset = Occupation.objects.medical_only()
 
         if plan and getattr(plan, 'max_occupations', 1) > 1:
             self.fields['occupations'] = forms.ModelMultipleChoiceField(
+                label="Ocupações",
                 queryset=occupation_queryset,
                 required=True,
                 widget=forms.SelectMultiple(attrs={
@@ -152,6 +163,7 @@ class UserRegisterForm(UserCreationForm):
             )
         else:
             self.fields['occupations'] = forms.ModelChoiceField(
+                label="Ocupação",
                 queryset=occupation_queryset,
                 required=True,
                 widget=forms.Select(attrs={
@@ -173,6 +185,41 @@ class UserRegisterForm(UserCreationForm):
 
         return occupations
 
+    def clean_CPF(self):
+        cpf = self.cleaned_data.get('CPF')
+        if not validate_cpf(cpf):
+            raise ValidationError("CPF inválido.")
+        return cpf
+
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if dob:
+            today = date.today()
+            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            if age < 18:
+                raise ValidationError("Você precisa ter pelo menos 18 anos.")
+        return dob
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        first_name = self.cleaned_data.get('first_name', '') or ''
+        last_name = self.cleaned_data.get('last_name', '') or ''
+        email = self.cleaned_data.get('email', '') or ''
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("As senhas não coincidem.")
+
+        similar_data = [first_name.lower(), last_name.lower(), email.lower()]
+        password_lower = password2.lower() if password2 else ''
+
+        for value in similar_data:
+            if value and value in password_lower:
+                raise ValidationError("A senha não deve conter seu nome ou email.")
+
+        return password2
+    
+    @transaction.atomic
     def save(self, commit=True):
         user = super().save(commit=False)
         user.plan = self.plan
@@ -182,11 +229,17 @@ class UserRegisterForm(UserCreationForm):
             user.save()
 
             occupations = self.cleaned_data.get('occupation')
-            for occupation in occupations:
-                user.occupations.add(occupation)
+
+            if occupations:
+                if not hasattr(occupations, '__iter__') or isinstance(occupations, str):
+                    occupations = [occupations]
+
+                for occupation in occupations:
+                    user.occupations.add(occupation)
 
             self.save_m2m()
         return user
+
 
 class UserEditForm(forms.ModelForm):  
     class Meta:

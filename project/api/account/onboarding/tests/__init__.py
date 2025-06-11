@@ -1,3 +1,0 @@
-from api.account.onboarding.views.occupation_list import OccupationAccountOnboardingListAPIView
-from api.account.onboarding.views.plan_list import PlanAccountOnboardingListAPIView
-from api.account.onboarding.views.user_create import UserAccountOnboardingCreateAPIView

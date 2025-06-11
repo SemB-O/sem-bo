@@ -1,3 +1,0 @@
-from .occupation_list import OccupationAccountOnboardingListAPIView
-from .plan_list import PlanAccountOnboardingListAPIView
-from .user_create import UserAccountOnboardingCreateAPIView

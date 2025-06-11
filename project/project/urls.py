@@ -28,7 +28,7 @@ handler404 = Error404View.as_view()
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('cbo.urls')),
-    path('api/', include('api.urls')),
+    path('api/', include('cbo.api.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
