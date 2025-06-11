@@ -229,8 +229,14 @@ if not CLOUDWATCH_CLIENT:
 # Check if AWS_STORAGE_BUCKET_NAME is defined
 USE_S3 = os.getenv('USE_S3') == 'TRUE'
 if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "cbo.utils.storages.S3MediaStorage",  
+        },
+        "staticfiles": {
+            "BACKEND": "cbo.utils.storages.S3StaticStorage",
+        },
+    }
+    
     STATICFILES_LOCATION = 'static'
-    STATICFILES_STORAGE = 'cbo.utils.storages.S3StaticStorage'
-
     MEDIAFILES_LOCATION = 'media'
-    DEFAULT_FILE_STORAGE = 'cbo.utils.storages.S3MediaStorage'
