@@ -11,6 +11,7 @@ from ..models import FavoriteProceduresFolderHasProcedure, Procedure, FavoritePr
 from ..forms.favorite import FavoriteProceduresFolderForm
 
 
+
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 class FavoriteView(ListView):
     template_name = 'front/procedure_favorite.html'
