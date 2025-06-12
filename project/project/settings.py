@@ -206,11 +206,11 @@ LOGGING = {
         },
     },
     'loggers': {
-        '': {
-            'handlers': ['console', 'cloudwatch'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
+        # '': {
+        #     'handlers': ['console', 'cloudwatch'],
+        #     'level': 'DEBUG',
+        #     'propagate': False,
+        # },
         'django': {
             'handlers': ['console', 'cloudwatch'],
             'level': 'ERROR',
