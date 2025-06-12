@@ -18,7 +18,7 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from django.db.models import Q
 from ..forms.user import LoginAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
-from ..models import Occupation, Plan, FavoriteProceduresFolder, User
+from ..models import Plan, FavoriteProceduresFolder, User
 
 
 class LoginView(FormView):

@@ -32,8 +32,7 @@ class FavoriteView(ListView):
         
         for folder in favorite_folders:
             folder.procedures = Procedure.objects.filter(
-                favoriteprocedure__folder=folder,
-                favoriteprocedure__deleted__isnull=True
+                favoriteproceduresfolderhasprocedure__favorite_procedures_folder=folder,
             )
 
             for procedure in folder.procedures:
@@ -99,7 +98,9 @@ class FavoriteProceduresListView(View):
         favorite_folders = FavoriteProceduresFolder.objects.filter(user=user)
         data = []
         for folder in favorite_folders:
-            folder_procedures = Procedure.objects.filter(favoriteprocedure__folder=folder)
+            folder_procedures = Procedure.objects.filter(
+                favoriteproceduresfolderhasprocedure__favorite_procedures_folder=folder,
+            )
 
             for procedure in folder_procedures:
                 if user.is_authenticated and user.occupations.exists():
