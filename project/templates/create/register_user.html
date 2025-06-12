@@ -320,9 +320,10 @@ Sem B.O
            $submitButtons.on("click", function (e) {
                e.preventDefault();
        
-               const userName = $('#id_first_name').val()?.trim() || 'Usuário';
-               LoadingButtonHandler.toggleAllButtons(this, true);
-       
+               const userNameRaw = $('#id_first_name').val() || 'Usuário';
+               const userName = userNameRaw.trim().charAt(0).toUpperCase() + userNameRaw.trim().slice(1).toLowerCase();
+
+               LoadingButtonHandler.toggleAllButtons(this, true);       
                StepNavigator.advanceStepIfValid(this, false).then((isValid) => {
                    LoadingButtonHandler.toggleAllButtons(this, false);
        
@@ -335,7 +336,6 @@ Sem B.O
                            customClass: {
                                confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
                                popup: 'rounded-xl',
-                               icon: 'border-blue-500 text-blue-500'
                            },
                            buttonsStyling: false
                        }).then((result) => {
@@ -449,37 +449,38 @@ Sem B.O
    
            this.clearErrors($step, stepNumber);
        
-           return new Promise((resolve) => {
-               $.ajax({
-                   url: url,
-                   method: 'POST',
-                   contentType: 'application/json',
-                   data: JSON.stringify(data),
-                   success: function () {
-                       resolve(true);
-                   },
-                   error: (xhr) => {
-                       if (xhr.responseJSON && xhr.responseJSON.errors) {
-                           OnboardingFormHandler.showErrors($step, stepNumber, xhr.responseJSON.errors);
-                       } else {
-                           error: (xhr) => {
-                               debugger
-                               if (xhr.responseJSON && xhr.responseJSON.errors) {
-                                   OnboardingFormHandler.showErrors($step, stepNumber, xhr.responseJSON.errors);
-                               } else {
-                                   Swal.fire({
-                                       icon: 'error',
-                                       title: 'Erro inesperado',
-                                       text: 'Ocorreu um erro ao validar os dados. Tente novamente.',
-                                       confirmButtonText: 'Ok'
-                                   });
-                               }
-                               resolve(false);
-                           }                        }
-                       resolve(false);
-                   }
-               });
-           });
+            return new Promise((resolve) => {
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function () {
+                        resolve(true);
+                    },
+                    error: (xhr) => {
+                        const response = xhr.responseJSON;
+            
+                        if (response && response.errors) {
+                            OnboardingFormHandler.showErrors($step, stepNumber, response.errors);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro inesperado',
+                                text: 'Ocorreu um erro ao validar os dados. Tente novamente.',
+                                confirmButtonText: 'Ok',
+                                customClass: {
+                                    confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
+                                    popup: 'rounded-xl',
+                                },
+                                buttonsStyling: false
+                            });
+                        }
+            
+                        resolve(false);
+                    }
+                });
+            });
        }
    }
 </script>

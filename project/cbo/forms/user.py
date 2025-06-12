@@ -11,7 +11,38 @@ from datetime import date
 import re
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django import forms
+from cbo.models import Occupation
 
+
+class PlanBasedOccupationField(forms.ModelMultipleChoiceField):
+    def __init__(self, plan=None, *args, **kwargs):
+        multiple = plan and getattr(plan, 'max_occupations', 1) > 1
+        queryset = Occupation.objects.medical_only()
+
+        label = "Ocupações" if multiple else "Ocupação"
+        widget_attrs = {
+            'class': 'select2 requiredField form-control',
+            'id': 'occupation-select',
+            'data-placeholder': (
+                'Selecione uma ou mais ocupações de acordo com seu Plano' if multiple
+                else 'Selecione uma ocupação de acordo com seu Plano'
+            )
+        }
+
+        widget = (
+            forms.SelectMultiple(attrs=widget_attrs) if multiple
+            else forms.Select(attrs=widget_attrs)
+        )
+
+        super().__init__(queryset=queryset, label=label, widget=widget, *args, **kwargs)
+        self.multiple = multiple
+
+    def clean(self, value):
+        value = value if self.multiple else [value]
+        cleaned = super().clean(value)
+        return list(cleaned)
+    
 
 DEFAULT_CLASS = 'mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2'
 
@@ -136,7 +167,7 @@ class UserRegisterForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         self.plan = kwargs.pop('plan', None)
         super(UserRegisterForm, self).__init__(*args, **kwargs)
-        self.set_occupations_field_based_on_plan(self.plan)        
+        self.fields['occupations'] = PlanBasedOccupationField(plan=self.plan, required=True)
 
         self.fields['password1'].widget.attrs.update({
             'class': 'requiredField ' + DEFAULT_CLASS,
@@ -147,32 +178,6 @@ class UserRegisterForm(UserCreationForm):
             'placeholder': 'Confirme sua Senha'
         })
                     
-    def set_occupations_field_based_on_plan(self, plan):
-        occupation_queryset = Occupation.objects.medical_only()
-
-        if plan and getattr(plan, 'max_occupations', 1) > 1:
-            self.fields['occupations'] = forms.ModelMultipleChoiceField(
-                label="Ocupações",
-                queryset=occupation_queryset,
-                required=True,
-                widget=forms.SelectMultiple(attrs={
-                    'class': f'select2 requiredField {DEFAULT_CLASS}',
-                    'id': 'occupation-select',
-                    'data-placeholder': 'Selecione uma ou mais ocupações de acordo com seu Plano',
-                })
-            )
-        else:
-            self.fields['occupations'] = forms.ModelChoiceField(
-                label="Ocupação",
-                queryset=occupation_queryset,
-                required=True,
-                widget=forms.Select(attrs={
-                    'class': f'select2 requiredField {DEFAULT_CLASS}',
-                    'id': 'occupation-select',
-                    'data-placeholder': 'Selecione uma ocupação de acordo com seu Plano',
-                })
-            )
-
     def clean_occupations(self):
         occupations = self.cleaned_data.get('occupations')
 
@@ -227,16 +232,6 @@ class UserRegisterForm(UserCreationForm):
         
         if commit:
             user.save()
-
-            occupations = self.cleaned_data.get('occupation')
-
-            if occupations:
-                if not hasattr(occupations, '__iter__') or isinstance(occupations, str):
-                    occupations = [occupations]
-
-                for occupation in occupations:
-                    user.occupations.add(occupation)
-
             self.save_m2m()
         return user
 
