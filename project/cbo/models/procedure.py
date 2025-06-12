@@ -38,7 +38,7 @@ class Procedure(BaseModel):
 
     def is_favorite(self, user):
         from cbo.models.favorite_procedures_folder_has_procedure import FavoriteProceduresFolderHasProcedure
-        return FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure=self).exists()
+        return FavoriteProceduresFolderHasProcedure.objects.filter(favorite_procedures_folder__user=user, procedure=self).exists()
     
     def get_related_occupations(self, user):
         if user and user.occupations.exists():

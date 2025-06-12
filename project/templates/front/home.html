@@ -26,9 +26,8 @@ Sem B.O
                 </div>
                 <div class="note text-gray-600">
                     {% for occupation in user.occupations.all %}
-                        <b class="font-semibold">{{ occupation.name }} | </b>
+                        <b class="font-semibold">{{ occupation.name }}</b>
                     {% endfor %}
-                    <span>{{ user.occupational_registration }}</span>
                 </div>
             </div>
             <form id="search-form" class="form-search" method="GET" action="{% url 'search' %}">
