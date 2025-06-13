@@ -42,7 +42,7 @@ Sem B.O
         <div class="procedure p-4 my-2 border rounded-lg">
             <div class="title_tags">
                 <a class="title_procedure">{{ procedure }}</a>
-                <div class="records_tags">
+                <div class="records_tags hidden md:flex">
                     {% for occupation in procedure.related_occupations_names %}
                         <a class="procedure-occupation" href="#">{{ occupation }}</a>
                     {% endfor %}

@@ -110,14 +110,6 @@ body {
     cursor: pointer;
 }
 
-.help:hover {
-    background-color: #dfdfe499;
-    transition: 0.5s;
-    width: 4rem;
-    align-items: center;
-    height: 3.2rem;
-}
-
 .help ion-icon{
     align-self: center !important;
     font-size: 1.5rem;
@@ -430,7 +422,6 @@ body {
 
     .right_info {
         display: flex;
-        justify-content: space-evenly;
         justify-content: center;
         background: #F4F4F8;
         padding: 0.8rem;

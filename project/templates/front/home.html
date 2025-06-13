@@ -116,8 +116,8 @@ Sem B.O
 
             const procedureDiv = $('<div class="procedure p-4 my-2 border rounded-lg"></div>');
             const nameLink = $('<div class="title_tags"><a class="title_procedure" href="' + helpUrl + '">' + procedure.name + '</a></div>');
-            const records = $('<div class="records_tags"></div>')
-            const codeProcedure = $('<div class="procedure_code"></div>')
+            const records = $('<div class="records_tags hidden md:flex"></div>')
+            const codeProcedure = $('<div class="procedure_code w-[70%] md:w-[8rem]"></div>')
             const rightInfo = $('<div class="right_info"></div>')
 
             procedure.occupations_names.forEach(function (occupation_name) {
@@ -131,8 +131,8 @@ Sem B.O
             });
 
             codeProcedure.append(procedure.code)
-            const icon = $('<ion-icon name="' + (procedure.favorite ? 'bookmark' : 'bookmark-outline') + '" class="w-5 h-5 favorite-icon" data-procedure-id="' + procedure.code + '"></ion-icon>');
-            const help = $('<a class="help-icon" href="' + helpUrl + '"><div class="help"><ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon></div></a>');
+            const icon = $('<ion-icon name="' + (procedure.favorite ? 'bookmark' : 'bookmark-outline') + '" class="w-[10%] md:w-10 h-5 favorite-icon" data-procedure-id="' + procedure.code + '"></ion-icon>');
+            const help = $('<a class="help-icon w-[20%] md:w-10 md:mr-4" href="' + helpUrl + '"><div class="help "><ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon></div></a>');
 
             rightInfo.append(icon, codeProcedure, help)
             procedureDiv.append(nameLink, rightInfo);
