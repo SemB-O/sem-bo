@@ -129,34 +129,41 @@ class FavoriteProceduresListView(View):
 class ToggleFavoriteView(View):
     def post(self, request, *args, **kwargs):
         procedure_id = request.POST.get('procedure_id')
-        selected_folders_ids = [int(folder_id) for folder_id in request.POST.getlist('folders[]')]
+        folder_ids = request.POST.getlist('folders[]')
 
-        if procedure_id:
-            user = request.user
-            is_favorite = False
-            
-            FavoriteProceduresFolderHasProcedure.objects.filter(
-                user=user,
-                procedure_id=procedure_id
-            ).exclude(folder_id__in=selected_folders_ids).delete()
+        if not procedure_id or not folder_ids:
+            return JsonResponse({'error': 'Incomplete or invalid data.'}, status=400)
 
-            favorite_folders = FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure_id=procedure_id)
+        try:
+            selected_folders_ids = list(map(int, folder_ids))
+        except ValueError:
+            return JsonResponse({'error': 'Invalid folder ID(s).'}, status=400)
 
-            for folder_id in selected_folders_ids:
-                try:
-                    favorite, created = FavoriteProceduresFolderHasProcedure.objects.get_or_create(
-                        user=user,
-                        procedure_id=procedure_id,
-                        folder_id=folder_id
-                    )
-                    if created:
-                        is_favorite = True
-                except IntegrityError as e:
-                    return JsonResponse({'error': str(e)}, status=400)
-                
-            return JsonResponse({'is_favorite': is_favorite})
-        else:
-            return JsonResponse({'error': 'Dados incompletos ou inválidos'}, status=400)
+        user = request.user
+        is_favorite = False
+
+        FavoriteProceduresFolderHasProcedure.objects.filter(
+            favorite_procedures_folder__user=user,
+            procedure_id=procedure_id
+        ).exclude(favorite_procedures_folder_id__in=selected_folders_ids).delete()
+
+        valid_folder_ids = FavoriteProceduresFolder.objects.filter(
+            user=user,
+            id__in=selected_folders_ids
+        ).values_list('id', flat=True)
+
+        for folder_id in valid_folder_ids:
+            try:
+                _, created = FavoriteProceduresFolderHasProcedure.objects.get_or_create(
+                    procedure_id=procedure_id,
+                    favorite_procedures_folder_id=folder_id
+                )
+                if created:
+                    is_favorite = True
+            except IntegrityError as e:
+                return JsonResponse({'error': str(e)}, status=400)
+
+        return JsonResponse({'is_favorite': is_favorite})
 
 
 class CreateFolderView(View):
