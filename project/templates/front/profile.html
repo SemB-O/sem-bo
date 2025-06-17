@@ -16,7 +16,6 @@ Sem B.O
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
-
 {% endblock %}
 
 {% block content %}
@@ -28,13 +27,13 @@ Sem B.O
                 <img src="{% static 'assets/procedure.jpg' %}">
             </div>
             <div class="info_person">
-                <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
-                <h4>{{ request.user.email }}</h4>
+                <h4>{{ request.user.first_name.title }} {{ request.user.last_name.title }}</h4>
+                <h4>{{ request.user.email }} </h4>
             </div>
         </div>
     </div>
     
-    <div class="profile">
+    <div class="profile w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4">
         <div class="mb-4">
             {% if messages %}
                 <div class="messages mt-4 mb-2">
@@ -51,43 +50,42 @@ Sem B.O
                     {% endfor %}
                 </div>
             {% endif %}
-            <div class="profile-tabs w-full px-4 py-2 focus:outline-none bg-gray-100" onclick="toggleForm()">
-                <h4>Edite seu Perfil</h4>
-            </div>
+            {% include "components/standard-button.html" with text="Edite seu Perfil" disabled=False onclick="toggleForm()" %}
+
             <div class="profile-form">
                 <form action="{% url 'profile' %}" method="post">
                     {% csrf_token %}
-                    <div class="fields_edit">
-                        <label for="id_first_name" class="form-label">Nome</label>
-                        <input type="text" name="first_name" id="id_first_name" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Digite seu Nome" value="{{ request.user.first_name }}">
+                    <div>
+                        {{ form.first_name.as_field_group }}
                     </div>
-                
-                    <div class="fields_edit">
-                        <label for="id_last_name" class="form-label">Sobrenome</label>
-                        <input type="text" name="last_name" id="id_last_name" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Digite seu Sobrenome" value="{{ request.user.last_name }}">
+                    <div>
+                        {{ form.last_name.as_field_group }}
                     </div>
-    
-                    <div class="fields_edit">
-                        <label for="id_CPF" class="form-label">CPF</label>
-                        <input type="text" name="CPF" id="id_CPF" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="CPF" value="{{ request.user.CPF }}">
+                    <div>
+                        {{ form.CPF.as_field_group }}
                     </div>
-                    
-                    <div class="fields_edit">
-                        <label for="id_telephone" class="form-label">Telefone</label>
-                        <input type="text" name="telephone" id="id_telephone" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Telefone" value="{{ request.user.telephone }}">
+                    <div>
+                        {{ form.telephone.as_field_group }}
                     </div>
-                    
-                    <div class="fields_edit">
-                        <label for="id_date_of_birth" class="form-label">Data de Nascimento</label>
-                        <input type="date" name="date_of_birth" id="id_date_of_birth" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Data de nascimento" value="{{ request.user.date_of_birth }}">
+                    <div>
+                        {{ form.email.as_field_group }}
                     </div>
-                    
-                    <div class="fields_edit">
-                        <label for="id_occupational_registration" class="form-label">Registro Ocupacional</label>
-                        <input type="text" name="occupational_registration" id="id_occupational_registration" class="w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Registro ocupacional" value="{{ request.user.occupational_registration }}">
+                    <div class="flex gap-2 my-2">
+                        {% include "components/standard-button.html" with text="Voltar" extra_classes="w-1/2" disabled=False onclick="toggleForm()" %}
+                        {% include "components/standard-button.html" with text="Confirmar" extra_classes="w-1/2" disabled=False onclick="toggleForm()" %}
                     </div>
-                    
-                    <button type="submit" class="save-edit w-full rounded-md">Confirmar alterações</button>
+                    <div class="flex gap-2 my-2">
+                        <button type="button"
+                           class="relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                           <span>Anterior</span>
+                           <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </button>
+                        <button type="button" id="second-step"
+                           class="relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                           <span>Próximo</span>
+                           <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </button>
+                     </div>
                 </form>
                 
             </div>
@@ -96,11 +94,7 @@ Sem B.O
             </div> -->
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="w-full text-left">
-                    <div class="profile-tabs w-full px-4 py-2 focus:outline-none logout">
-                        <h4>Logout</h4>
-                    </div>
-                </button>
+                {% include "components/standard-button.html" with text="Sair da conta" disabled=False %}
             </form>
         </div>    
     </div>

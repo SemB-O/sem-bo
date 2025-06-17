@@ -16,13 +16,6 @@
     gap: 1rem;
 }
 
-.profile div div {
-    border-radius: 0.5rem;
-    height: 3.5rem;
-    transition: 0.3s;
-    cursor: pointer;
-}
-
 .profile-tabs {
     display: flex;
     justify-content: center;

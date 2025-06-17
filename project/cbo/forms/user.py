@@ -241,10 +241,37 @@ class UserEditForm(forms.ModelForm):
         model = User
         fields = ['first_name', 'last_name', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration']
         widgets = {
-            'CPF': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'CPF'}),
-            'telephone': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Telefone'}),
-            'date_of_birth': forms.DateInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Data de nascimento'}),
-            'occupational_registration': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Registro ocupacional'}),
+             'email': forms.EmailInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'seuemail@exemplo.com',
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'Digite seu Nome',
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'Digite seu Sobrenome',
+            }),
+            'CPF': forms.TextInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'id': 'id_CPF',
+                'placeholder': 'Digite seu CPF',
+            }),
+            'telephone': forms.TextInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'id': 'id_telephone',
+                'placeholder': 'Digite seu Celular',
+            }),
+            'date_of_birth': forms.DateInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'Digite sua Data de nascimento',
+                'type': 'date',
+            }),
+            'occupational_registration': forms.TextInput(attrs={
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'Digite seu Registro ocupacional',
+            }),
         }
 
 

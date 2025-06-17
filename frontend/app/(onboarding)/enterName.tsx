@@ -20,7 +20,6 @@ export default function EnterNameScreen() {
 
   const handleNext = () => {
     if (name.trim()) {
-      console.log('Nome:', name);
       router.push('/choosePlan');
     }
   };

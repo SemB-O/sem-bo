@@ -1,0 +1,9 @@
+<button type="button" id="{{ id|default:'standard-button' }}"
+  class="relative w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition flex items-center justify-center gap-2 {{ extra_classes|default:'' }}"
+  {% if disabled %}disabled{% endif %}
+  {% if onclick %}onclick="{{ onclick }}"{% endif %}
+  {% if onmouseover %}onmouseover="{{ onmouseover }}"{% endif %}
+  {% if onfocus %}onfocus="{{ onfocus }}"{% endif %}>
+  <span>{{ text|default:'Próximo' }}</span>
+  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+</button>

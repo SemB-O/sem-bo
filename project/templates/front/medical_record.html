@@ -254,7 +254,6 @@ Sem B.O
 
                 function initializeCid10Select2() {
                     const url = window.location.origin + "{% url 'cid-autocomplete' %}";
-                    console.log('URL para autocomplete:', url);
 
                     $('#cid_10').select2({
                         ajax: {
@@ -263,14 +262,12 @@ Sem B.O
                             delay: 250,
                             type: 'GET',
                             data: function(params) {
-                                console.log('Ajax data params:', params);
                                 return {
                                     term: params.term,
                                     page: params.page || 1
                                 };
                             },
                             processResults: function(data, params) {
-                                console.log('Ajax response data:', data);
                                 params.page = params.page || 1;
                                 return {
                                     results: data.results,

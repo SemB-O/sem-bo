@@ -60,3 +60,7 @@
   border-color: #54d6ee !important;
   color: #54d6ee !important;
 }
+
+.hidden {
+  display: none !important;
+}
