@@ -130,7 +130,7 @@ Sem B.O
                 </div>
                 <ul class="mb-4">
                     {% for folder in favorite_folders %}
-                    <li class="folder mb-2">
+                    <li class="folder mb-2 shadow">
                         <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders">
                             <label for="folder-{{ folder.id }}">{{ folder.name }}</label>
                             <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>

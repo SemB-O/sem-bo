@@ -250,7 +250,7 @@ body {
 }
 
 .checkbox-custom:checked {
-    background-color: #5bcd3e;
+    background-color: black;
 }
 
 .checkbox-custom:checked::after {
