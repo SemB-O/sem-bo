@@ -19,8 +19,8 @@ Sem B.O
     <section class="content-page">
         {% include 'parciais/menu.html' %}
 
-        <div class="central-container">
-            <div class="welcome-div">
+        <div class="central-container mx-[5rem]">
+            <div>
                 <div class="welcome text-black-700 font-semibold text-3xl">
                     Olá, <b class="text-black-700">Sr(a) {{ user.first_name }}</b>
                 </div>
@@ -32,16 +32,13 @@ Sem B.O
             </div>
             <form id="search-form" class="form-search" method="GET" action="{% url 'search' %}">
                 {% csrf_token %}
-                <div class="content-search flex justify-center">
-                    <div class="search flex items-center bg-transparent p-2">
-                        <input type="text" class="search focus:outline-none w-full p-2.5 opacity-90" placeholder="Digite o procedimento" name="q">
+                <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
+                    <div class="mr-2 w-full">
+                        <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
                     </div>
-                    <div id="search" class="filter bg-F4F4F8 flex justify-center items-center">
-                        <ion-icon name="search-outline" class="w-6 h-6"></ion-icon>
-                    </div>
-                    <div id="close-filter" class="filter bg-F4F4F8 flex justify-center items-center" style="display: none; background-color: rgb(243 106 106 / 85%)">
-                        <ion-icon name="close-outline" style="color: white;" class="w-6 h-6"></ion-icon>
-                    </div>
+                    <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                        <ion-icon name="search-outline" class="w-5 h-5 md hydrated" role="img"></ion-icon>
+                    </button>
                 </div>
             </form>
             
