@@ -17,7 +17,7 @@ Sem B.O
 
 {% block content %}
 
-<section class="mx-auto detail-section">
+<section class="detail-section">
     <div class="super text-white p-4">
         <div class="menu-super">
             <a href="{% url 'home' %}" class="back"><ion-icon name="chevron-back-outline"></ion-icon></a>
@@ -32,6 +32,7 @@ Sem B.O
     </div>
     </div>
 
+    <div class="mx-[5rem]">
     <div class="info p-4">
       <div class="procedure-img">
         <img src="{% static 'assets/procedure.jpg' %}">
@@ -146,6 +147,8 @@ Sem B.O
       
       {% include 'parciais/menu_inferior.html' %}
       
+
+    </div>
 </section>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
