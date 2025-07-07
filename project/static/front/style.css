@@ -60,3 +60,8 @@
   border-color: #54d6ee !important;
   color: #54d6ee !important;
 }
+
+/* Tailwind Class To Do */
+.bg-\[\#F2F2F7\] {
+  background-color: #F2F2F7;
+}

@@ -31,15 +31,6 @@ body {
     padding-right: 0.2rem;
 }
 
-form div input {
-    background-color: #F2F2F7;
-}
-
-form div select {
-    background-color: #F2F2F7;
-    cursor: pointer;
-}
-
 .date-picker-container {
     position: relative;
 }

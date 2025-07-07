@@ -1,0 +1,35 @@
+{% extends '_base.html' %}
+{%  load static %}
+
+{% block content %}
+    <div>
+        <div class="text-black-700 font-semibold text-3xl">
+            Olá, <b class="text-black-700">Sr(a) {{ user.first_name.title }}</b>
+        </div>
+        <div class="text-gray-600">
+            {% for occupation in user.occupations.all %}
+                <b class="font-semibold">{{ occupation.name }}</b>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form method="GET" action="{% url 'search' %}">
+        <div class="flex">
+            <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
+                <div class='mr-2 w-full'>
+                    <input type="text" name="q"
+                        class="block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full"
+                        placeholder="Digite o procedimento">
+                </div>
+                <button type="submit" aria-label="search"
+                    class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                    <ion-icon name="search-outline" class="w-5 h-5"></ion-icon>
+                </button>
+            </div>
+        </div>
+    </form>    
+    
+    <div class="flex justify-center items-center h-[46vh] lg:h-[55vh]">
+        <img src="{% static 'assets/abstract.jpg' %}" class="rounded-md h-full w-full">
+    </div>
+{% endblock %}

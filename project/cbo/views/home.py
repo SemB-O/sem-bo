@@ -7,7 +7,7 @@ from ..models import Procedure, Record, FavoriteProceduresFolder
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 class Home(ListView):
     model = Procedure
-    template_name = 'front/home.html'
+    template_name = 'app/home.html'
     context_object_name = 'procedures'
 
     def get_context_data(self, **kwargs):

@@ -1,0 +1,102 @@
+{% load static %}
+{% url 'home' as home_url %}
+{% url 'procedure_list' as procedure_list_url %}
+{% url 'procedure_favorite' as procedure_favorite_url %}
+{% url 'profile' as profile_url %}
+<div class="fixed bottom-0 left-0 right-0 bg-white md:pb-5 devices md:shadow-none shadow-[0_-2px_4px_rgba(0,0,0,0.1)] md:h-auto h-24 rounded-t-xl z-50">
+  <div class="list flex w-full justify-evenly md:justify-center md:gap-4 px-2 mt-2 md:mt-4 md:mb-4">
+
+    <!-- Home -->
+    <a href="{{ home_url }}">
+      <div class="item rounded-md bg-white md:shadow-md text-center flex flex-col items-center justify-center p-2 md:w-40 md:h-36 hover:bg-gray-100 transition">
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="material-symbols-outlined text-2xl md:text-4xl {% if request.path != home_url %}opacity-50{% endif %}">
+          home
+        </span>
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="text-xs md:text-sm mt-1 md:mt-2 {% if request.path != home_url %}opacity-50{% endif %}">
+          Início
+        </span>
+      </div>
+    </a>
+
+    <!-- Procedimentos -->
+    <a href="{{ procedure_list_url }}">
+      <div class="item rounded-md bg-white md:shadow-md text-center flex flex-col items-center justify-center p-2 md:w-40 md:h-36 hover:bg-gray-100 transition">
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="material-symbols-outlined text-2xl md:text-4xl {% if request.path != procedure_list_url %}opacity-50{% endif %}">
+          medical_services
+        </span>
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="text-xs md:text-sm mt-1 md:mt-2 {% if request.path != procedure_list_url %}opacity-50{% endif %}">
+          Procedimentos
+        </span>
+      </div>
+    </a>
+
+    <!-- Favoritos -->
+    <a href="{{ procedure_favorite_url }}">
+      <div class="item rounded-md bg-white md:shadow-md text-center flex flex-col items-center justify-center p-2 md:w-40 md:h-36 hover:bg-gray-100 transition">
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="material-symbols-outlined text-2xl md:text-4xl {% if request.path != procedure_favorite_url %}opacity-50{% endif %}">
+          favorite
+        </span>
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="text-xs md:text-sm mt-1 md:mt-2 {% if request.path != procedure_favorite_url %}opacity-50{% endif %}">
+          Favoritos
+        </span>
+      </div>
+    </a>
+
+    <!-- Meu Perfil -->
+    <a href="{{ profile_url }}">
+      <div class="item rounded-md bg-white md:shadow-md text-center flex flex-col items-center justify-center p-2 md:w-40 md:h-36 hover:bg-gray-100 transition">
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="material-symbols-outlined text-2xl md:text-4xl {% if request.path != profile_url %}opacity-50{% endif %}">
+          person
+        </span>
+        <span 
+          onmouseover="hoverEffect(this)" 
+          onmouseout="restoreColor(this)" 
+          class="text-xs md:text-sm mt-1 md:mt-2 {% if request.path != profile_url %}opacity-50{% endif %}">
+          Meu Perfil
+        </span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<script>
+  function hoverEffect(element) {
+    const spans = element.parentElement.querySelectorAll("span");
+    spans.forEach(span => {
+      span.style.opacity = "1";
+      span.style.transition = "0.3s";
+    });
+  }
+
+  function restoreColor(element) {
+    const spans = element.parentElement.querySelectorAll("span");
+    spans.forEach(span => {
+      if (!span.classList.contains("checked-page")) {
+        span.style.opacity = "";
+      }
+      span.style.transition = "0.3s";
+    });
+  }
+</script>

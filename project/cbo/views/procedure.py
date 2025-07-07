@@ -39,7 +39,7 @@ class DetailView(DetailView):
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
 class ListView(ListView):
-    template_name = 'front/procedure_list.html'
+    template_name = 'app/procedure_list.html'
     procedures_per_page = 30
 
     def get(self, request, *args, **kwargs):

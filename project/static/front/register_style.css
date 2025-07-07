@@ -1,11 +1,3 @@
-form div input {
-    background-color: #F2F2F7;
-}
-
-form div select {
-    background-color: #F2F2F7;
-    cursor: pointer;
-}
 
 .login h2 {
     font-family: 'Poppins', sans-serif;
