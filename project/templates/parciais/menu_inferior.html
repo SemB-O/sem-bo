@@ -51,7 +51,7 @@
     <a href="{{ procedure_favorite_url }}">
       <div class="item rounded-md bg-white md:shadow-md text-center flex flex-col items-center justify-center p-2 md:w-40 md:h-36 hover:bg-gray-100 transition">
         <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="material-symbols-outlined text-2xl md:text-4xl {% if request.path != procedure_favorite_url %}opacity-50{% endif %}">
-          favorite
+          bookmark
         </span>
         <span onmouseover="hoverEffect(this)" onmouseout="restoreColor(this)" class="text-xs md:text-sm mt-1 {% if request.path != procedure_favorite_url %}opacity-50{% endif %}">
           Favoritos
