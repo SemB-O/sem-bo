@@ -28,12 +28,11 @@ Sem B.O
                 <img src="{% static 'assets/procedure.jpg' %}">
             </div>
             <div class="info_person">
-                <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
+                <h4>{{ request.user.first_name.title }} {{ request.user.last_name.title }}</h4>
                 <h4>{{ request.user.email }}</h4>
             </div>
         </div>
     </div>
-    
     <div class="profile">
         <div class="mb-4">
             {% if messages %}

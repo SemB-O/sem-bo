@@ -2,7 +2,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 100vh;
 }
 
 .profile {
@@ -27,15 +26,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.menu-top a {
-    display: flex;
-    align-items: center;
-}
-
-.menu-top a img {
-    width: 11rem;
 }
 
 .grid {

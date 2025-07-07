@@ -8,19 +8,6 @@ body {
     background-color: #FFFFFF;
 }
 
-.menu-top {
-    margin-bottom: 1.5rem;
-}
-
-.menu-top a {
-    display: flex;
-    align-items: center;
-}
-
-.menu-top a img {
-    width: 10rem;
-}
-
 .search {
     width: 100%;
 }
