@@ -39,12 +39,19 @@ Sem B.O
 
 <div class="results">
     {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <p class="text-sm py-1 px-4 rounded {% if message.tags == 'error' %} bg-red-200 text-red-800 {% elif message.tags == 'success' %} bg-green-200 text-green-800 {% endif %}">{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
+    <div class="messages mt-4 mb-2">
+        {% for message in messages %}
+            <script>
+                Swal.fire({
+                    text: '{{ message }}',
+                    icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% endif %}',
+                    confirmButtonText: 'OK'
+                });
+            </script>
+        {% endfor %}
+    </div>
+{% endif %}
+
 
   
     <div class="favorite-folders">
@@ -115,16 +122,16 @@ Sem B.O
             {% csrf_token %}
             <div class="mt-2">
                 <label for="id_name" class="text-gray-600">Nome</label>
-                <input type="text" id="id_name" name="name" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none" placeholder="Digite o nome">
+                <input type="text" id="id_name" name="name" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o nome">
             </div>
 
             <div class="mt-2">
                 <label for="id_description" class="text-gray-600">Descrição</label>
-                <textarea id="id_description" name="description" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none"  placeholder="Digite sua descrição"></textarea>
+                <textarea id="id_description" name="description" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full"  placeholder="Digite sua descrição"></textarea>
             </div>
         
             <div class="mt-4">
-                <button type="submit" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Criar Pasta</button>
+                <button type="submit" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Criar Pasta</button>
             </div>
         </form>
     </div>

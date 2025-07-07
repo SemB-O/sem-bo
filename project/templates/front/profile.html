@@ -35,31 +35,13 @@ Sem B.O
     </div>
     <div class="mx-[15rem]">
         <div class="mb-4">
-            {% if messages %}
-            <div class="messages mt-4 mb-2">
-                {% for message in messages %}
-                <script>
-                    // Exibe o SweetAlert dependendo da tag da mensagem
-                    Swal.fire({
-                        text: '{{ message }}',
-                        icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% endif %}',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
-                            popup: 'rounded-xl',
-                        },                    });
-                </script>
-                {% endfor %}
-            </div>
-        {% endif %}
-        
             <div class="!flex gap-2">
                 <button type="button" class="w-full bg-[#0F0F0F] text-white px-3 py-2 rounded-md flex justify-center" onclick="toggleForm()">
                     Editar seu Perfil
                 </button>
                 
                 <form action="/logout/" method="post">
-                    <input type="hidden" name="csrfmiddlewaretoken" value="9AMasRzt6MlYZx9Kvfth1MRZS4GaU1EdAnqY1XwZNup4sqeuuxrXeJdLyjGUhKEx">
+                    {% csrf_token %}
                     <button type="submit" class="bg-[#0F0F0F] text-white px-3 py-2 rounded-md flex justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="white">
                             <path d="M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h264v72H216v528h264v72H216Zm432-168-51-51 81-81H384v-72h294l-81-81 51-51 168 168-168 168Z"></path>

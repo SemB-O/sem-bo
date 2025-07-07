@@ -14,5 +14,19 @@
 
 
 {% endblock %}
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        text: '{{ message }}',
+        icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% endif %}',
+        confirmButtonText: 'OK',
+        customClass: {
+            confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
+            popup: 'rounded-xl',
+        },                    });
+</script>
+{% endfor %}
+{% endif %}
 </body>
 </html>
