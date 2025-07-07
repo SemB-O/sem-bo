@@ -27,6 +27,12 @@ Sem B.O
         
                     <div>
                         {{ form.password.label_tag }}
+                        <div class="relative">
+                            {{ form.password }}
+                            <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                                visibility
+                            </span>
+                        </div>
                         {% if form.password.errors %}
                         <ul class="errorlist">
                             {% for error in form.password.errors %}
@@ -34,12 +40,6 @@ Sem B.O
                             {% endfor %}
                         </ul>
                         {% endif %}
-                        <div class="relative">
-                            {{ form.password }}
-                            <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                                visibility
-                            </span>
-                        </div>
                     </div>
 
                     <div class="error-message text-sm text-red-600 hidden"></div>
