@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from ..models import FavoriteProceduresFolderHasProcedure, Procedure, FavoriteProceduresFolder, Record
 from ..forms.favorite import FavoriteProceduresFolderForm
-
+from django.db.models import Q
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -67,7 +67,7 @@ class FavoriteProceduresListView(View):
     def get(self, request, *args, **kwargs):
         user = request.user
 
-        favorite_procedures = FavoriteProceduresFolderHasProcedure.objects.filter(user=user).values_list('procedure', flat=True)
+        favorite_procedures = FavoriteProceduresFolderHasProcedure.objects.filter(favorite_procedures_folder__user=user).values_list('procedure', flat=True)
 
         procedures_list = Procedure.objects.filter(
             Q(pk__in=favorite_procedures)

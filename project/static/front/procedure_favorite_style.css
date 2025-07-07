@@ -25,13 +25,6 @@ body {
     width: 100%;
 }
 
-.search input{
-    background-color: #F4F4F8;
-    border-radius: 10px;
-    width: 100%;
-    padding-left: 5rem;
-}
-
 .search ion-icon {
     left: 4rem;
 }
@@ -55,7 +48,7 @@ body {
 }
 
 .results {
-    width: 97.5vw;
+    width: 100%;
     align-self: center;
     justify-self: center;
     height: 64vh;
@@ -65,7 +58,7 @@ body {
 }
 
 .results_search {
-    width: 97.5vw;
+    width: 100%;
     align-self: center;
     justify-self: center;
     max-height: 64vh;
@@ -260,12 +253,6 @@ body {
     padding: 10px;
     border: 1px solid #e9e8e8;
     border-radius: 5px;
-}
-
-.favorite-folder {
-    justify-content: space-between;
-    background-color: #F5F5F9;
-    border: 0;
 }
 
 .favorite-folder a {

@@ -23,16 +23,17 @@ Sem B.O
 <div class="mx-[5rem]">
 <form id="search-form" class="form-search" method="GET" action="{% url 'procedure_more' %}">
     {% csrf_token %}
-    <div class="flex justify-center ml-4 mr-4">
-        <div class="search flex items-center bg-transparent p-2">
-            <input type="text" class="search bg-white focus:outline-none w-full p-2.5 opacity-90" placeholder="Digite o procedimento" name="q">
-            <ion-icon class="w-6 h-6 absolute text-gray-600 opacity-40" name="search-outline"></ion-icon>
+    <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
+        <div class="mr-2 w-full">
+            <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
         </div>
-        <div id="filter" class="filter bg-F4F4F8 flex justify-center items-center">
-            <ion-icon name="options-outline" class="w-6 h-6"></ion-icon>
-        </div>
-        <div id="close-filter" class="filter bg-F4F4F8 flex justify-center items-center" style="display: none; background-color: rgb(243 106 106 / 85%)">
-            <ion-icon name="close-outline" style="color: white;" class="w-6 h-6"></ion-icon>
+        <div class="grid grid-cols-2 gap-2">
+            <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                <ion-icon name="search-outline" class="w-5 h-5 md hydrated" role="img"></ion-icon>
+            </button>
+            <button type="button" id="filter" id="open-filter-modal" aria-label="filter" class="flex items-center justify-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                <ion-icon name="options-outline" class="w-6 h-6 md hydrated" role="img"></ion-icon>
+            </button>
         </div>
     </div>
 </form>
@@ -41,7 +42,7 @@ Sem B.O
     {% for procedure in procedures %}
         <div class="procedure p-4 my-2 border rounded-lg">
             <div class="title_tags">
-                <a class="title_procedure">{{ procedure }}</a>
+                <a class="text-sm font-bold opacity-80">{{ procedure }}</a>
                 <div class="records_tags hidden md:flex">
                     {% for occupation in procedure.related_occupations_names %}
                         <a class="procedure-occupation" href="#">{{ occupation }}</a>
@@ -67,7 +68,7 @@ Sem B.O
         </div>
     {% endfor %}
     <button id="load-more" style="display: {% if procedures.has_next %}block{% else %}none{% endif %};">Carregar Mais</button>
-    <div class="loading" style="display: none;">carregando...</div>
+    <div class="loading" style="display: none;">Carregando...</div>
 </div>
 
 <div class="content-principal">
@@ -181,10 +182,8 @@ Sem B.O
 
         function toggleFilterVisibility() {
             if (searchActive) {
-                $('#filter').hide();
                 $('#close-filter').show();
             } else {
-                $('#filter').show();
                 $('#close-filter').hide();
             }
         }
