@@ -22,7 +22,7 @@ Sem B.O
         <div class="central-container mx-[5rem]">
             <div>
                 <div class="welcome text-black-700 font-semibold text-3xl">
-                    Olá, <b class="text-black-700">Sr(a) {{ user.first_name }}</b>
+                    Olá, <b class="text-black-700">Sr(a) {{ user.first_name.title }}</b>
                 </div>
                 <div class="note text-gray-600">
                     {% for occupation in user.occupations.all %}

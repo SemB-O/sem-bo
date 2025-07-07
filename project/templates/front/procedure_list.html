@@ -20,7 +20,7 @@ Sem B.O
 
 {% include 'parciais/menu.html' %}
 
-
+<div class="mx-[5rem]">
 <form id="search-form" class="form-search" method="GET" action="{% url 'procedure_more' %}">
     {% csrf_token %}
     <div class="flex justify-center ml-4 mr-4">
@@ -92,6 +92,7 @@ Sem B.O
         </div>
     </div>
     <div class="blur hidden"></div>
+</div>
 </div>
 
 <div class="content-principal folder-modal">
