@@ -12,7 +12,7 @@ class OccupationManager(models.Manager):
             'Médico', 'Cirurgião', 'Enfermeiro', 'Dentista', 'Farmacêutico',
             'Fisioterapeuta', 'Nutricionista', 'Psicólogo', 'Psiquiatra', 'Radiologista',
             'Oncologista', 'Cardiologista', 'Ginecologista', 'Pediatra', 'Ortopedista',
-            'Fonoaudiólogo', 'Terapeuta', 'Ortoptista', 'Psicomotricista', 'Saúde', 'Neuro'
+            'Fonoaudiólogo', 'Terapeuta', 'Ortoptista', 'Psicomotricista', 'Saúde', 'Neuro', 'Assistenet Administrativo'
         ]
 
         query = reduce(operator.or_, (Q(name__icontains=kw) for kw in medical_keywords))

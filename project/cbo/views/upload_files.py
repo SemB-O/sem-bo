@@ -10,7 +10,6 @@ from django.db import transaction
 logger = logging.getLogger(__name__)
 
 
-@method_decorator(login_required(login_url='/login'), name='dispatch')
 class UploadFilesView(View):
     template_name = 'create/send_files.html'
 
