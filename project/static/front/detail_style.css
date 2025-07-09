@@ -57,11 +57,6 @@ ion-icon {
     z-index: 999;
 }
 
-.info {
-    position: relative;
-    bottom: 5rem;
-}
-
 .procedure-img {
     display: flex;
     justify-content: center;
@@ -81,7 +76,6 @@ ion-icon {
 
 .tabs {
     padding: 0.4rem;
-    margin: 1rem;
     display: flex;
     flex-direction: column;
     border-radius: 0.7rem;
@@ -89,17 +83,6 @@ ion-icon {
 
 .tabs div:first-child {
     margin-bottom: 0.5rem;
-}
-
-.tabs div:last-child {
-    background-color: #F4F4F8;
-    width: 100%;
-    transition: 0.7s;
-    padding: 0.7rem;
-    border-radius: 0.5rem;
-    text-align: center;
-    font-size: 1.2rem;
-    margin: 0 !important;
 }
 
 .records_tags {
@@ -122,14 +105,7 @@ ion-icon {
     font-size: 1.6rem;
 }
 
-.devices {
-    position: relative;
-    bottom: 6.5rem;
-}
-
 .description {
-    position: relative;
-    bottom: 6rem;
     padding: 1rem 2.5rem;
     min-height: 31vh;
     overflow: overlay;
