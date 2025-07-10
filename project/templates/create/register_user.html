@@ -73,11 +73,18 @@ Sem B.O
             <div>
                {{ form.date_of_birth.as_field_group }}
             </div>
-            <button type="button" id="first-step"
-               class="next-step relative w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-               <span>Próximo</span>
-               <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            </button>
+            <div class="flex gap-2 my-2">
+                <a href="{% url 'select_plan' %}"
+                    class="relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <span>Anterior</span>
+                    <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </a>
+                <button type="button" id="first-step"
+                class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                <span>Próximo</span>
+                <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </button>
+            </div>
          </div>
          <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
             <div class="text-left hidden md:block">
