@@ -50,7 +50,7 @@ Sem B.O
             </script>
         {% endfor %}
     </div>
-{% endif %}
+    {% endif %}
 
 
   
@@ -282,8 +282,8 @@ Sem B.O
                         const proceduresHTML = data.procedures.map(createProcedureHTML);
 
                         if (data.procedures[0].has_more_results) {
-                            resultsAll.append('<button id="load-more" style="display: block;">Carregar Mais</button>');
-                            resultsAll.append('<div class="loading" style="display: none;">carregando...</div>');
+                            searchResults.append('<button id="load-more" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: block;">Carregar Mais</button>');
+                            searchResults.append('<div class="loading flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: none;">Carregando...</div>');
                         }
 
                         optionsIcon.hide();
