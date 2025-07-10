@@ -1,18 +1,29 @@
 {% extends 'base_auth.html' %}
-{%  load static %}
+{% load static %}
 {% block title %}
 Sem B.O
 {% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{% static 'front/register_style.css' %}">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css">
+<link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    rel="stylesheet">
+<link
+    href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+    rel="stylesheet" />
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+
 <script>
    $(document).ready(function () {
        $('select.select2').select2({
@@ -44,119 +55,138 @@ Sem B.O
    box-shadow: 0 0 0 1px black;      /* focus:ring-blue-500 */
    }
 </style>
-<section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
-   <div></div>
-   <div class="flex flex-col gap-2 justify-center items-center px-6 md:px-0 w-full md:w-2/3">
-      <div class="sticky text-center py-2">
-         <h1 class="font-bold text-6xl md:text-7xl">Hora do <span class="text-[#43D1EB]">cadastro</span></h1>
-         <p class="text-gray-600 break-all">Preencha o formulário com suas informações!</p>
-      </div>
-      <form id="onboarding-form" class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4" action="{% url 'register' selected_plan=selected_plan %}" method="post">
-         {% csrf_token %}
-         <div class="step flex flex-col gap-4" id="step-1">
-            <div class="text-left hidden md:block">
-               <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
-               <p class="text-gray-600">Suas informações pessoais!</p>
+<section
+    class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
+    <div></div>
+    <div
+        class="flex flex-col gap-2 justify-center items-center px-6 md:px-0 w-full md:w-2/3">
+        <div class="sticky text-center py-2">
+            <h1 class="font-bold text-6xl md:text-7xl">Hora do <span
+                    class="text-[#43D1EB]">cadastro</span></h1>
+            <p class="text-gray-600 break-all">Preencha o formulário com suas
+                informações!</p>
+        </div>
+        <form id="onboarding-form"
+            class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-4"
+            action="{% url 'register' selected_plan=selected_plan %}"
+            method="post">
+            {% csrf_token %}
+            <div class="step flex flex-col gap-4" id="step-1">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 1:</h1>
+                    <p class="text-gray-600">Suas informações pessoais!</p>
+                </div>
+                <div>
+                    {{ form.first_name.as_field_group }}
+                </div>
+                <div>
+                    {{ form.last_name.as_field_group }}
+                </div>
+                <div>
+                    {{ form.CPF.as_field_group }}
+                </div>
+                <div>
+                    {{ form.telephone.as_field_group }}
+                </div>
+                <div>
+                    {{ form.date_of_birth.as_field_group }}
+                </div>
+                <div class="flex gap-2 my-2">
+                    <a href="{% url 'select_plan' %}"
+                        class="relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Anterior</span>
+                        <div
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </a>
+                    <button type="button" id="first-step"
+                        class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Próximo</span>
+                        <div
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                </div>
             </div>
-            <div>
-               {{ form.first_name.as_field_group }}
+            <div class="step flex flex-col gap-4" id="step-2"
+                style="display: none;">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
+                    <p class="text-gray-600">Suas informações profissionais!</p>
+                </div>
+                <div>
+                    {{ form.occupational_registration.as_field_group }}
+                </div>
+                <div>
+                    {{ form.occupations.as_field_group }}
+                </div>
+                <div class="error-message text-sm text-red-600 hidden"></div>
+                <div class="flex gap-2 my-2">
+                    <button type="button"
+                        class="previous-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Anterior</span>
+                        <div
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <button type="button" id="second-step"
+                        class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Próximo</span>
+                        <div
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                </div>
             </div>
-            <div>
-               {{ form.last_name.as_field_group }}
+            <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
+                <div class="text-left hidden md:block">
+                    <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
+                    <p class="text-gray-600">Suas informações de login!</p>
+                </div>
+                <div>
+                    {{ form.email.as_field_group }}
+                </div>
+                <div>
+                    {{ form.password1.label_tag }}
+                    <div class="relative">
+                        {{ form.password1 }}
+                        <span
+                            class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                            visibility
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    {{ form.password2.label_tag }}
+                    <div class="relative">
+                        {{ form.password2 }}
+                        <span
+                            class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                            visibility
+                        </span>
+                    </div>
+                </div>
+                <div class="flex gap-2 my-2">
+                    <button type="button"
+                        class="previous-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Anterior</span>
+                        <div
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <button type="button"
+                        id="final-next-step"
+                        class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span>Próximo</span>
+                        <div
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                </div>
             </div>
-            <div>
-               {{ form.CPF.as_field_group }}
-            </div>
-            <div>
-               {{ form.telephone.as_field_group }}
-            </div>
-            <div>
-               {{ form.date_of_birth.as_field_group }}
-            </div>
-            <div class="flex gap-2 my-2">
-                <a href="{% url 'select_plan' %}"
-                    class="relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                    <span>Anterior</span>
-                    <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                </a>
-                <button type="button" id="first-step"
-                class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                <span>Próximo</span>
-                <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                </button>
-            </div>
-         </div>
-         <div class="step flex flex-col gap-4" id="step-2" style="display: none;">
-            <div class="text-left hidden md:block">
-               <h1 class="font-bold text-3xl md:text-4xl">Passo 2:</h1>
-               <p class="text-gray-600">Suas informações profissionais!</p>
-            </div>
-            <div>
-               {{ form.occupational_registration.as_field_group }}
-            </div>
-            <div>
-               {{ form.occupations.as_field_group }}
-            </div>
-            <div class="error-message text-sm text-red-600 hidden"></div>
-            <div class="flex gap-2 my-2">
-               <button type="button"
-                  class="previous-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  <span>Anterior</span>
-                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-               </button>
-               <button type="button" id="second-step"
-                  class="next-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition my-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  <span>Próximo</span>
-                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-               </button>
-            </div>
-         </div>
-         <div class="step flex flex-col gap-4" id="step-3" style="display: none;">
-            <div class="text-left hidden md:block">
-               <h1 class="font-bold text-3xl md:text-4xl">Passo 3:</h1>
-               <p class="text-gray-600">Suas informações de login!</p>
-            </div>
-            <div>
-               {{ form.email.as_field_group }}
-            </div>
-            <div>
-               {{ form.password1.label_tag }}
-               <div class="relative">
-                  {{ form.password1 }}
-                  <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                  visibility
-                  </span>
-               </div>
-            </div>
-            <div>
-               {{ form.password2.label_tag }}
-               <div class="relative">
-                  {{ form.password2 }}
-                  <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                  visibility
-                  </span>
-               </div>
-            </div>
-            <div class="flex gap-2 my-2">
-               <button type="button"
-                  class="previous-step relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  <span>Anterior</span>
-                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-               </button>
-               <button type="submit"
-                  class="submit-form relative w-1/2 bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  <span>Cadastrar</span>
-                  <div class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-               </button>
-            </div>
-         </div>
-      </form>
-   </div>
-   <div class="flex justify-center py-8">
-      <p>Já tem cadastro? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
-   </div>
+        </form>
+    </div>
+    <div class="flex justify-center py-8">
+        <p>Já tem cadastro? <a href="{% url 'login' %}"
+                class="text-blue-500">Faça login</a></p>
+    </div>
 </section>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
    $(document).ready(function() {
        function validateOccupations() {
@@ -208,7 +238,7 @@ Sem B.O
        $('#id_telephone').mask('(00) 00000-0000');
        $('#id_CPF').mask('000.000.000-00', {reverse: true});
    });
-</script>    
+</script>
 <script>
    flatpickr("#id_date_of_birth", {
        dateFormat: "Y-m-d",
@@ -249,10 +279,7 @@ Sem B.O
            const $scope = $(scope);
            const $clickedButton = $(clickedButton);
    
-           console.log($scope, $clickedButton)
-           const $allButtons = $scope.find('button');
-           console.log($allButtons)
-   
+           const $allButtons = $scope.find('button');   
            $allButtons.each(function () {
                const $btn = $(this);
                if (!$btn.is($clickedButton)) {
@@ -323,38 +350,49 @@ Sem B.O
                const $step = $(this).closest('.step');
                StepNavigator.previous($step);
            });
-       
-           $submitButtons.on("click", function (e) {
-               e.preventDefault();
-       
-               const userNameRaw = $('#id_first_name').val() || 'Usuário';
-               const userName = userNameRaw.trim().charAt(0).toUpperCase() + userNameRaw.trim().slice(1).toLowerCase();
 
-               LoadingButtonHandler.toggleAllButtons(this, true);       
-               StepNavigator.advanceStepIfValid(this, false).then((isValid) => {
-                   LoadingButtonHandler.toggleAllButtons(this, false);
-       
-                   if (isValid) {
-                       Swal.fire({
-                           icon: 'success',
-                           title: `Seja bem-vindo, ${userName}!`,
-                           text: `Seu registro foi finalizado com sucesso.`,
-                           confirmButtonText: 'Entrar',
-                           customClass: {
-                               confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
-                               popup: 'rounded-xl',
-                           },
-                           buttonsStyling: false
-                       }).then((result) => {
-                           if (result.isConfirmed) {
-                               window.location.href = '/login';
-                           }
-                       });
-                   }
-               });
-           });
+           $("#final-next-step").on("click", function (e) {
+                e.preventDefault();
+                const $button = $(this);
+                LoadingButtonHandler.toggleAllButtons($button, true);
+
+                StepNavigator.advanceStepIfValid($button, false).then((isValid) => {
+                    LoadingButtonHandler.toggleAllButtons($button, false);
+                    if (isValid) {
+                        const userData = Object.assign(
+                            {},
+                            ...Object.keys(OnboardingFormHandler.fieldMapByStep).map(step =>
+                                OnboardingFormHandler.getStepData(Number(step))
+                            )
+                        );
+                        userData.selected_plan = OnboardingFormHandler.getPlanIdFromUrl();
+
+                        $.ajax({
+                            url: '/api/payment/checkout/modal/',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(userData),
+                            success: function (response) {
+                                openMercadoPagoModal(response.preference_id, );
+                            },
+                            error: function () {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Erro ao iniciar pagamento',
+                                    text: 'Tente novamente mais tarde.',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
+                                        popup: 'rounded-xl',
+                                    },
+                                    buttonsStyling: false
+                                });
+                            }
+                        });
+                    }
+                });
+            });
        }
-       
    }
    
    $(document).ready(function () {
@@ -372,7 +410,7 @@ Sem B.O
        static apiUrls = {
            1: "{% url 'onboarding-user-validate-personal-info' %}",
            2: "{% url 'onboarding-user-validate-professional-info' %}",
-           3: "{% url 'onboarding-user-create' %}",
+           3: "{% url 'onboarding-user-validate-login-info' %}",
        };
    
        static fieldMapByStep = {
@@ -490,5 +528,78 @@ Sem B.O
             });
        }
    }
+</script>
+<script>
+function openMercadoPagoModal(preferenceId, userData) {
+    const mp = new MercadoPago("{{ MERCADO_PAGO_PUBLIC_KEY }}", {
+        locale: "pt-BR"
+    });
+
+    mp.checkout({
+        preference: {
+            id: preferenceId
+        },
+        autoOpen: true,
+        render: {
+            container: false
+        },
+        onReturn: function({ deepLink }) {
+            const paymentId = new URL(deepLink).searchParams.get('payment_id');
+
+            if (!paymentId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Pagamento não foi concluído corretamente.',
+                });
+                return;
+            }
+
+            userData.payment_id = paymentId;
+
+            fetch('/api/account/onboarding/users/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.valid) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: `Seja bem-vindo!`,
+                        text: `Seu registro foi finalizado com sucesso.`,
+                        confirmButtonText: 'Entrar',
+                        customClass: {
+                            confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
+                            popup: 'rounded-xl',
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro ao criar usuário',
+                        text: Object.values(res.errors).flat().join(', '),
+                    });
+                }
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro inesperado',
+                    text: 'Tente novamente mais tarde.',
+                });
+            });
+        }
+    });
+}
 </script>
 {% endblock %}

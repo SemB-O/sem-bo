@@ -49,6 +49,7 @@ class RegisterView(View):
         context = {
             'form': form,
             'selected_plan': selected_plan,
+            'MERCADO_PAGO_PUBLIC_KEY': settings.MERCADO_PAGO_PUBLIC_KEY
         }
 
         return render(request, self.template_name, context)

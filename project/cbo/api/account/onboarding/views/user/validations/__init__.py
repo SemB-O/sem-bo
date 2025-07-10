@@ -1,2 +1,3 @@
 from .pessoal_info import ValidatePessoalInfoView
 from .profissional_info import ValidateProfissionalInfoView
+from .login_info import ValidateLoginInfoView

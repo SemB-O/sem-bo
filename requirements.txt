@@ -35,3 +35,4 @@ yarl==1.9.4
 watchtower==3.4.0
 pytest==8.4.0
 pytest-django==4.11.1
+mercadopago==2.3.0

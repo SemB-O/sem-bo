@@ -1,0 +1,1 @@
+from cbo.api.payment.views.modal import PaymentCheckoutModalView

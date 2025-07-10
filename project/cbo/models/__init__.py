@@ -13,3 +13,4 @@ from cbo.models.cid import Cid
 from cbo.models.procedure_qualified_for_cid import ProcedureHasCid
 from cbo.models.occupation_qualified_for_procedure import ProcedureHasOccupation
 from cbo.models.procedure_has_record import ProcedureHasRecord
+from cbo.models.payment import Payment
