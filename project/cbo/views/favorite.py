@@ -48,16 +48,15 @@ class FavoriteView(ListView):
         return context
     
     def post(self, request, *args, **kwargs):
-        form = FavoriteProceduresFolderForm(request.POST)
+        form = FavoriteProceduresFolderForm(request.POST, user=request.user)
+
         if form.is_valid():
-            folder = form.save(commit=False)
-            folder.user = request.user
-            folder.save()
+            form.save()
             messages.success(request, 'Pasta de favoritos criada com sucesso!')
-        else:
-            messages.error(request, 'Ocorreu um erro ao criar a pasta de favoritos.')
+            return redirect(request.path_info)
         
-        return redirect(request.path_info)
+        messages.error(request, 'Ocorreu um erro ao criar a pasta de favoritos.')
+        return self.get(request, *args, **kwargs) 
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
