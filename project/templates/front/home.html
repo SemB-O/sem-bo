@@ -2,83 +2,77 @@
 {%  load static %}
 
 {% block title %}
-
 Sem B.O
-
 {% endblock %}
 
 {% block head %}
-
-    <link rel="stylesheet" href="{% static 'front/home_style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+<link rel="stylesheet" href="{% static 'front/home_style.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-
-    <section class="content-page">
-        {% include 'parciais/menu.html' %}
-
-        <div class="central-container mx-[5rem]">
-            <div>
-                <div class="welcome text-black-700 font-semibold text-3xl">
-                    Olá, <b class="text-black-700">Sr(a) {{ user.first_name.title }}</b>
-                </div>
-                <div class="note text-gray-600">
-                    {% for occupation in user.occupations.all %}
-                        <b class="font-semibold">{{ occupation.name }}</b>
-                    {% endfor %}
-                </div>
+<section class="content-page">
+    {% include 'parciais/menu.html' %}
+    <div class="central-container px-4 md:mt-0 mt-8 md:mx-[5rem]">
+        <div class="mb-4">
+            <div class="welcome text-black-700 font-semibold text-2xl md:text-3xl text-center md:text-left">
+                Olá, <b class="text-black-700">Sr(a) {{ user.first_name.title }}</b>
             </div>
-            <form id="search-form" class="form-search" method="GET" action="{% url 'search' %}">
-                {% csrf_token %}
-                <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
-                    <div class="mr-2 w-full">
-                        <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
-                    </div>
-                    <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
-                        <ion-icon name="search-outline" class="w-5 h-5 md hydrated" role="img"></ion-icon>
-                    </button>
-                </div>
-            </form>
-            
-            <div class="results none">
-                <div class="search_results">
-                </div>
-            </div>
-            
-            <div class="banner flex justify-center items-center">
-                <!-- <video src="{% static 'assets/banner.mp4' %}" loop autoplay muted></video> -->
-                <img src="{% static 'assets/abstract.jpg' %}" class="object-cover">
+            <div class="note text-gray-600 text-sm md:text-base text-center md:text-left mt-1">
+                {% for occupation in user.occupations.all %}
+                    <b class="font-semibold">{{ occupation.name }}</b>
+                {% endfor %}
             </div>
         </div>
 
-        {% include 'parciais/menu_inferior.html' %}
-    </section>
-
-    <div class="content-principal folder-modal">
-        <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-            <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6">
-                <div class="sup-folder">
-                    <div></div>
-                    <h2 class="text-xl ml-2 mb-2 title-modal-folders">Adicione a uma <b>Pasta de Favoritos</b></h2>
-                    <span class="close text-gray-600 cursor-pointer">&times;</span>
+        <form id="search-form" class="form-search w-full" method="GET" action="{% url 'search' %}">
+            {% csrf_token %}
+            <div class="search flex flex-row items-center gap-2 bg-transparent w-full">
+                <div class="w-full">
+                    <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
                 </div>
-                <ul class="mb-4">
-                    {% for folder in favorite_folders %}
-                        <li class="folder mb-2 shadow">
-                            <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders">
-                                <label for="folder-{{ folder.id }}">{{ folder.name }}</label>
-                                <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>
-                            </label>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <button id="confirm-favorite" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Confirmar</button>
+                <button type="submit" aria-label="search" class="flex items-center justify-center rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                    <ion-icon name="search-outline" class="w-5 h-5 md hydrated" role="img"></ion-icon>
+                </button>
             </div>
+        </form>
+
+        <div class="results none mt-4">
+            <div class="search_results"></div>
         </div>
-        <div class="blur hidden"></div>
+
+        <div class="banner flex justify-center items-start md:items-center mt-4 md:mt-6">
+            <img src="{% static 'assets/abstract.jpg' %}" class="object-cover w-full md:max-h-[250px] md:max-h-none rounded-lg">
+        </div>
     </div>
+
+    {% include 'parciais/menu_inferior.html' %}
+</section>
+
+<div class="content-principal folder-modal">
+    <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 max-h-[80vh] overflow-auto">
+            <div class="sup-folder flex justify-between items-center mb-4">
+                <div></div>
+                <h2 class="text-xl text-center title-modal-folders">Adicione a uma <b>Pasta de Favoritos</b></h2>
+                <span class="close text-gray-600 cursor-pointer">&times;</span>
+            </div>
+            <ul class="mb-4">
+                {% for folder in favorite_folders %}
+                    <li class="folder mb-2 shadow">
+                        <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders flex justify-between items-center">
+                            <span class="truncate max-w-[70%]">{{ folder.name }}</span>
+                            <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>
+                        </label>
+                    </li>
+                {% endfor %}
+            </ul>
+            <button id="confirm-favorite" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Confirmar</button>
+        </div>
+    </div>
+    <div class="blur hidden"></div>
+</div>
+
 
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
@@ -347,5 +341,4 @@ Sem B.O
     });
 
 </script>
-
 {% endblock %}

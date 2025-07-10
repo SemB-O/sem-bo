@@ -333,11 +333,6 @@ body {
         height: 80vh;
     }
 
-    .bg-white {
-        --tw-bg-opacity: none !important; 
-        background-color: transparent !important;
-    }
-
     ::-webkit-scrollbar {
         display: none;
     }

@@ -16,16 +16,19 @@
   {% block content %}
   <div class="flex flex-col items-center justify-center min-h-screen text-gray-800 pb-28 px-4">
     <div class="w-full max-w-4xl bg-white p-4 md:p-6 rounded-xl">
-      <!-- Perfil Header -->
       <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 mb-6 border-b pb-4 text-center md:text-left">
-        <img src="{% static 'assets/procedure.jpg' %}" alt="Foto de perfil" class="w-24 h-24 rounded-full object-cover shadow">
+        <div class="flex md:hidden justify-center items-center px-8 pt-6 w-[18rem] mx-auto mb-5 mt-4">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'assets/logo.png' %}" alt="" class="mt-1.5">
+            </a>
+        </div>
+        <img src="{% static 'assets/procedure.jpg' %}" alt="Foto de perfil" class="w-24 h-24 rounded-full object-cover shadow hidden md:flex">
         <div>
           <h2 class="text-2xl font-semibold">{{ request.user.first_name.title }} {{ request.user.last_name.title }}</h2>
           <p class="text-sm text-gray-600">{{ request.user.email }}</p>
         </div>
       </div>
 
-      <!-- Ações -->
       <div class="flex flex-col md:flex-row gap-4 mb-6">
         <button onclick="toggleForm()" class="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-900 transition">
           Editar seu Perfil
@@ -41,7 +44,6 @@
         </form>
       </div>
 
-      <!-- Formulário -->
       <div class="profile-form hidden md:max-h-none max-h-[35vh] overflow-y-auto pr-2">
         <form id="profile-form" action="{% url 'profile' %}" method="post" class="flex flex-col gap-2 max-h-[35vh] overflow-scroll">
           {% csrf_token %}
