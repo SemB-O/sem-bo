@@ -27,7 +27,7 @@
 
             <button id="btn-favorite" title="Salvar favorito" aria-label="Salvar favorito" class="focus:outline-none">
               {% if favorite %}
-                <i class="fa-solid fa-bookmark text-yellow-400 text-2xl"></i>
+                <i class="fa-solid fa-bookmark text-white text-2xl"></i>
               {% else %}
                 <i class="fa-regular fa-bookmark text-white text-2xl"></i>
               {% endif %}
@@ -111,9 +111,7 @@
     {% include 'parciais/menu_inferior.html' %}
   </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   // Copiar texto do código do procedimento
@@ -154,21 +152,19 @@
         selectedFolders.push($(this).val());
       });
 
-      // Envia dados via AJAX para salvar (ajuste a URL para seu endpoint)
       $.ajax({
-        url: "{% url 'toggle_favorite' %}",  // Deve existir essa rota no backend
+        url: "{% url 'add_remove_favorite' %}",
         method: 'POST',
         data: {
-          procedure_code: "{{ procedure.procedure_code }}",
+          procedure_id: "{{ procedure.procedure_code }}",
           folders: selectedFolders,
           csrfmiddlewaretoken: '{{ csrf_token }}'
         },
         success: function(response) {
-          // Atualiza o ícone baseado no retorno
-          if(response.favorited) {
-            icon.removeClass('fa-regular text-white').addClass('fa-solid text-yellow-400');
+          if(response.is_favorite) {
+            icon.removeClass('fa-regular text-white').addClass('fa-solid text-white');
           } else {
-            icon.removeClass('fa-solid text-yellow-400').addClass('fa-regular text-white');
+            icon.removeClass('fa-solid text-white').addClass('fa-regular text-white');
           }
           modal.addClass('hidden');
           blur.addClass('hidden');

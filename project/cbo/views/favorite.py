@@ -131,15 +131,23 @@ class ToggleFavoriteView(View):
         procedure_id = request.POST.get('procedure_id')
         folder_ids = request.POST.getlist('folders[]')
 
-        if not procedure_id or not folder_ids:
+        if not procedure_id:
             return JsonResponse({'error': 'Incomplete or invalid data.'}, status=400)
+        
+        user = request.user
+
+        if not folder_ids:
+            FavoriteProceduresFolderHasProcedure.objects.filter(
+                favorite_procedures_folder__user=user,
+                procedure_id=procedure_id
+            ).delete()
+            return JsonResponse({'is_favorite': False})
 
         try:
             selected_folders_ids = list(map(int, folder_ids))
         except ValueError:
             return JsonResponse({'error': 'Invalid folder ID(s).'}, status=400)
 
-        user = request.user
         is_favorite = False
 
         FavoriteProceduresFolderHasProcedure.objects.filter(
