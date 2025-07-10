@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django import forms
 from cbo.models import Occupation
+from cbo.forms.fields import CPFField, DateOfBirthField
 
 
 class PlanBasedOccupationField(forms.ModelMultipleChoiceField):
@@ -107,6 +108,21 @@ def validate_cpf(cpf: str) -> bool:
     return True
 
 class UserRegisterForm(UserCreationForm):
+    CPF = CPFField(
+        widget=forms.TextInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'id': 'id_CPF',
+            'placeholder': 'Digite seu CPF',
+        })
+    )
+    date_of_birth = DateOfBirthField(
+        widget=forms.DateInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'placeholder': 'Digite sua Data de nascimento',
+            'type': 'date',
+        }),
+        label=User._meta.get_field('date_of_birth').verbose_name
+    )
 
     class Meta:
         model = User
@@ -143,20 +159,10 @@ class UserRegisterForm(UserCreationForm):
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Confirme sua senha',
             }),
-            'CPF': forms.TextInput(attrs={
-                'class': 'requiredField ' + DEFAULT_CLASS,
-                'id': 'id_CPF',
-                'placeholder': 'Digite seu CPF',
-            }),
             'telephone': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_telephone',
                 'placeholder': 'Digite seu Celular',
-            }),
-            'date_of_birth': forms.DateInput(attrs={
-                'class': 'requiredField ' + DEFAULT_CLASS,
-                'placeholder': 'Digite sua Data de nascimento',
-                'type': 'date',
             }),
             'occupational_registration': forms.TextInput(attrs={
                 'class': 'requiredField ' + DEFAULT_CLASS,
@@ -190,20 +196,20 @@ class UserRegisterForm(UserCreationForm):
 
         return occupations
 
-    def clean_CPF(self):
-        cpf = self.cleaned_data.get('CPF')
-        if not validate_cpf(cpf):
-            raise ValidationError("CPF inválido.")
-        return cpf
+    # def clean_CPF(self):
+    #     cpf = self.cleaned_data.get('CPF')
+    #     if not validate_cpf(cpf):
+    #         raise ValidationError("CPF inválido.")
+    #     return cpf
 
-    def clean_date_of_birth(self):
-        dob = self.cleaned_data.get('date_of_birth')
-        if dob:
-            today = date.today()
-            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-            if age < 18:
-                raise ValidationError("Você precisa ter pelo menos 18 anos.")
-        return dob
+    # def clean_date_of_birth(self):
+    #     dob = self.cleaned_data.get('date_of_birth')
+    #     if dob:
+    #         today = date.today()
+    #         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    #         if age < 18:
+    #             raise ValidationError("Você precisa ter pelo menos 18 anos.")
+    #     return dob
 
     def clean_password2(self):
         password1 = self.cleaned_data.get('password1')
@@ -237,13 +243,27 @@ class UserRegisterForm(UserCreationForm):
 
 
 class UserEditForm(forms.ModelForm):  
+    CPF = CPFField(
+        widget=forms.TextInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'id': 'id_CPF',
+            'placeholder': 'Digite seu CPF',
+        })
+    )
+    date_of_birth = DateOfBirthField(
+        widget=forms.DateInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'placeholder': 'Digite sua Data de nascimento',
+            'type': 'date',
+        }),
+        label=User._meta.get_field('date_of_birth').verbose_name
+    )
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration']
         widgets = {
-            'CPF': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'CPF'}),
             'telephone': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Telefone'}),
-            'date_of_birth': forms.DateInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Data de nascimento'}),
             'occupational_registration': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Registro ocupacional'}),
         }
 
