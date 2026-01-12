@@ -1,0 +1,271 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.db.models import Count, Q
+from cbo.models import Plan, PlanBenefit, Procedure, Occupation, Cid, User
+
+
+def is_superuser(user):
+    return user.is_superuser
+
+
+def admin_required(view_class):
+    return method_decorator([login_required, user_passes_test(is_superuser)], name='dispatch')(view_class)
+
+
+@admin_required
+class AdminDashboardView(View):
+    template_name = 'admin/dashboard.html'
+
+    def get(self, request):
+        context = {
+            'total_plans': Plan.objects.count(),
+            'total_benefits': PlanBenefit.objects.count(),
+            'total_procedures': Procedure.objects.count(),
+            'total_occupations': Occupation.objects.count(),
+            'total_cids': Cid.objects.count(),
+            'total_users': User.objects.count(),
+            'active_plans': Plan.objects.filter(is_active=True).count(),
+            'recent_plans': Plan.objects.order_by('-id')[:5],
+        }
+        return render(request, self.template_name, context)
+
+
+@admin_required
+class PlanListView(View):
+    template_name = 'admin/plan_list.html'
+
+    def get(self, request):
+        plans = Plan.objects.annotate(
+            benefit_count=Count('benefits')
+        ).order_by('-id')
+        
+        search = request.GET.get('search', '')
+        if search:
+            plans = plans.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        
+        context = {'plans': plans, 'search': search}
+        return render(request, self.template_name, context)
+
+
+@admin_required
+class PlanCreateView(View):
+    template_name = 'admin/plan_form.html'
+
+    def get(self, request):
+        context = {
+            'benefits': PlanBenefit.objects.filter(is_active=True),
+            'action': 'Criar'
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        try:
+            plan = Plan.objects.create(
+                name=request.POST.get('name'),
+                max_occupations=request.POST.get('max_occupations'),
+                description=request.POST.get('description'),
+                price=request.POST.get('price'),
+                is_active=request.POST.get('is_active') == 'on'
+            )
+            
+            self._add_benefits_to_plan(plan, request)
+            messages.success(request, f'Plano "{plan.name}" criado com sucesso!')
+            return redirect('admin-plan-list')
+        except Exception as e:
+            messages.error(request, f'Erro ao criar plano: {str(e)}')
+            return redirect('admin-plan-create')
+
+    def _add_benefits_to_plan(self, plan, request):
+        for benefit_id in request.POST.getlist('benefits'):
+            benefit = PlanBenefit.objects.get(id=benefit_id)
+            available = request.POST.get(f'benefit_available_{benefit_id}') == 'on'
+            plan.add_benefit(benefit, available=available)
+
+
+@admin_required
+class PlanEditView(View):
+    template_name = 'admin/plan_form.html'
+
+    def get(self, request, pk):
+        plan = get_object_or_404(Plan, pk=pk)
+        benefit_availability = {
+            assoc.plan_benefit_id: assoc.available 
+            for assoc in plan.plan_benefits.all()
+        }
+        
+        context = {
+            'plan': plan,
+            'benefits': PlanBenefit.objects.filter(is_active=True),
+            'plan_benefit_ids': list(plan.benefits.values_list('id', flat=True)),
+            'benefit_availability': benefit_availability,
+            'action': 'Editar'
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        plan = get_object_or_404(Plan, pk=pk)
+        
+        try:
+            plan.name = request.POST.get('name')
+            plan.max_occupations = request.POST.get('max_occupations')
+            plan.description = request.POST.get('description')
+            plan.price = request.POST.get('price')
+            plan.is_active = request.POST.get('is_active') == 'on'
+            plan.save()
+            
+            plan.plan_benefits.all().delete()
+            PlanCreateView()._add_benefits_to_plan(plan, request)
+            
+            messages.success(request, f'Plano "{plan.name}" atualizado com sucesso!')
+            return redirect('admin-plan-list')
+        except Exception as e:
+            messages.error(request, f'Erro ao atualizar plano: {str(e)}')
+            return redirect('admin-plan-edit', pk=pk)
+
+
+@admin_required
+class PlanDeleteView(View):
+    def post(self, request, pk):
+        plan = get_object_or_404(Plan, pk=pk)
+        plan_name = plan.name
+        plan.delete()
+        messages.success(request, f'Plano "{plan_name}" excluído com sucesso!')
+        return redirect('admin-plan-list')
+
+
+@admin_required
+class BenefitListView(View):
+    template_name = 'admin/benefit_list.html'
+
+    def get(self, request):
+        benefits = PlanBenefit.objects.annotate(
+            plan_count=Count('plans')
+        ).order_by('-id')
+        
+        search = request.GET.get('search', '')
+        if search:
+            benefits = benefits.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        
+        context = {'benefits': benefits, 'search': search}
+        return render(request, self.template_name, context)
+
+
+@admin_required
+class BenefitCreateView(View):
+    template_name = 'admin/benefit_form.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'action': 'Criar'})
+
+    def post(self, request):
+        try:
+            benefit = PlanBenefit.objects.create(
+                name=request.POST.get('name'),
+                description=request.POST.get('description'),
+                icon=request.POST.get('icon', ''),
+                is_active=request.POST.get('is_active') == 'on'
+            )
+            messages.success(request, f'Benefício "{benefit.name}" criado com sucesso!')
+            return redirect('admin-benefit-list')
+        except Exception as e:
+            messages.error(request, f'Erro ao criar benefício: {str(e)}')
+            return redirect('admin-benefit-create')
+
+
+@admin_required
+class BenefitEditView(View):
+    template_name = 'admin/benefit_form.html'
+
+    def get(self, request, pk):
+        benefit = get_object_or_404(PlanBenefit, pk=pk)
+        return render(request, self.template_name, {'benefit': benefit, 'action': 'Editar'})
+
+    def post(self, request, pk):
+        benefit = get_object_or_404(PlanBenefit, pk=pk)
+        
+        try:
+            benefit.name = request.POST.get('name')
+            benefit.description = request.POST.get('description')
+            benefit.icon = request.POST.get('icon', '')
+            benefit.is_active = request.POST.get('is_active') == 'on'
+            benefit.save()
+            
+            messages.success(request, f'Benefício "{benefit.name}" atualizado com sucesso!')
+            return redirect('admin-benefit-list')
+        except Exception as e:
+            messages.error(request, f'Erro ao atualizar benefício: {str(e)}')
+            return redirect('admin-benefit-edit', pk=pk)
+
+
+@admin_required
+class BenefitDeleteView(View):
+    def post(self, request, pk):
+        benefit = get_object_or_404(PlanBenefit, pk=pk)
+        benefit_name = benefit.name
+        benefit.delete()
+        messages.success(request, f'Benefício "{benefit_name}" excluído com sucesso!')
+        return redirect('admin-benefit-list')
+
+
+@admin_required
+class AdminUploadSigtapView(View):
+    template_name = 'admin/upload_sigtap.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        import time
+        import logging
+        from django.db import transaction
+        from ..process_files import DataImporter
+
+        logger = logging.getLogger(__name__)
+        files = request.FILES.getlist('arquivos_txt')
+
+        if not files:
+            messages.error(request, 'Nenhum arquivo selecionado.')
+            return redirect('admin-upload-sigtap')
+
+        FILE_IMPORTERS = {
+            'tb_procedimento': DataImporter.import_procedure_data,
+            'tb_ocupacao': DataImporter.import_occupation_data,
+            'tb_registro': DataImporter.import_record_data,
+            'tb_cid': DataImporter.import_cid_data,
+            'rl_procedimento_cid': DataImporter.import_procedure_has_cid_data,
+            'rl_procedimento_ocupacao': DataImporter.import_procedure_has_occupation_data,
+            'rl_procedimento_registro': DataImporter.import_procedure_has_record_data,
+            'tb_descricao': DataImporter.import_description_data,
+        }
+
+        start_time = time.time()
+        logger.info("Starting SIGTAP file upload from admin panel")
+
+        try:
+            with transaction.atomic():
+                for file in files:
+                    file_start = time.time()
+                    logger.info(f"Processing: {file.name}")
+
+                    for file_type, importer in FILE_IMPORTERS.items():
+                        if file_type in file.name:
+                            importer(file)
+                            break
+
+                    logger.info(f"Processed {file.name} in {time.time() - file_start:.2f}s")
+
+            logger.info(f"Upload completed in {time.time() - start_time:.2f}s")
+            messages.success(request, f'{len(files)} arquivo(s) SIGTAP processado(s) com sucesso!')
+            return redirect('admin-dashboard')
+            
+        except Exception as e:
+            logger.error(f"Upload error: {str(e)}")
+            messages.error(request, f'Erro ao processar arquivos: {str(e)}')
+            return redirect('admin-upload-sigtap')

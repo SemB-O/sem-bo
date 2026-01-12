@@ -1,7 +1,21 @@
-from django.urls import path, include
-from .views import home, search_view, upload_files, user, profile, chat, procedure, favorite, plan, medical_record, cid
+from django.urls import path
+from .views import (
+    home, search_view, upload_files, user, profile, chat, 
+    procedure, favorite, plan, medical_record, cid, admin_panel
+)
 
 urlpatterns = [
+    path('admin/', admin_panel.AdminDashboardView.as_view(), name='admin-dashboard'),
+    path('admin/plans/', admin_panel.PlanListView.as_view(), name='admin-plan-list'),
+    path('admin/plans/create/', admin_panel.PlanCreateView.as_view(), name='admin-plan-create'),
+    path('admin/plans/<int:pk>/edit/', admin_panel.PlanEditView.as_view(), name='admin-plan-edit'),
+    path('admin/plans/<int:pk>/delete/', admin_panel.PlanDeleteView.as_view(), name='admin-plan-delete'),
+    path('admin/benefits/', admin_panel.BenefitListView.as_view(), name='admin-benefit-list'),
+    path('admin/benefits/create/', admin_panel.BenefitCreateView.as_view(), name='admin-benefit-create'),
+    path('admin/benefits/<int:pk>/edit/', admin_panel.BenefitEditView.as_view(), name='admin-benefit-edit'),
+    path('admin/benefits/<int:pk>/delete/', admin_panel.BenefitDeleteView.as_view(), name='admin-benefit-delete'),
+    path('admin/upload-sigtap/', admin_panel.AdminUploadSigtapView.as_view(), name='admin-upload-sigtap'),
+    
     path('upload_files/', upload_files.UploadFilesView.as_view(), name='upload_files'),
     path('', home.Home.as_view(), name='home'),
     path('search/', search_view.SearchView.as_view(), name='search'),

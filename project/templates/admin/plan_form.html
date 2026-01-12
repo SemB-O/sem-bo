@@ -1,0 +1,147 @@
+{% extends 'admin/base_admin.html' %}
+{% load admin_filters %}
+
+{% block page_title %}{{ action }} Plano{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl">
+    <div class="mb-6">
+        <a href="{% url 'admin-plan-list' %}" class="text-gray-600 hover:text-gray-900 transition">
+            <i class="fas fa-arrow-left mr-2"></i>Voltar para lista
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ action }} Plano</h2>
+        
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Name -->
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Nome do Plano <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="name" name="name" required 
+                       value="{{ plan.name|default:'' }}"
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-cyan-200 transition"
+                       placeholder="Ex: Plano Premium">
+            </div>
+            
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descrição <span class="text-red-500">*</span>
+                </label>
+                <textarea id="description" name="description" required rows="4"
+                          class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-cyan-200 transition"
+                          placeholder="Descreva as características do plano...">{{ plan.description|default:'' }}</textarea>
+            </div>
+            
+            <!-- Price and Max Occupations -->
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Preço (R$) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="price" name="price" required step="0.01" min="0.01"
+                           value="{{ plan.price|default:'' }}"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-cyan-200 transition"
+                           placeholder="0.00">
+                </div>
+                
+                <div>
+                    <label for="max_occupations" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Ocupações Máximas <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="max_occupations" name="max_occupations" required min="1"
+                           value="{{ plan.max_occupations|default:'' }}"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-cyan-200 transition"
+                           placeholder="1">
+                </div>
+            </div>
+            
+            <!-- Status -->
+            <div class="flex items-center">
+                <input type="checkbox" id="is_active" name="is_active" {% if plan.is_active or not plan %}checked{% endif %}
+                       class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary">
+                <label for="is_active" class="ml-3 text-sm font-medium text-gray-700">
+                    Plano ativo
+                </label>
+            </div>
+            
+            <!-- Benefits -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    Benefícios do Plano
+                </label>
+                
+                {% if benefits %}
+                <div class="space-y-3 max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4">
+                    {% for benefit in benefits %}
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-start">
+                            <input type="checkbox" id="benefit_{{ benefit.id }}" name="benefits" value="{{ benefit.id }}"
+                                   {% if benefit.id in plan_benefit_ids %}checked{% endif %}
+                                   class="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary">
+                            <div class="ml-3 flex-1">
+                                <label for="benefit_{{ benefit.id }}" class="font-medium text-gray-900 cursor-pointer">
+                                    {% if benefit.icon %}{{ benefit.icon }} {% endif %}{{ benefit.name }}
+                                </label>
+                                <p class="text-sm text-gray-600 mt-1">{{ benefit.description }}</p>
+                                
+                                <!-- Availability toggle -->
+                                <div class="mt-3 flex items-center">
+                                    <input type="checkbox" id="benefit_available_{{ benefit.id }}" 
+                                           name="benefit_available_{{ benefit.id }}"
+                                           {% if not benefit_availability or benefit_availability|get_item:benefit.id %}checked{% endif %}
+                                           class="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500">
+                                    <label for="benefit_available_{{ benefit.id }}" class="ml-2 text-xs text-gray-600">
+                                        Disponível neste plano
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Nenhum benefício cadastrado. 
+                        <a href="{% url 'admin-benefit-create' %}" class="underline font-medium">Criar benefício</a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <a href="{% url 'admin-plan-list' %}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition font-medium">
+                    <i class="fas fa-save mr-2"></i>
+                    Salvar Plano
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-enable availability checkbox when benefit is selected
+document.querySelectorAll('input[name="benefits"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const benefitId = this.value;
+        const availabilityCheckbox = document.getElementById(`benefit_available_${benefitId}`);
+        if (this.checked && availabilityCheckbox) {
+            availabilityCheckbox.checked = true;
+        }
+    });
+});
+</script>
+{% endblock %}
