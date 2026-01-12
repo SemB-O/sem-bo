@@ -19,7 +19,21 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Command(BaseCommand):
-    help = 'Sincroniza dados da SIGTAP automaticamente do DATASUS'
+    help = '''Sincroniza dados da SIGTAP automaticamente do DATASUS
+    
+    ATENÇÃO: Este comando verifica se a competência já existe no banco.
+    Se existir, a sincronização será BLOQUEADA para evitar perda de dados.
+    
+    Opções:
+        --force: Força download mesmo que já tenha atualizado recentemente
+        --allow-overwrite: PERIGOSO! Permite sobrescrever competência existente
+    
+    Exemplo de uso seguro:
+        python manage.py sync_sigtap
+    
+    Exemplo de sobrescrita (USE COM CUIDADO):
+        python manage.py sync_sigtap --allow-overwrite
+    '''
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -27,6 +41,21 @@ class Command(BaseCommand):
             action='store_true',
             help='Força o download mesmo que já tenha atualizado recentemente',
         )
+        parser.add_argument(
+            '--allow-overwrite',
+            action='store_true',
+            help='Permite sobrescrever dados de competências já existentes (USE COM CUIDADO!)',
+        )
+    
+    def extract_competence_from_filename(self, filename):
+        """
+        Extrai código da competência do nome do arquivo ZIP.
+        Ex: TabelaUnificada_202601_v2601061123.zip -> 202601
+        """
+        match = re.search(r'(\d{6})', filename)
+        if match:
+            return match.group(1)
+        return None
 
     def send_success_email(self, month, date, files_count):
         """Envia email notificando sucesso na sincronização"""
@@ -59,14 +88,26 @@ Sistema: SEM B.O
             fail_silently=False,
         )
 
-    def update_progress(self, step, message, percentage):
+    def update_progress(self, step, message, percentage, warning=None, error=None, requires_confirmation=False, competence_info=None):
         """Atualiza o progresso no cache para o frontend"""
-        cache.set('sigtap_sync_progress', {
+        progress_data = {
             'step': step,
             'message': message,
             'percentage': percentage,
             'timestamp': timezone.now().isoformat()
-        }, timeout=3600)  # 1 hora
+        }
+        
+        if warning:
+            progress_data['warning'] = warning
+        
+        if error:
+            progress_data['error'] = error
+        
+        if requires_confirmation:
+            progress_data['requires_confirmation'] = True
+            progress_data['competence_info'] = competence_info
+        
+        cache.set('sigtap_sync_progress', progress_data, timeout=3600)  # 1 hora
 
     def download_ftp_file(self, url, file_path):
         """Baixa arquivo via FTP com progress tracking"""
@@ -109,9 +150,57 @@ Sistema: SEM B.O
         return True
 
     def handle(self, *args, **options):
+        from cbo.models import SigtapSyncHistory, Competence, Procedure
+        
+        # Cria registro de histórico
+        sync_history = SigtapSyncHistory.objects.create(
+            status='in_progress',
+            is_automatic=not options.get('force', False),
+            files_total=8,  # 8 arquivos esperados do SIGTAP
+        )
+        
         try:
-            self.update_progress(1, 'Iniciando sincronização...', 0)
+            self.update_progress(1, 'Verificando competências existentes...', 0)
             self.stdout.write(self.style.SUCCESS(f'[{timezone.now()}] Iniciando sincronização SIGTAP...'))
+            
+            # PROTEÇÃO: Verifica competências existentes no banco
+            existing_competences = list(
+                Competence.objects.filter(is_atemporal=False)
+                .order_by('-code')
+                .values_list('code', 'formatted_date')[:5]
+            )
+            
+            if existing_competences:
+                warning_msg = f'Já existem {len(existing_competences)} competências no banco'
+                comp_list = ', '.join([f'{c[1]}' for c in existing_competences[:3]])
+                
+                self.stdout.write(self.style.WARNING('⚠️  ATENÇÃO: Já existem competências no banco:'))
+                for comp_code, comp_date in existing_competences:
+                    self.stdout.write(f'   • {comp_date} (código: {comp_code})')
+                
+                # Atualiza progresso com warning
+                self.update_progress(
+                    1, 
+                    'Competências existentes detectadas',
+                    5,
+                    warning=f'{warning_msg}: {comp_list}'
+                )
+                
+                # Verifica se não é um --force
+                if not options.get('force'):
+                    self.stdout.write(self.style.WARNING(
+                        '\n⚠️  A sincronização pode sobrepor dados existentes!'
+                    ))
+                    self.stdout.write(self.style.WARNING(
+                        '   Use --force apenas se tiver certeza que deseja atualizar a MESMA competência.'
+                    ))
+                    
+                    # Registra no histórico
+                    sync_history.details = {
+                        'existing_competences': [c[0] for c in existing_competences],
+                        'warning': 'Competências existentes detectadas'
+                    }
+                    sync_history.save()
 
             self.update_progress(2, 'Buscando última versão...', 5)
             downloader = FileDownloader(
@@ -200,12 +289,82 @@ Sistema: SEM B.O
                             break
                 
                 if not download_success:
-                    self.update_progress(0, 'Erro: Não foi possível baixar de nenhuma URL', 0)
+                    error_msg = 'Não foi possível baixar de nenhuma URL'
+                    sync_history.mark_as_completed(status='failed', error_message=error_msg)
+                    self.update_progress(0, f'Erro: {error_msg}', 0)
                     self.stdout.write(self.style.ERROR('❌ Todas as URLs falharam. DATASUS pode estar offline.'))
                     return
 
                 self.update_progress(4, 'Download concluído!', 40)
                 self.stdout.write(self.style.SUCCESS('✅ Download concluído'))
+                
+                # PROTEÇÃO: Extrai e verifica competência do arquivo
+                filename = os.path.basename(sigtap_url)
+                new_competence = self.extract_competence_from_filename(filename)
+                
+                if new_competence:
+                    self.stdout.write(f'📅 Competência detectada no arquivo: {new_competence}')
+                    self.update_progress(4, f'Competência detectada: {new_competence}', 42)
+                    
+                    # Verifica se já existe esta competência
+                    existing_comp = Competence.objects.filter(code=new_competence).first()
+                    
+                    if existing_comp and not existing_comp.is_atemporal:
+                        # Competência já existe
+                        if not options.get('allow_overwrite'):
+                            error_msg = f'❌ Competência {new_competence} ({existing_comp.formatted_date}) já existe no banco!'
+                            
+                            # Mensagem especial para interface web (pede confirmação)
+                            detailed_error = f'A competência {existing_comp.formatted_date} já está no sistema.'
+                            
+                            sync_history.mark_as_completed(status='failed', error_message=error_msg)
+                            sync_history.details = {
+                                'error': 'competence_already_exists',
+                                'existing_competence': new_competence,
+                                'existing_formatted': existing_comp.formatted_date,
+                                'requires_confirmation': True  # Flag para frontend
+                            }
+                            sync_history.save()
+                            
+                            # Atualiza progresso com erro que pede confirmação
+                            self.update_progress(
+                                0,
+                                'Competência já existe',
+                                0,
+                                error=detailed_error,
+                                requires_confirmation=True,
+                                competence_info={
+                                    'code': new_competence,
+                                    'formatted': existing_comp.formatted_date
+                                }
+                            )
+                            
+                            self.stdout.write(self.style.ERROR(
+                                f'\n{error_msg}\n'
+                                f'   Use --allow-overwrite para forçar a sobrescrita (NÃO RECOMENDADO!)\n'
+                                f'   Ou importe manualmente dados de uma competência diferente.'
+                            ))
+                            return
+                        else:
+                            warning_msg = f'Sobrescrevendo competência {new_competence} ({existing_comp.formatted_date})'
+                            
+                            self.stdout.write(self.style.WARNING(f'⚠️  {warning_msg}'))
+                            self.update_progress(
+                                4,
+                                f'Verificando arquivos...',
+                                43,
+                                warning=warning_msg
+                            )
+                            
+                            sync_history.details = {
+                                'warning': 'overwriting_existing_competence',
+                                'competence': new_competence
+                            }
+                            sync_history.save()
+                    
+                    # Salva competência no histórico
+                    sync_history.competence_code = new_competence
+                    sync_history.save()
                 
                 self.update_progress(5, 'Descompactando arquivos...', 45)
                 self.stdout.write('📦 Descompactando arquivos...')
@@ -215,7 +374,10 @@ Sistema: SEM B.O
 
                 self.update_progress(6, 'Importando dados...', 50)
                 self.stdout.write('💾 Importando dados...')
-                importer = DataImporter()
+                
+                # Cria importer com flag de sobrescrita se permitido
+                allow_overwrite = options.get('allow_overwrite', False)
+                importer = DataImporter(allow_overwrite=allow_overwrite)
                 
                 # Mapeamento correto baseado nos nomes reais dos arquivos SIGTAP
                 file_mapping = {
@@ -251,10 +413,39 @@ Sistema: SEM B.O
                             imported_count += 1
                             break
 
+                self.update_progress(8, 'Sincronizando competências...', 95)
+                
+                # Sincroniza tabela de competências
+                from cbo.process_files import DataImporter
+                from cbo.models import Competence
+                
+                try:
+                    comp_stats = DataImporter.sync_competences()
+                    sync_history.competences_synced = comp_stats['total']
+                    sync_history.files_processed = imported_count
+                    
+                    # Obtém a última competência real
+                    latest_comp = Competence.get_latest_real_competence()
+                    if latest_comp:
+                        sync_history.competence_code = latest_comp.code
+                    
+                    self.stdout.write(self.style.SUCCESS(
+                        f'📅 Competências sincronizadas: {comp_stats["total"]} total '
+                        f'({comp_stats["real_competences"]} reais, {comp_stats["atemporal_competences"]} atemporais)'
+                    ))
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f'⚠️  Erro ao sincronizar competências: {str(e)}'))
+                
+                # Atualiza contadores do histórico
+                sync_history.update_counts()
+                
+                # Marca como concluída com sucesso
+                sync_history.mark_as_completed(status='success')
+                
                 self.update_progress(8, 'Sincronização concluída!', 100)
                 self.stdout.write(self.style.SUCCESS(f'✅ Sincronização concluída! {imported_count} arquivos processados'))
                 
-                # Salva informação da última sincronização
+                # Salva informação da última sincronização (backward compatibility)
                 current_month = timezone.now().strftime('%Y%m')
                 current_date = timezone.now().strftime('%d/%m/%Y às %H:%M')
                 cache.set('sigtap_last_sync_month', current_month, timeout=None)
@@ -268,8 +459,12 @@ Sistema: SEM B.O
                     self.stdout.write(self.style.WARNING(f'⚠️  Erro ao enviar email: {str(e)}'))
 
         except requests.RequestException as e:
+            error_msg = f'Erro ao baixar: {str(e)}'
+            sync_history.mark_as_completed(status='failed', error_message=error_msg)
             self.update_progress(0, f'Erro no download: {str(e)}', 0)
-            self.stdout.write(self.style.ERROR(f'❌ Erro ao baixar: {str(e)}'))
+            self.stdout.write(self.style.ERROR(f'❌ {error_msg}'))
         except Exception as e:
+            error_msg = f'Erro durante sincronização: {str(e)}'
+            sync_history.mark_as_completed(status='failed', error_message=error_msg)
             self.update_progress(0, f'Erro: {str(e)}', 0)
-            self.stdout.write(self.style.ERROR(f'❌ Erro durante sincronização: {str(e)}'))
+            self.stdout.write(self.style.ERROR(f'❌ {error_msg}'))

@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.core.management import call_command
 from django.core.cache import cache
-from cbo.models import Plan, PlanBenefit, Procedure, Occupation, Cid, User
+from cbo.models import Plan, PlanBenefit, Procedure, Occupation, Cid, User, Competence, SigtapSyncHistory
 import threading
 
 
@@ -24,17 +24,36 @@ class AdminDashboardView(View):
     template_name = 'admin/dashboard.html'
 
     def get(self, request):
-        # Informações sobre última sincronização SIGTAP
-        from django.core.cache import cache
-        last_sync_month = cache.get('sigtap_last_sync_month', 'Nunca')
-        last_sync_date = cache.get('sigtap_last_sync_date', 'Nunca')
+        # Busca última sincronização bem-sucedida do histórico
+        last_sync = SigtapSyncHistory.get_last_successful_sync()
         
-        # Formata a data se existir
-        if last_sync_date != 'Nunca':
-            from django.utils.dateparse import parse_datetime
-            sync_datetime = parse_datetime(last_sync_date)
-            if sync_datetime:
-                last_sync_date = sync_datetime.strftime('%d/%m/%Y às %H:%M')
+        if last_sync:
+            last_sync_date = last_sync.formatted_started_at
+            last_sync_month = last_sync.competence_code
+            if last_sync_month and len(last_sync_month) == 6:
+                # Formata YYYYMM para MM/YYYY
+                last_sync_month = f"{last_sync_month[4:6]}/{last_sync_month[:4]}"
+        else:
+            # Fallback para cache (backward compatibility)
+            last_sync_month = cache.get('sigtap_last_sync_month', 'Nunca')
+            last_sync_date = cache.get('sigtap_last_sync_date', 'Nunca')
+            
+            # Formata a data se existir
+            if last_sync_date != 'Nunca':
+                from django.utils.dateparse import parse_datetime
+                sync_datetime = parse_datetime(last_sync_date)
+                if sync_datetime:
+                    last_sync_date = sync_datetime.strftime('%d/%m/%Y às %H:%M')
+        
+        # Busca a última competência real (não atemporal) do modelo Competence
+        latest_competence_obj = Competence.get_latest_real_competence()
+        
+        if latest_competence_obj:
+            formatted_competence = latest_competence_obj.formatted_date
+            latest_competence_raw = latest_competence_obj.code
+        else:
+            formatted_competence = 'Não disponível'
+            latest_competence_raw = None
         
         context = {
             'total_plans': Plan.objects.count(),
@@ -47,6 +66,9 @@ class AdminDashboardView(View):
             'recent_plans': Plan.objects.order_by('-id')[:5],
             'sigtap_last_sync_month': last_sync_month,
             'sigtap_last_sync_date': last_sync_date,
+            'latest_competence': formatted_competence,
+            'latest_competence_raw': latest_competence_raw,
+            'last_sync_history': last_sync,  # Objeto completo para mais detalhes
         }
         return render(request, self.template_name, context)
 
@@ -237,7 +259,48 @@ class AdminUploadSigtapView(View):
     template_name = 'admin/upload_sigtap.html'
 
     def get(self, request):
-        return render(request, self.template_name)
+        # Busca última sincronização bem-sucedida do histórico
+        last_sync = SigtapSyncHistory.get_last_successful_sync()
+        
+        if last_sync:
+            last_sync_date = last_sync.formatted_started_at
+            last_sync_month = last_sync.competence_code
+            if last_sync_month and len(last_sync_month) == 6:
+                # Formata YYYYMM para MM/YYYY
+                last_sync_month = f"{last_sync_month[4:6]}/{last_sync_month[:4]}"
+        else:
+            # Fallback para cache (backward compatibility)
+            last_sync_month = cache.get('sigtap_last_sync_month', 'Nunca')
+            last_sync_date = cache.get('sigtap_last_sync_date', 'Nunca')
+            
+            # Formata a data se existir
+            if last_sync_date != 'Nunca':
+                from django.utils.dateparse import parse_datetime
+                sync_datetime = parse_datetime(last_sync_date)
+                if sync_datetime:
+                    last_sync_date = sync_datetime.strftime('%d/%m/%Y às %H:%M')
+        
+        # Busca a última competência real (não atemporal) do modelo Competence
+        latest_competence_obj = Competence.get_latest_real_competence()
+        
+        if latest_competence_obj:
+            formatted_competence = latest_competence_obj.formatted_date
+        else:
+            formatted_competence = 'Não disponível'
+        
+        # Busca histórico de sincronizações
+        sync_history = SigtapSyncHistory.objects.order_by('-started_at')[:10]
+        
+        context = {
+            'total_procedures': Procedure.objects.count(),
+            'total_occupations': Occupation.objects.count(),
+            'total_cids': Cid.objects.count(),
+            'sigtap_last_sync_date': last_sync_date,
+            'latest_competence': formatted_competence,
+            'sync_history': sync_history,
+        }
+        
+        return render(request, self.template_name, context)
 
     def post(self, request):
         import time
@@ -294,13 +357,25 @@ class SyncSigtapNowView(View):
     """View para sincronização manual instantânea da SIGTAP"""
     
     def post(self, request):
+        import json
+        
+        # Verifica se é uma confirmação de sobrescrita
+        try:
+            body = json.loads(request.body)
+            allow_overwrite = body.get('allow_overwrite', False)
+        except:
+            allow_overwrite = False
+        
         # Limpa progresso anterior
         cache.delete('sigtap_sync_progress')
         
         def run_sync():
             """Executa o comando em thread separada"""
             try:
-                call_command('sync_sigtap')
+                if allow_overwrite:
+                    call_command('sync_sigtap', allow_overwrite=True)
+                else:
+                    call_command('sync_sigtap')
             except Exception as e:
                 cache.set('sigtap_sync_progress', {
                     'step': 0,
@@ -326,3 +401,58 @@ class SyncSigtapProgressView(View):
             'percentage': 0
         })
         return JsonResponse(progress)
+
+
+@admin_required
+class SigtapStatsView(View):
+    """View para retornar estatísticas detalhadas da SIGTAP"""
+    
+    def get(self, request):
+        from django.db.models import Max, Min, Count
+        from cbo.models import Record
+        
+        # Busca competências de cada tabela
+        procedure_stats = Procedure.objects.aggregate(
+            latest=Max('competence_date'),
+            oldest=Min('competence_date'),
+            total=Count('id')
+        )
+        
+        occupation_stats = Occupation.objects.aggregate(
+            total=Count('id')
+        )
+        
+        cid_stats = Cid.objects.aggregate(
+            total=Count('id')
+        )
+        
+        record_stats = Record.objects.aggregate(
+            latest=Max('competence_date'),
+            total=Count('id')
+        )
+        
+        # Formata competências
+        def format_competence(comp):
+            if comp and len(comp) == 6:
+                return f"{comp[4:6]}/{comp[:4]}"
+            return 'N/A'
+        
+        data = {
+            'procedures': {
+                'total': procedure_stats['total'],
+                'latest_competence': format_competence(procedure_stats['latest']),
+                'oldest_competence': format_competence(procedure_stats['oldest']),
+            },
+            'occupations': {
+                'total': occupation_stats['total'],
+            },
+            'cids': {
+                'total': cid_stats['total'],
+            },
+            'records': {
+                'total': record_stats['total'],
+                'latest_competence': format_competence(record_stats['latest']),
+            },
+        }
+        
+        return JsonResponse(data)

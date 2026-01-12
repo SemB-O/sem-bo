@@ -1,0 +1,160 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block page_title %}Pesquisa de Ocupações (CBO){% endblock %}
+
+{% block content %}
+<!-- Header com Busca -->
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-user-tie text-purple-500 mr-3"></i>
+                Pesquisa de Ocupações (CBO)
+            </h2>
+            <p class="text-sm text-gray-600 mt-1">Busque ocupações profissionais por código CBO ou nome</p>
+        </div>
+        <a href="{% url 'admin-dashboard' %}" class="text-primary hover:text-primary-dark font-medium text-sm">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+    
+    <!-- Formulário de Busca -->
+    <form method="get" class="mt-6">
+        <div class="flex gap-3">
+            <div class="flex-1">
+                <input type="text" 
+                       name="search" 
+                       value="{{ search_term }}"
+                       placeholder="Digite o código CBO ou nome da ocupação..." 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm">
+            </div>
+            <button type="submit" 
+                    class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-indigo-600 transition font-medium">
+                <i class="fas fa-search mr-2"></i>
+                Buscar
+            </button>
+        </div>
+    </form>
+    
+    <!-- Estatísticas -->
+    {% if search_term %}
+    <div class="mt-4 flex items-center gap-4 text-sm">
+        <span class="text-gray-600">
+            <i class="fas fa-search text-purple-500 mr-1"></i>
+            Termo buscado: <strong>{{ search_term }}</strong>
+        </span>
+        <span class="text-gray-600">
+            <i class="fas fa-list text-blue-500 mr-1"></i>
+            Total de resultados: <strong>{{ total_results }}</strong>
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Resultados -->
+{% if occupations %}
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-purple-50 to-indigo-50">
+                <tr>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Código CBO
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Nome da Ocupação
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Procedimentos Relacionados
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for occupation in occupations %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-id-badge text-purple-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-mono font-bold text-gray-900">{{ occupation.occupation_code }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900">{{ occupation.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <i class="fas fa-procedures mr-2"></i>
+                            {{ occupation.procedure_count }} procedimento{{ occupation.procedure_count|pluralize }}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ total_results }} resultados
+            </div>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?search={{ search_term }}&page=1" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?search={{ search_term }}&page={{ page_obj.previous_page_number }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium">
+                    {{ page_obj.number }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?search={{ search_term }}&page={{ page_obj.next_page_number }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?search={{ search_term }}&page={{ page_obj.paginator.num_pages }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<!-- Mensagem quando não há resultados -->
+<div class="bg-white rounded-xl shadow-sm p-12 text-center">
+    <div class="w-24 h-24 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+        <i class="fas fa-search text-4xl text-gray-400"></i>
+    </div>
+    {% if search_term %}
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Nenhum resultado encontrado</h3>
+    <p class="text-gray-600">
+        Não encontramos ocupações para "<strong>{{ search_term }}</strong>".<br>
+        Tente usar termos diferentes ou mais genéricos.
+    </p>
+    {% else %}
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Digite um termo para pesquisar</h3>
+    <p class="text-gray-600">
+        Use o campo de busca acima para encontrar ocupações profissionais<br>
+        por código CBO ou nome da ocupação.
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -61,9 +61,26 @@
                     <span class="ml-3">Benefícios</span>
                 </a>
                 
-                <a href="{% url 'admin-upload-sigtap' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'sigtap' in request.resolver_match.url_name %}sidebar-active{% endif %}">
+                <a href="{% url 'admin-upload-sigtap' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'upload-sigtap' in request.resolver_match.url_name %}sidebar-active{% endif %}">
                     <i class="fas fa-upload w-5"></i>
                     <span class="ml-3">Upload SIGTAP</span>
+                </a>
+                
+                <div class="px-6 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase">Pesquisar SIGTAP</div>
+                
+                <a href="{% url 'admin-search-procedures' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'search-procedures' in request.resolver_match.url_name %}sidebar-active{% endif %}">
+                    <i class="fas fa-procedures w-5 text-green-500"></i>
+                    <span class="ml-3">Procedimentos</span>
+                </a>
+                
+                <a href="{% url 'admin-search-cids' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'search-cids' in request.resolver_match.url_name %}sidebar-active{% endif %}">
+                    <i class="fas fa-heartbeat w-5 text-red-500"></i>
+                    <span class="ml-3">CIDs</span>
+                </a>
+                
+                <a href="{% url 'admin-search-occupations' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'search-occupations' in request.resolver_match.url_name %}sidebar-active{% endif %}">
+                    <i class="fas fa-user-tie w-5 text-purple-500"></i>
+                    <span class="ml-3">Ocupações (CBO)</span>
                 </a>
                 
                 <div class="px-6 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase">Sistema</div>

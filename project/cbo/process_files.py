@@ -1,5 +1,5 @@
 import logging
-from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord
+from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord, Competence
 from .models.descricao import Description
 from django.utils import timezone
 from django.db import transaction
@@ -22,8 +22,44 @@ def safe_int(value, default=0):
 
 
 class DataImporter:
-    def __init__(self, encoding='iso-8859-1'):
+    def __init__(self, encoding='iso-8859-1', allow_overwrite=False):
         self.encoding = encoding
+        self.allow_overwrite = allow_overwrite
+        self._warned_competences = set()  # Para evitar warnings repetidos
+    
+    def check_competence_conflict(self, new_competence_code):
+        """
+        Verifica se há conflito de competência antes de importar.
+        Retorna True se pode prosseguir, False se deve abortar.
+        """
+        if not new_competence_code or new_competence_code.endswith('9999'):
+            # Competências atemporais podem ser atualizadas sempre
+            return True
+        
+        # Verifica se já existe no banco
+        existing = Competence.objects.filter(
+            code=new_competence_code,
+            is_atemporal=False
+        ).exists()
+        
+        if existing:
+            if self.allow_overwrite:
+                # Avisa apenas uma vez por competência
+                if new_competence_code not in self._warned_competences:
+                    logger.warning(
+                        f"Competência {new_competence_code} já existe. "
+                        f"Sobrescrevendo conforme allow_overwrite=True"
+                    )
+                    self._warned_competences.add(new_competence_code)
+                return True
+            else:
+                logger.error(
+                    f"BLOQUEADO: Tentativa de sobrescrever competência {new_competence_code} "
+                    f"que já existe no banco. Use allow_overwrite=True para forçar."
+                )
+                return False
+        
+        return True
 
     @transaction.atomic
     def import_procedure_data(self, file):
@@ -569,4 +605,45 @@ class DataImporter:
                         description_obj.description = description
                         description_obj.competence_date = dt_competencia
 
-                    description_obj.save()   
+                    description_obj.save()
+
+    @staticmethod
+    @transaction.atomic
+    def sync_competences():
+        """
+        Sincroniza a tabela de competências com base em todos os valores 
+        de competence_date encontrados nas tabelas SIGTAP.
+        """
+        logger.info("Starting competence synchronization...")
+        
+        competence_codes = set()
+        
+        # Coleta competências de todas as tabelas que possuem o campo
+        for model in [Procedure, Record, ProcedureHasCid, ProcedureHasRecord, Description]:
+            codes = model.objects.values_list('competence_date', flat=True).distinct()
+            competence_codes.update([code for code in codes if code])
+        
+        logger.info(f"Found {len(competence_codes)} unique competence codes")
+        
+        created_count = 0
+        updated_count = 0
+        
+        for code in competence_codes:
+            competence, created = Competence.objects.get_or_create(code=code)
+            if created:
+                created_count += 1
+            else:
+                # Re-salva para reprocessar (caso a lógica tenha mudado)
+                competence.save()
+                updated_count += 1
+        
+        logger.info(f"Competence sync complete: {created_count} created, {updated_count} updated")
+        
+        # Retorna estatísticas
+        return {
+            'total': len(competence_codes),
+            'created': created_count,
+            'updated': updated_count,
+            'real_competences': Competence.objects.filter(is_atemporal=False).count(),
+            'atemporal_competences': Competence.objects.filter(is_atemporal=True).count(),
+        }

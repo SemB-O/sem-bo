@@ -59,6 +59,113 @@
     </div>
 </div>
 
+<!-- Pesquisa Rápida SIGTAP -->
+<div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl shadow-sm p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-search text-blue-500 mr-2"></i>
+                Pesquisa Rápida SIGTAP
+            </h3>
+            <p class="text-sm text-gray-600 mt-1">Busque procedimentos, CIDs, ocupações e registros</p>
+        </div>
+        <div class="text-right">
+            <p class="text-xs text-gray-500">Competência vigente:</p>
+            <p class="text-sm font-bold text-blue-600">{{ latest_competence }}</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Pesquisar Procedimentos -->
+        <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-procedures text-green-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900">Procedimentos</h4>
+                    <p class="text-xs text-gray-500">{{ total_procedures }} registros</p>
+                </div>
+            </div>
+            <form action="{% url 'admin-search-procedures' %}" method="get" class="mt-3">
+                <input type="text" name="search" placeholder="Buscar código ou nome..." 
+                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <button type="submit" class="w-full mt-2 bg-green-500 text-white py-2 px-3 rounded-lg hover:bg-green-600 transition text-sm font-medium">
+                    <i class="fas fa-search mr-1"></i> Pesquisar
+                </button>
+            </form>
+        </div>
+
+        <!-- Pesquisar CIDs -->
+        <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-heartbeat text-red-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900">CIDs</h4>
+                    <p class="text-xs text-gray-500">{{ total_cids }} registros</p>
+                </div>
+            </div>
+            <form action="{% url 'admin-search-cids' %}" method="get" class="mt-3">
+                <input type="text" name="search" placeholder="Buscar código CID..." 
+                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                <button type="submit" class="w-full mt-2 bg-red-500 text-white py-2 px-3 rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                    <i class="fas fa-search mr-1"></i> Pesquisar
+                </button>
+            </form>
+        </div>
+
+        <!-- Pesquisar Ocupações -->
+        <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-user-tie text-purple-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900">Ocupações (CBO)</h4>
+                    <p class="text-xs text-gray-500">{{ total_occupations }} registros</p>
+                </div>
+            </div>
+            <form action="{% url 'admin-search-occupations' %}" method="get" class="mt-3">
+                <input type="text" name="search" placeholder="Buscar ocupação..." 
+                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                <button type="submit" class="w-full mt-2 bg-purple-500 text-white py-2 px-3 rounded-lg hover:bg-purple-600 transition text-sm font-medium">
+                    <i class="fas fa-search mr-1"></i> Pesquisar
+                </button>
+            </form>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg p-4 text-white shadow-sm">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-database text-white"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold">Dados SIGTAP</h4>
+                    <p class="text-xs opacity-90">Status da base</p>
+                </div>
+            </div>
+            <div class="mt-4 space-y-2 text-sm">
+                <div class="flex justify-between items-center">
+                    <span class="opacity-90">Última Sync:</span>
+                    <span class="font-semibold text-xs">{{ sigtap_last_sync_date|truncatewords:3 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="opacity-90">Competência:</span>
+                    <span class="font-semibold">{{ latest_competence }}</span>
+                </div>
+                <div class="pt-2 border-t border-white border-opacity-20">
+                    <a href="{% url 'admin-upload-sigtap' %}" class="text-xs underline hover:no-underline">
+                        Gerenciar SIGTAP →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Recent Plans & Quick Actions -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Recent Plans -->
@@ -145,12 +252,33 @@
                 </div>
             </div>
             
+            <!-- Informações de Competência -->
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">Dados da Última Atualização</h4>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Última Sync:</span>
+                        <span class="font-semibold text-green-600">{{ sigtap_last_sync_date }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Competência:</span>
+                        <span class="font-semibold text-blue-600">{{ latest_competence }}</span>
+                    </div>
+                </div>
+                
+                <!-- Tooltip explicativo -->
+                <div class="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                    <strong>Competência:</strong> Mês/Ano de vigência dos dados SIGTAP no banco
+                </div>
+            </div>
+            
             <!-- Info sobre sincronização automática -->
             <div class="mt-4 p-3 bg-blue-50 rounded-lg">
                 <p class="text-xs text-blue-800">
                     <i class="fas fa-info-circle mr-1"></i>
                     <strong>Sincronização Automática:</strong><br>
-                    <span class="text-blue-600">Toda segunda às 3h da manhã</span>
+                    <span class="text-blue-600">Diariamente (dias 3-18) às 3h</span>
                 </p>
             </div>
         </div>
@@ -169,8 +297,45 @@
             <p class="text-sm text-gray-600 mt-2" id="syncMessage">Iniciando...</p>
         </div>
 
+        <!-- Alerta de Warning -->
+        <div id="warningAlert" class="hidden mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700" id="warningMessage"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerta de Erro com Confirmação -->
+        <div id="errorAlert" class="hidden mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-medium text-red-800" id="errorTitle">Competência Já Existe</p>
+                    <p class="text-sm text-red-700 mt-1" id="errorMessage"></p>
+                    
+                    <!-- Botões de Confirmação -->
+                    <div id="confirmationButtons" class="hidden mt-4 flex gap-3">
+                        <button id="confirmOverwriteBtn" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition text-sm">
+                            <i class="fas fa-check mr-2"></i>
+                            Sim, Atualizar Dados
+                        </button>
+                        <button id="cancelOverwriteBtn" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition text-sm">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Barra de Progresso -->
-        <div class="mb-6">
+        <div class="mb-6" id="progressSection">
             <div class="flex justify-between mb-2">
                 <span class="text-sm font-medium text-gray-700">Progresso</span>
                 <span class="text-sm font-bold text-cyan-600" id="progressPercentage">0%</span>
@@ -266,6 +431,56 @@ function updateProgress(data) {
     const percentage = data.percentage || 0;
     const message = data.message || 'Processando...';
     const step = data.step || 0;
+    const warning = data.warning || null;
+    const error = data.error || null;
+    const requiresConfirmation = data.requires_confirmation || false;
+    const competenceInfo = data.competence_info || null;
+    
+    // Exibe ou esconde warning
+    if (warning) {
+        document.getElementById('warningAlert').classList.remove('hidden');
+        document.getElementById('warningMessage').textContent = warning;
+    } else {
+        document.getElementById('warningAlert').classList.add('hidden');
+    }
+    
+    // Exibe ou esconde error
+    if (error) {
+        document.getElementById('errorAlert').classList.remove('hidden');
+        
+        if (requiresConfirmation && competenceInfo) {
+            // Mostra dialog de confirmação
+            document.getElementById('errorTitle').textContent = 'Competência Já Existe';
+            document.getElementById('errorMessage').innerHTML = `
+                A competência <strong>${competenceInfo.formatted}</strong> já existe no banco de dados.
+                <br><br>
+                <strong>⚠️ ATENÇÃO:</strong> Atualizar irá sobrescrever os dados existentes. 
+                Esta ação deve ser usada apenas se houver uma atualização oficial da mesma competência.
+                <br><br>
+                Deseja realmente atualizar os dados?
+            `;
+            document.getElementById('confirmationButtons').classList.remove('hidden');
+            
+            // Para o polling
+            clearInterval(progressInterval);
+        } else {
+            // Erro normal sem confirmação
+            document.getElementById('errorMessage').textContent = error;
+            document.getElementById('confirmationButtons').classList.add('hidden');
+        }
+        
+        // Esconde barra de progresso quando há erro
+        document.getElementById('progressSection').classList.add('hidden');
+        
+        // Para animação de loading
+        showErrorState(message);
+        clearInterval(progressInterval);
+        return;
+    } else {
+        document.getElementById('errorAlert').classList.add('hidden');
+        document.getElementById('confirmationButtons').classList.add('hidden');
+        document.getElementById('progressSection').classList.remove('hidden');
+    }
     
     // Atualiza barra
     document.getElementById('progressBar').style.width = percentage + '%';
@@ -344,6 +559,51 @@ function showErrorState(message) {
     closeBtn.classList.add('from-red-500', 'to-pink-500');
     closeBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Fechar';
 }
+
+// Handler para confirmar sobrescrita
+document.getElementById('confirmOverwriteBtn').addEventListener('click', function() {
+    // Esconde botões de confirmação
+    document.getElementById('confirmationButtons').classList.add('hidden');
+    document.getElementById('errorAlert').classList.add('hidden');
+    document.getElementById('progressSection').classList.remove('hidden');
+    
+    // Reseta visual para loading
+    document.getElementById('syncIcon').className = 'fas fa-sync-alt text-3xl text-white animate-spin';
+    document.getElementById('syncIcon').parentElement.className = 'w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center';
+    document.getElementById('syncMessage').textContent = 'Iniciando atualização...';
+    document.getElementById('syncMessage').className = 'text-sm text-gray-600 mt-2';
+    
+    // Limpa cache de progresso
+    cache.delete('sigtap_sync_progress');
+    
+    // Envia requisição com flag de sobrescrita
+    fetch('{% url "admin-sync-sigtap-now" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ allow_overwrite: true })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'started') {
+            startProgressPolling();
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showErrorState('Erro ao iniciar sincronização');
+    });
+});
+
+// Handler para cancelar sobrescrita
+document.getElementById('cancelOverwriteBtn').addEventListener('click', function() {
+    document.getElementById('sigtapModal').classList.add('hidden');
+    // Limpa cache
+    fetch('{% url "admin-sync-sigtap-progress" %}')
+        .then(() => location.reload());
+});
 
 document.getElementById('closeModalBtn').addEventListener('click', function() {
     document.getElementById('sigtapModal').classList.add('hidden');

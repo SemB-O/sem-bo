@@ -1,5 +1,5 @@
 {% extends 'admin/base_admin.html' %}
-{% load admin_filters %}
+{% load admin_filters l10n %}
 
 {% block page_title %}{{ action }} Plano{% endblock %}
 
@@ -17,7 +17,6 @@
         <form method="post" class="space-y-6">
             {% csrf_token %}
             
-            <!-- Name -->
             <div>
                 <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
                     Nome do Plano <span class="text-red-500">*</span>
@@ -28,7 +27,6 @@
                        placeholder="Ex: Plano Premium">
             </div>
             
-            <!-- Description -->
             <div>
                 <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">
                     Descrição <span class="text-red-500">*</span>
@@ -38,14 +36,13 @@
                           placeholder="Descreva as características do plano...">{{ plan.description|default:'' }}</textarea>
             </div>
             
-            <!-- Price and Max Occupations -->
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">
                         Preço (R$) <span class="text-red-500">*</span>
                     </label>
                     <input type="number" id="price" name="price" required step="0.01" min="0.01"
-                           value="{{ plan.price|default:'' }}"
+                           value="{% if plan %}{{ plan.price|unlocalize }}{% endif %}"
                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-cyan-200 transition"
                            placeholder="0.00">
                 </div>
@@ -61,7 +58,6 @@
                 </div>
             </div>
             
-            <!-- Status -->
             <div class="flex items-center">
                 <input type="checkbox" id="is_active" name="is_active" {% if plan.is_active or not plan %}checked{% endif %}
                        class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary">
@@ -70,7 +66,6 @@
                 </label>
             </div>
             
-            <!-- Benefits -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-3">
                     Benefícios do Plano
@@ -90,7 +85,6 @@
                                 </label>
                                 <p class="text-sm text-gray-600 mt-1">{{ benefit.description }}</p>
                                 
-                                <!-- Availability toggle -->
                                 <div class="mt-3 flex items-center">
                                     <input type="checkbox" id="benefit_available_{{ benefit.id }}" 
                                            name="benefit_available_{{ benefit.id }}"
@@ -116,7 +110,6 @@
                 {% endif %}
             </div>
             
-            <!-- Actions -->
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                 <a href="{% url 'admin-plan-list' %}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
                     Cancelar
@@ -133,14 +126,10 @@
 
 {% block extra_scripts %}
 <script>
-// Auto-enable availability checkbox when benefit is selected
 document.querySelectorAll('input[name="benefits"]').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
-        const benefitId = this.value;
-        const availabilityCheckbox = document.getElementById(`benefit_available_${benefitId}`);
-        if (this.checked && availabilityCheckbox) {
-            availabilityCheckbox.checked = true;
-        }
+        const availabilityCheckbox = document.getElementById(`benefit_available_${this.value}`);
+        if (this.checked && availabilityCheckbox) availabilityCheckbox.checked = true;
     });
 });
 </script>

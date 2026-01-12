@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     home, search_view, upload_files, user, profile, chat, 
-    procedure, favorite, plan, medical_record, cid, admin_panel
+    procedure, favorite, plan, medical_record, cid, admin_panel, sigtap_search
 )
 
 urlpatterns = [
@@ -17,6 +17,12 @@ urlpatterns = [
     path('admin/upload-sigtap/', admin_panel.AdminUploadSigtapView.as_view(), name='admin-upload-sigtap'),
     path('admin/sync-sigtap-now/', admin_panel.SyncSigtapNowView.as_view(), name='admin-sync-sigtap-now'),
     path('admin/sync-sigtap-progress/', admin_panel.SyncSigtapProgressView.as_view(), name='admin-sync-sigtap-progress'),
+    path('admin/sigtap-stats/', admin_panel.SigtapStatsView.as_view(), name='admin-sigtap-stats'),
+    
+    # Pesquisas SIGTAP
+    path('admin/search/procedures/', sigtap_search.ProcedureSearchView.as_view(), name='admin-search-procedures'),
+    path('admin/search/cids/', sigtap_search.CidSearchView.as_view(), name='admin-search-cids'),
+    path('admin/search/occupations/', sigtap_search.OccupationSearchView.as_view(), name='admin-search-occupations'),
     
     path('upload_files/', upload_files.UploadFilesView.as_view(), name='upload_files'),
     path('', home.Home.as_view(), name='home'),
