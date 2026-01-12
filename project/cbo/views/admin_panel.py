@@ -4,7 +4,11 @@ from django.contrib import messages
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.db.models import Count, Q
+from django.http import JsonResponse
+from django.core.management import call_command
+from django.core.cache import cache
 from cbo.models import Plan, PlanBenefit, Procedure, Occupation, Cid, User
+import threading
 
 
 def is_superuser(user):
@@ -20,6 +24,18 @@ class AdminDashboardView(View):
     template_name = 'admin/dashboard.html'
 
     def get(self, request):
+        # Informações sobre última sincronização SIGTAP
+        from django.core.cache import cache
+        last_sync_month = cache.get('sigtap_last_sync_month', 'Nunca')
+        last_sync_date = cache.get('sigtap_last_sync_date', 'Nunca')
+        
+        # Formata a data se existir
+        if last_sync_date != 'Nunca':
+            from django.utils.dateparse import parse_datetime
+            sync_datetime = parse_datetime(last_sync_date)
+            if sync_datetime:
+                last_sync_date = sync_datetime.strftime('%d/%m/%Y às %H:%M')
+        
         context = {
             'total_plans': Plan.objects.count(),
             'total_benefits': PlanBenefit.objects.count(),
@@ -29,6 +45,8 @@ class AdminDashboardView(View):
             'total_users': User.objects.count(),
             'active_plans': Plan.objects.filter(is_active=True).count(),
             'recent_plans': Plan.objects.order_by('-id')[:5],
+            'sigtap_last_sync_month': last_sync_month,
+            'sigtap_last_sync_date': last_sync_date,
         }
         return render(request, self.template_name, context)
 
@@ -269,3 +287,42 @@ class AdminUploadSigtapView(View):
             logger.error(f"Upload error: {str(e)}")
             messages.error(request, f'Erro ao processar arquivos: {str(e)}')
             return redirect('admin-upload-sigtap')
+
+
+@admin_required
+class SyncSigtapNowView(View):
+    """View para sincronização manual instantânea da SIGTAP"""
+    
+    def post(self, request):
+        # Limpa progresso anterior
+        cache.delete('sigtap_sync_progress')
+        
+        def run_sync():
+            """Executa o comando em thread separada"""
+            try:
+                call_command('sync_sigtap')
+            except Exception as e:
+                cache.set('sigtap_sync_progress', {
+                    'step': 0,
+                    'message': f'Erro: {str(e)}',
+                    'percentage': 0
+                }, timeout=3600)
+        
+        # Inicia sincronização em background
+        thread = threading.Thread(target=run_sync, daemon=True)
+        thread.start()
+        
+        return JsonResponse({'status': 'started'})
+
+
+@admin_required
+class SyncSigtapProgressView(View):
+    """View para retornar o progresso da sincronização"""
+    
+    def get(self, request):
+        progress = cache.get('sigtap_sync_progress', {
+            'step': 0,
+            'message': 'Aguardando início...',
+            'percentage': 0
+        })
+        return JsonResponse(progress)

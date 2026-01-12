@@ -7,13 +7,26 @@ from django.db import transaction
 logger = logging.getLogger(__name__)
 
 
+def safe_int(value, default=0):
+    """Converte string para int de forma segura, retornando default se vazio ou inválido"""
+    if value is None:
+        return default
+    if isinstance(value, int):
+        return value
+    if not value or not str(value).strip():
+        return default
+    try:
+        return int(str(value).strip())
+    except (ValueError, AttributeError, TypeError):
+        return default
+
+
 class DataImporter:
     def __init__(self, encoding='iso-8859-1'):
         self.encoding = encoding
 
     @transaction.atomic
-    @staticmethod
-    def import_procedure_data(file):
+    def import_procedure_data(self, file):
         try:
             logger.info("Starting import of procedure data.")
 
@@ -37,15 +50,15 @@ class DataImporter:
                     'name': line[10:260].strip() if len(line) >= 260 else '',
                     'complexity_type': line[260].strip() if len(line) >= 260 else '',
                     'sex_type': line[261].strip() if len(line) >= 261 else '',
-                    'maximum_execution_amount': int(line[262:266].strip()) if len(line) >= 266 else 0,
-                    'stay_day_number': int(line[267:270].strip()) if len(line) >= 270 else 0,
-                    'points_number': int(line[271:274].strip()) if len(line) >= 274 else 0,
-                    'minimum_age_value': int(line[275:278].strip()) if len(line) >= 278 else 0,
-                    'maximum_age_value': int(line[279:282].strip()) if len(line) >= 282 else 0,
-                    'SH_value': int(line[283:292].strip()) if len(line) >= 292 else 0,
-                    'SA_value': int(line[293:302].strip()) if len(line) >= 302 else 0,
-                    'SP_value': int(line[303:312].strip()) if len(line) >= 312 else 0,
-                    'stay_time_number': int(line[320:324].strip()) if len(line) >= 324 else 0,
+                    'maximum_execution_amount': safe_int(line[262:266]),
+                    'stay_day_number': safe_int(line[267:270]),
+                    'points_number': safe_int(line[271:274]),
+                    'minimum_age_value': safe_int(line[275:278]),
+                    'maximum_age_value': safe_int(line[279:282]),
+                    'SH_value': safe_int(line[283:292]),
+                    'SA_value': safe_int(line[293:302]),
+                    'SP_value': safe_int(line[303:312]),
+                    'stay_time_number': safe_int(line[320:324]),
                     'competence_date': line[324:330].strip() if len(line) >= 330 else '',
                 }
 
@@ -94,8 +107,7 @@ class DataImporter:
             raise
 
     @transaction.atomic
-    @staticmethod
-    def import_occupation_data(file):
+    def import_occupation_data(self, file):
         try:
             logger.info("Starting import of occupation data.")
 
@@ -156,7 +168,7 @@ class DataImporter:
             logger.exception(f"Error during occupation data import: {str(e)}")
             raise
 
-    def import_record_data(file):
+    def import_record_data(self, file):
         content = file.read()
         content_str = content.decode('iso-8859-1')
 
@@ -191,8 +203,7 @@ class DataImporter:
             record.save()
 
     @transaction.atomic
-    @staticmethod
-    def import_cid_data(file):
+    def import_cid_data(self, file):
         try:
             logger.info("Starting import of CID data.")
 
@@ -212,15 +223,27 @@ class DataImporter:
                     logger.warning(f"Line {index} missing CID code, skipping: {line}")
                     continue
 
+                # Garantir que irradiated_fields_value seja sempre um inteiro válido
+                irradiated_value = safe_int(line[110:114] if len(line) >= 114 else '', 0)
+                if irradiated_value is None:
+                    logger.warning(f"Line {index}: irradiated_fields_value is None for CID {co_cid}, setting to 0")
+                    irradiated_value = 0
+
                 cid_data[co_cid] = {
                     'name': line[4:104].strip() if len(line) >= 104 else '',
                     'grievance_type': line[104:105].strip() if len(line) >= 105 else '',
                     'sex_type': line[105:106].strip() if len(line) >= 106 else '',
                     'stadium_stype': line[106:107].strip() if len(line) >= 107 else '',
-                    'irradiated_fields_value': int(line[110:114].strip()) if len(line) >= 111 and line[110:114].strip().isdigit() else 0
+                    'irradiated_fields_value': irradiated_value
                 }
 
             logger.info(f"Parsed {len(cid_data)} CID entries from file.")
+            
+            # Verificar se há valores None no dicionário
+            for code, data in cid_data.items():
+                if data['irradiated_fields_value'] is None:
+                    logger.error(f"CID {code} has None irradiated_fields_value! Fixing to 0")
+                    data['irradiated_fields_value'] = 0
 
             existing_cids = Cid.objects.filter(
                 cid_code__in=cid_data.keys()
@@ -236,6 +259,9 @@ class DataImporter:
 
                 updated = False
                 for field, value in data.items():
+                    # Garantir que irradiated_fields_value nunca seja None
+                    if field == 'irradiated_fields_value' and value is None:
+                        value = 0
                     if getattr(cid, field) != value:
                         setattr(cid, field, value)
                         updated = True
@@ -244,7 +270,14 @@ class DataImporter:
                     to_update.append(cid)
 
             to_create = [
-                Cid(cid_code=code, **data)
+                Cid(
+                    cid_code=code,
+                    name=data['name'],
+                    grievance_type=data['grievance_type'],
+                    sex_type=data['sex_type'],
+                    stadium_stype=data['stadium_stype'],
+                    irradiated_fields_value=data['irradiated_fields_value'] if data['irradiated_fields_value'] is not None else 0
+                )
                 for code, data in cid_data.items()
                 if code not in existing_codes
             ]
@@ -265,8 +298,7 @@ class DataImporter:
             raise
 
     @transaction.atomic
-    @staticmethod
-    def import_procedure_has_cid_data(file):
+    def import_procedure_has_cid_data(self, file):
         try:
             logger.info("Starting import of procedure has CID data.")
 
@@ -319,7 +351,17 @@ class DataImporter:
             procedure_map = {proc.procedure_code: proc for proc in all_procedures}
 
             missing_cid_codes = cid_code_set - cid_map.keys()
-            new_cids = [Cid(cid_code=code) for code in missing_cid_codes]
+            new_cids = [
+                Cid(
+                    cid_code=code,
+                    name='',
+                    grievance_type='',
+                    sex_type='',
+                    stadium_stype='',
+                    irradiated_fields_value=0
+                )
+                for code in missing_cid_codes
+            ]
             if new_cids:
                 Cid.objects.bulk_create(new_cids, batch_size=500)
                 logger.info(f"Created {len(new_cids)} new CIDs.")
@@ -355,8 +397,7 @@ class DataImporter:
             raise
 
     @transaction.atomic
-    @staticmethod
-    def import_procedure_has_occupation_data(file):
+    def import_procedure_has_occupation_data(self, file):
         try:
             logger.info("Starting import of procedure and occupation data.")
 
@@ -412,8 +453,7 @@ class DataImporter:
             raise
 
     @transaction.atomic
-    @staticmethod
-    def import_procedure_has_record_data(file):
+    def import_procedure_has_record_data(self, file):
         try:
             logger.info("Starting import of procedure has record data.")
 
@@ -505,7 +545,7 @@ class DataImporter:
             logger.exception(f"Error during procedure has record data import: {str(e)}")
             raise
     
-    def import_description_data(file):
+    def import_description_data(self, file):
         content = file.read()
         content_str = content.decode('iso-8859-1')
 

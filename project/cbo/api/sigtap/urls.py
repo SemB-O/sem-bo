@@ -1,5 +1,6 @@
 from django.urls import path
+from .views.weebhook import SyncSIGTAPView
 
 urlpatterns = [
-    # Adicione suas rotas aqui
+    path('sync/', SyncSIGTAPView.as_view(), name='sigtap-sync'),
 ]

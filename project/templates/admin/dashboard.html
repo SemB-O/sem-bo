@@ -121,6 +121,14 @@
                 <i class="fas fa-upload mr-2"></i>
                 Upload SIGTAP
             </a>
+
+            <form method="POST" action="{% url 'admin-sync-sigtap-now' %}" id="syncSigtapForm" class="block w-full">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 transition text-center font-medium shadow-sm">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Atualizar SIGTAP Agora
+                </button>
+            </form>
         </div>
         
         <!-- System Info -->
@@ -136,7 +144,210 @@
                     <span class="font-semibold">{{ total_cids }}</span>
                 </div>
             </div>
+            
+            <!-- Info sobre sincronização automática -->
+            <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p class="text-xs text-blue-800">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <strong>Sincronização Automática:</strong><br>
+                    <span class="text-blue-600">Toda segunda às 3h da manhã</span>
+                </p>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal de Progresso SIGTAP -->
+<div id="sigtapModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <i class="fas fa-sync-alt text-3xl text-white animate-spin" id="syncIcon"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">Sincronizando SIGTAP</h3>
+            <p class="text-sm text-gray-600 mt-2" id="syncMessage">Iniciando...</p>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="mb-6">
+            <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">Progresso</span>
+                <span class="text-sm font-bold text-cyan-600" id="progressPercentage">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-4 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="space-y-3 mb-6">
+            <div class="flex items-center text-sm" id="step1">
+                <i class="fas fa-circle text-gray-300 mr-3"></i>
+                <span class="text-gray-500">Buscando última versão</span>
+            </div>
+            <div class="flex items-center text-sm" id="step2">
+                <i class="fas fa-circle text-gray-300 mr-3"></i>
+                <span class="text-gray-500">Baixando arquivo</span>
+            </div>
+            <div class="flex items-center text-sm" id="step3">
+                <i class="fas fa-circle text-gray-300 mr-3"></i>
+                <span class="text-gray-500">Descompactando</span>
+            </div>
+            <div class="flex items-center text-sm" id="step4">
+                <i class="fas fa-circle text-gray-300 mr-3"></i>
+                <span class="text-gray-500">Importando dados</span>
+            </div>
+        </div>
+
+        <!-- Botão Fechar (aparece só quando concluído) -->
+        <button id="closeModalBtn" class="hidden w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 transition font-medium">
+            <i class="fas fa-check mr-2"></i>
+            Concluído!
+        </button>
+    </div>
+</div>
+
+<script>
+let progressInterval;
+
+document.getElementById('syncSigtapForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Mostra modal
+    document.getElementById('sigtapModal').classList.remove('hidden');
+    
+    // Envia requisição
+    fetch('{% url "admin-sync-sigtap-now" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'started') {
+            // Inicia polling de progresso
+            startProgressPolling();
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        updateModalError('Erro ao iniciar sincronização');
+    });
+});
+
+function startProgressPolling() {
+    progressInterval = setInterval(checkProgress, 1000); // A cada 1 segundo
+}
+
+function checkProgress() {
+    fetch('{% url "admin-sync-sigtap-progress" %}')
+        .then(response => response.json())
+        .then(data => {
+            updateProgress(data);
+            
+            // Se concluído ou erro, para o polling
+            if (data.percentage >= 100 || data.step === 0) {
+                clearInterval(progressInterval);
+                
+                if (data.percentage >= 100) {
+                    showCompletedState();
+                } else if (data.step === 0 && data.message.includes('Erro')) {
+                    showErrorState(data.message);
+                }
+            }
+        })
+        .catch(error => console.error('Erro ao buscar progresso:', error));
+}
+
+function updateProgress(data) {
+    const percentage = data.percentage || 0;
+    const message = data.message || 'Processando...';
+    const step = data.step || 0;
+    
+    // Atualiza barra
+    document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('progressPercentage').textContent = percentage + '%';
+    document.getElementById('syncMessage').textContent = message;
+    
+    // Atualiza steps
+    const stepMappings = {
+        1: 'step1', 2: 'step1', 3: 'step2',
+        4: 'step2', 5: 'step3', 6: 'step3',
+        7: 'step4', 8: 'step4'
+    };
+    
+    // Reseta todos os steps
+    for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById('step' + i);
+        const icon = stepEl.querySelector('i');
+        const text = stepEl.querySelector('span');
+        
+        icon.className = 'fas fa-circle text-gray-300 mr-3';
+        text.className = 'text-gray-500';
+    }
+    
+    // Marca step atual
+    const currentStepEl = document.getElementById(stepMappings[step]);
+    if (currentStepEl) {
+        const icon = currentStepEl.querySelector('i');
+        const text = currentStepEl.querySelector('span');
+        
+        icon.className = 'fas fa-spinner fa-spin text-cyan-500 mr-3';
+        text.className = 'text-cyan-600 font-medium';
+    }
+    
+    // Marca steps concluídos
+    for (let i = 1; i <= 4; i++) {
+        const stepKey = 'step' + i;
+        const mappedStep = Object.entries(stepMappings).find(([k, v]) => v === stepKey)?.[0];
+        
+        if (mappedStep && parseInt(mappedStep) < step) {
+            const stepEl = document.getElementById(stepKey);
+            const icon = stepEl.querySelector('i');
+            const text = stepEl.querySelector('span');
+            
+            icon.className = 'fas fa-check-circle text-green-500 mr-3';
+            text.className = 'text-green-600';
+        }
+    }
+}
+
+function showCompletedState() {
+    document.getElementById('syncIcon').className = 'fas fa-check text-3xl text-white';
+    document.getElementById('syncIcon').parentElement.className = 'w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center';
+    
+    // Marca todos os steps como concluídos
+    for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById('step' + i);
+        const icon = stepEl.querySelector('i');
+        const text = stepEl.querySelector('span');
+        
+        icon.className = 'fas fa-check-circle text-green-500 mr-3';
+        text.className = 'text-green-600';
+    }
+    
+    // Mostra botão fechar
+    document.getElementById('closeModalBtn').classList.remove('hidden');
+}
+
+function showErrorState(message) {
+    document.getElementById('syncIcon').className = 'fas fa-times text-3xl text-white';
+    document.getElementById('syncIcon').parentElement.className = 'w-20 h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center';
+    document.getElementById('syncMessage').textContent = message;
+    document.getElementById('syncMessage').className = 'text-sm text-red-600 mt-2 font-medium';
+    
+    const closeBtn = document.getElementById('closeModalBtn');
+    closeBtn.classList.remove('hidden', 'from-green-500', 'to-emerald-500');
+    closeBtn.classList.add('from-red-500', 'to-pink-500');
+    closeBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Fechar';
+}
+
+document.getElementById('closeModalBtn').addEventListener('click', function() {
+    document.getElementById('sigtapModal').classList.add('hidden');
+    location.reload(); // Recarrega para mostrar novos dados
+});
+</script>
 {% endblock %}

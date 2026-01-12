@@ -8,4 +8,8 @@ class CboConfig(AppConfig):
     def ready(self):
         from django.contrib.auth.management import commands as auth_commands
         from django.core.management import call_command
-        import cbo.signals 
+        import cbo.signals
+        
+        # Inicia o scheduler de tarefas automáticas
+        from . import scheduler
+        scheduler.start() 

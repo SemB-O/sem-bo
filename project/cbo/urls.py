@@ -15,6 +15,8 @@ urlpatterns = [
     path('admin/benefits/<int:pk>/edit/', admin_panel.BenefitEditView.as_view(), name='admin-benefit-edit'),
     path('admin/benefits/<int:pk>/delete/', admin_panel.BenefitDeleteView.as_view(), name='admin-benefit-delete'),
     path('admin/upload-sigtap/', admin_panel.AdminUploadSigtapView.as_view(), name='admin-upload-sigtap'),
+    path('admin/sync-sigtap-now/', admin_panel.SyncSigtapNowView.as_view(), name='admin-sync-sigtap-now'),
+    path('admin/sync-sigtap-progress/', admin_panel.SyncSigtapProgressView.as_view(), name='admin-sync-sigtap-progress'),
     
     path('upload_files/', upload_files.UploadFilesView.as_view(), name='upload_files'),
     path('', home.Home.as_view(), name='home'),

@@ -1,4 +1,5 @@
 import json
+import logging
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.views.generic.edit import FormView
 from django.contrib.auth import authenticate, login
@@ -20,16 +21,22 @@ from django.db.models import Q
 from ..forms.user import LoginAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
 from ..models import Plan, FavoriteProceduresFolder, User
 
+logger = logging.getLogger(__name__)
+
 
 class LoginView(FormView):
     template_name = 'front/login.html'
     form_class = LoginAuthenticationForm
-    success_url = reverse_lazy('home') 
+    success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        user = form.cleaned_data.get('user') 
+        user = form.cleaned_data.get('user')
         if user:
             login(self.request, user)
+            
+            if user.is_superuser:
+                self.success_url = reverse_lazy('admin-dashboard')
+        
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -70,7 +77,8 @@ class RegisterView(View):
                 # self.activateEmail(request, user, form.cleaned_data.get('email'))
                 return redirect('login')
             except Exception as e:
-                pass
+                logger.exception(f"Erro ao criar usuário: {e}")
+                messages.error(request, "Erro ao criar conta. Tente novamente.")
 
         return render(request, self.template_name, {
             'form': form,

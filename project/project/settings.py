@@ -158,7 +158,10 @@ EMAIL_FROM = 'sembooficial@gmail.com'
 EMAIL_HOST_USER = 'sembooficial@gmail.com'
 EMAIL_HOST_PASSWORD = 'ksghszfbpazriqiq'
 EMAIL_USE_TLS = True
-PASSWORD_RESET_TIMEOUT = 14400 
+PASSWORD_RESET_TIMEOUT = 14400
+
+# Email para notificações de sistema (SIGTAP, etc)
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'sembooficial@gmail.com')
 
 #Midia
 MEDIA_URL = '/media/'
@@ -228,6 +231,11 @@ if not CLOUDWATCH_CLIENT:
 #STORAGE 4S3
 # Check if AWS_STORAGE_BUCKET_NAME is defined
 USE_S3 = os.getenv('USE_S3') == 'TRUE'
+
+# Definir variáveis de localização (sempre disponíveis)
+STATICFILES_LOCATION = 'static'
+MEDIAFILES_LOCATION = 'media'
+
 if USE_S3:
     STORAGES = {
         "default": {
@@ -237,6 +245,3 @@ if USE_S3:
             "BACKEND": "cbo.utils.storages.S3StaticStorage",
         },
     }
-    
-    STATICFILES_LOCATION = 'static'
-    MEDIAFILES_LOCATION = 'media'
