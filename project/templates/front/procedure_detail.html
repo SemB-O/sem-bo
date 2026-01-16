@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Sem B.O{% endblock %}
+{% block title %}{{ procedure.name }} - Sem B.O{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'front/detail_style.css' %}">
@@ -9,136 +9,327 @@
 {% endblock %}
 
 {% block content %}
-{% include 'parciais/menu.html' %}
-<div class="flex flex-col mt-8 md:mt-12 items-center justify-center text-gray-800 pb-28 px-4">
-  <div class="w-full bg-white md:px-6 rounded-xl">
-    <div class="info md:px-4">
-      <div class="procedure-header h-50 md:h-40 flex flex-col justify-center bg-black text-white p-6 rounded-xl">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div class="text-center md:text-left">
-            <h1 class="text-2xl font-bold break-words">{{ procedure.name }}</h1>
-            <p class="text-sm text-gray-300 mt-1">Código do procedimento:</p>
-            <div class="w-[82%] text-lg font-mono bg-white text-black inline-block mt-1 px-3 py-1 rounded cursor-pointer w-40 max-w-full text-center" onclick="copyText()" id="code">{{ procedure.procedure_code }}</div>
-          </div>
-          <div class="flex flex-wrap justify-center md:justify-end gap-2 self-center md:self-end items-center">
-            {% for occupation in procedure.related_occupations_names %}
-              <span class="bg-gray-800 text-white px-3 py-1 rounded text-sm break-words max-w-full">{{ occupation }}</span>
-            {% endfor %}
+<!-- Logo Fixa -->
+<div class="fixed top-0 left-0 right-0 bg-white z-40">
+  <div class="flex justify-center items-center pl-12 pr-12 pt-6 pb-4 w-[18rem] mx-auto">
+    <a href="{% url 'home' %}">
+      <img src="{% static 'assets/logo.png' %}" alt="Sem B.O" class="mt-1.5">
+    </a>
+  </div>
+</div>
 
-            <button id="btn-favorite" title="Salvar favorito" aria-label="Salvar favorito" class="focus:outline-none">
-              {% if favorite %}
-                <i class="fa-solid fa-bookmark text-white text-2xl"></i>
-              {% else %}
-                <i class="fa-regular fa-bookmark text-white text-2xl"></i>
-              {% endif %}
-            </button>
-          </div>
+<!-- Conteúdo Scrollável -->
+<div class="flex flex-col items-center justify-center text-gray-800 px-4 pt-28 pb-40 overflow-y-auto">
+  <div class="w-full max-w-6xl">
+    
+    <!-- HEADER DO PROCEDIMENTO -->
+    <div class="procedure-header-modern bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 md:p-8 rounded-2xl shadow-xl mb-6">
+      <!-- Título e Botão de Favorito -->
+      <div class="flex justify-between items-start gap-4 mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold flex-1 leading-tight">{{ procedure.name }}</h1>
+        <button id="btn-favorite" title="Salvar favorito" aria-label="Salvar favorito" class="favorite-btn focus:outline-none transition-all duration-300 hover:scale-110 flex-shrink-0">
+          {% if favorite %}
+            <i class="fa-solid fa-bookmark text-[#42D1EB] text-3xl drop-shadow-lg"></i>
+          {% else %}
+            <i class="fa-regular fa-bookmark text-white text-3xl hover:text-[#42D1EB] transition-colors"></i>
+          {% endif %}
+        </button>
+      </div>
+
+      <!-- Código do Procedimento -->
+      <div class="mb-5">
+        <span class="text-xs uppercase tracking-wider text-gray-400 block mb-2">Código SIGTAP</span>
+        <div class="procedure-code-copy bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-300 inline-flex items-center gap-2 group" onclick="copyProcedureCode()" id="code-container">
+          <code class="font-mono text-xl font-bold" id="procedure-code">{{ procedure.procedure_code }}</code>
+          <i class="fas fa-copy text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
         </div>
       </div>
+
+      <!-- Ocupações Relacionadas -->
+      {% if procedure.related_occupations_names %}
+      <div>
+        <span class="text-xs uppercase tracking-wider text-gray-400 block mb-2">Ocupações autorizadas</span>
+        <div class="flex flex-wrap gap-2">
+          {% for occupation in procedure.related_occupations_names %}
+            <span class="bg-white bg-opacity-10 hover:bg-opacity-15 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border border-white border-opacity-20">
+              {{ occupation }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
     </div>
 
-    <div class="description bg-white md:px-6 py-4 rounded-lg">
+
+    <!-- TIPOS DE REGISTRO -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">
+        Tipos de Registro Disponíveis
+      </h2>
+      
       <div class="space-y-4">
         {% for record_name in procedure.get_records_names %}
+          
           {% if record_name == 'BPA (Consolidado)' %}
-          <details class="bg-gray-50 border rounded p-4">
-            <summary class="font-semibold cursor-pointer">BPA (Consolidado)</summary>
-            <p class="text-sm mt-2">Procedimentos BPA (Consolidado) <b>devem ser realizados no ambulatório</b></p>
-            <p class="text-sm mt-2">O BPA (Boletim de Produção Ambulatorial) consolidado é um documento que reúne informações sobre os procedimentos realizados no âmbito ambulatorial, fornecendo uma visão geral das atividades médicas e de saúde realizadas em determinado período.</p>
-          </details>
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">BPA (Consolidado)</h3>
+            <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
+              <p class="text-sm font-semibold" style="color: #1a7a8a;">
+                <i class="fas fa-map-marker-alt mr-2"></i>Local: Ambulatório
+              </p>
+            </div>
+            <p class="text-gray-700 mb-3 leading-relaxed">
+              O <strong>Boletim de Produção Ambulatorial (BPA) Consolidado</strong> é utilizado para registrar procedimentos ambulatoriais de forma agrupada, sem identificação individual dos pacientes.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-lightbulb mr-2" style="color: #42D1EB;"></i>
+                <strong>Quando usar:</strong> Consultas, procedimentos diagnósticos e terapêuticos ambulatoriais onde não é necessária a identificação individual do paciente.
+              </p>
+            </div>
+          </div>
+          
           {% elif record_name == 'BPA (Individualizado)' %}
-          <details class="bg-gray-50 border rounded p-4">
-            <summary class="font-semibold cursor-pointer">BPA (Individualizado)</summary>
-            <p class="text-sm mt-2">Procedimentos BPA (Individualizado) <b>devem ser realizados no ambulatório</b></p>
-            <p class="text-sm mt-2">O BPA individualizado é um documento que detalha os procedimentos realizados por um paciente específico, fornecendo um registro detalhado dos serviços prestados.</p>
-          </details>
-          {% elif record_name == 'AIH (Proc. Especial)' %}
-          <details class="bg-gray-50 border rounded p-4">
-            <summary class="font-semibold cursor-pointer">AIH (Procedimento Especial)</summary>
-            <p class="text-sm mt-2">Procedimentos AIH (Procedimento Especial) <b>devem ser realizados durante a internação</b></p>
-            <p class="text-sm mt-2">A AIH de procedimento especial é um documento que registra procedimentos realizados durante internações complexas.</p>
-          </details>
-          {% elif record_name == 'AIH (Proc. Secundário)' %}
-          <details class="bg-gray-50 border rounded p-4">
-            <summary class="font-semibold cursor-pointer">AIH (Procedimento Secundário)</summary>
-            <p class="text-sm mt-2">Procedimentos AIH (Procedimento Secundário) <b>devem ser realizados durante a internação</b></p>
-            <p class="text-sm mt-2">A AIH secundária é um documento que registra procedimentos médicos adicionais realizados durante internações hospitalares.</p>
-          </details>
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">BPA (Individualizado)</h3>
+            <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
+              <p class="text-sm font-semibold" style="color: #1a7a8a;">
+                <i class="fas fa-map-marker-alt mr-2"></i>Local: Ambulatório
+              </p>
+            </div>
+            <p class="text-gray-700 mb-3 leading-relaxed">
+              O <strong>BPA Individualizado</strong> registra procedimentos ambulatoriais com identificação específica de cada paciente atendido.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-lightbulb mr-2" style="color: #42D1EB;"></i>
+                <strong>Quando usar:</strong> Procedimentos que exigem identificação do paciente, acompanhamento individualizado ou são de maior complexidade ambulatorial.
+              </p>
+            </div>
+          </div>
+
           {% elif record_name == 'AIH (Proc. Principal)' %}
-          <details class="bg-gray-50 border rounded p-4">
-            <summary class="font-semibold cursor-pointer">AIH (Procedimento Principal)</summary>
-            <p class="text-sm mt-2">Preencher na folha de internação/B.O cirúrgico/Resumo de Alta</p>
-            <p class="text-sm mt-2">A AIH principal é um documento que registra o procedimento médico principal realizado durante internações hospitalares.</p>
-          </details>
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">AIH (Procedimento Principal)</h3>
+            <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
+              <p class="text-sm font-semibold" style="color: #1a7a8a;">
+                <i class="fas fa-bed mr-2"></i>Local: Internação Hospitalar
+              </p>
+            </div>
+            <p class="text-gray-700 mb-3 leading-relaxed">
+              A <strong>Autorização de Internação Hospitalar (AIH)</strong> com procedimento principal é o documento que autoriza e registra o motivo principal da internação do paciente.
+            </p>
+            <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-3">
+              <p class="text-sm font-semibold text-yellow-800">
+                <i class="fas fa-file-alt mr-2"></i>
+                Preencher na folha de internação / B.O cirúrgico / Resumo de Alta
+              </p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-lightbulb mr-2" style="color: #42D1EB;"></i>
+                <strong>Quando usar:</strong> É o procedimento que motivou a internação do paciente. Apenas um procedimento principal pode ser registrado por internação.
+              </p>
+            </div>
+          </div>
+
+          {% elif record_name == 'AIH (Proc. Secundário)' %}
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">AIH (Procedimento Secundário)</h3>
+            <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
+              <p class="text-sm font-semibold" style="color: #1a7a8a;">
+                <i class="fas fa-bed mr-2"></i>Local: Internação Hospitalar
+              </p>
+            </div>
+            <p class="text-gray-700 mb-3 leading-relaxed">
+              Procedimentos <strong>adicionais</strong> realizados durante a mesma internação, complementares ao procedimento principal.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-lightbulb mr-2" style="color: #42D1EB;"></i>
+                <strong>Quando usar:</strong> Procedimentos complementares realizados durante a internação, como exames especiais, pequenas cirurgias ou outros tratamentos necessários.
+              </p>
+            </div>
+          </div>
+
+          {% elif record_name == 'AIH (Proc. Especial)' %}
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">AIH (Procedimento Especial)</h3>
+            <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
+              <p class="text-sm font-semibold" style="color: #1a7a8a;">
+                <i class="fas fa-bed mr-2"></i>Local: Internação Hospitalar
+              </p>
+            </div>
+            <p class="text-gray-700 mb-3 leading-relaxed">
+              Procedimentos de <strong>alta complexidade</strong> realizados durante internações que exigem autorização e registro especial.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-lightbulb mr-2" style="color: #42D1EB;"></i>
+                <strong>Quando usar:</strong> Procedimentos de alta complexidade, cirurgias especializadas ou tratamentos que necessitam de autorização prévia específica.
+              </p>
+            </div>
+          </div>
+
           {% elif record_name == 'APAC (Proc. Principal)' %}
-          <details class="bg-gray-50 border rounded p-4">
-            <summary class="font-semibold cursor-pointer">APAC (Procedimento Principal)</summary>
-            <p class="text-sm mt-2">Formulário próprio de APAC</p>
-            <p class="text-sm mt-2">O APAC de procedimento principal é um registro para pacientes que requerem cuidados de alta complexidade.</p>
-          </details>
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">APAC (Procedimento Principal)</h3>
+            <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
+              <p class="text-sm font-semibold" style="color: #1a7a8a;">
+                <i class="fas fa-file-medical mr-2"></i>Documento: Formulário próprio de APAC
+              </p>
+            </div>
+            <p class="text-gray-700 mb-3 leading-relaxed">
+              A <strong>Autorização de Procedimento Ambulatorial de Alta Complexidade (APAC)</strong> é utilizada para procedimentos ambulatoriais de alta complexidade que exigem acompanhamento continuado.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-lightbulb mr-2" style="color: #42D1EB;"></i>
+                <strong>Quando usar:</strong> Tratamentos de quimioterapia, radioterapia, hemodiálise, procedimentos de alta complexidade ambulatoriais que necessitam de acompanhamento continuado.
+              </p>
+            </div>
+          </div>
           {% endif %}
+
         {% endfor %}
       </div>
     </div>
 
-    <div class="h-[10rem]"></div>
 
-    <div class="content-principal folder-modal">
-      <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-        <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 max-h-[80vh] overflow-auto">
-          <div class="sup-folder flex justify-between items-center">
-            <div></div>
-            <h2 class="text-xl ml-2 mb-2 title-modal-folders break-words">Adicione a uma <b>Pasta de Favoritos</b></h2>
-            <span class="close text-gray-600 cursor-pointer">&times;</span>
-          </div>
-          <ul class="mb-4">
-            {% for folder in favorite_folders %}
-            <li class="folder mb-2">
-              <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders flex justify-between items-center">
-                <label for="folder-{{ folder.id }}" class="truncate max-w-[70%]">{{ folder.name }}</label>
-                <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>
-              </label>
-            </li>
-            {% endfor %}
-          </ul>
-          <button id="confirm-favorite" class="bg-black text-white w-full py-2 px-4 rounded-md">Confirmar</button>
-        </div>
-      </div>
-      <div class="blur hidden"></div>
-    </div>
-
-    {% include 'parciais/menu_inferior.html' %}
   </div>
 </div>
 
+<!-- MODAL DE FAVORITOS -->
+<div class="content-principal folder-modal">
+  <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm z-50">
+    <div class="modal-content-folder bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto rounded-2xl p-6 max-h-[80vh] overflow-auto shadow-2xl">
+      <div class="sup-folder flex justify-between items-center mb-6">
+        <div></div>
+        <h2 class="text-xl font-bold text-gray-800 text-center">
+          <i class="fas fa-folder text-yellow-500 mr-2"></i>
+          Pastas de Favoritos
+        </h2>
+        <button class="close text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" aria-label="Fechar">
+          &times;
+        </button>
+      </div>
+      
+      <p class="text-sm text-gray-600 mb-4 text-center">Selecione as pastas onde deseja salvar este procedimento</p>
+      
+      <ul class="mb-6 space-y-2">
+        {% for folder in favorite_folders %}
+        <li class="folder-item">
+          <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders flex justify-between items-center bg-gray-50 hover:bg-gray-100 p-4 rounded-lg transition-colors border border-gray-200">
+            <span class="truncate max-w-[70%] font-medium text-gray-700">
+              <i class="fas fa-folder-open text-yellow-500 mr-2"></i>
+              {{ folder.name }}
+            </span>
+            <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" {% if folder.name == 'Geral' %}checked{% endif %}>
+          </label>
+        </li>
+        {% endfor %}
+      </ul>
+      
+      <button id="confirm-favorite" class="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+        <i class="fas fa-check mr-2"></i>Confirmar
+      </button>
+    </div>
+  </div>
+  <div class="blur hidden"></div>
+</div>
+
+{% include 'parciais/menu_inferior.html' %}
+
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-  function copyText() {
-    const codeElem = document.getElementById('code');
+  // Copiar código do procedimento
+  function copyProcedureCode() {
+    const codeElem = document.getElementById('procedure-code');
     const text = codeElem.innerText || codeElem.textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Código copiado: ' + text);
-    }).catch(() => {
-      alert('Falha ao copiar o código.');
-    });
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showFeedback('Código copiado: ' + text, true);
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
   }
 
+  // Fallback para navegadores antigos
+  function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+      document.execCommand('copy');
+      showFeedback('Código copiado: ' + text, true);
+    } catch (err) {
+      showFeedback('Falha ao copiar o código', false);
+    }
+    
+    document.body.removeChild(textarea);
+  }
+
+  // Feedback visual
+  function showFeedback(message, success) {
+    const existingFeedback = document.querySelector('.copy-feedback');
+    if (existingFeedback) {
+      existingFeedback.remove();
+    }
+
+    const feedback = document.createElement('div');
+    feedback.className = 'copy-feedback fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium flex items-center gap-2 animate-slideDown';
+    feedback.style.backgroundColor = success ? '#10b981' : '#ef4444';
+    
+    const icon = success ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>';
+    feedback.innerHTML = `${icon} <span>${message}</span>`;
+    
+    document.body.appendChild(feedback);
+    
+    setTimeout(() => {
+      feedback.style.animation = 'slideUp 0.3s ease-out';
+      setTimeout(() => feedback.remove(), 300);
+    }, 2000);
+  }
+
+  // Gerenciamento do modal de favoritos
   $(document).ready(function() {
     const modal = $('#favorite-modal');
     const blur = $('.blur');
     const btnFavorite = $('#btn-favorite');
     const icon = btnFavorite.find('i');
 
+    // Abrir modal
     btnFavorite.on('click', function() {
       modal.removeClass('hidden');
       blur.removeClass('hidden');
     });
 
+    // Fechar modal
     $('.close, .blur').on('click', function() {
       modal.addClass('hidden');
       blur.addClass('hidden');
     });
 
+    // Fechar com ESC
+    $(document).on('keydown', function(e) {
+      if (e.key === 'Escape' && !modal.hasClass('hidden')) {
+        modal.addClass('hidden');
+        blur.addClass('hidden');
+      }
+    });
+
+    // Confirmar favorito
     $('#confirm-favorite').on('click', function() {
       let selectedFolders = [];
       $('input[name="folders"]:checked').each(function() {
@@ -155,18 +346,93 @@
         },
         success: function(response) {
           if(response.is_favorite) {
-            icon.removeClass('fa-regular text-white').addClass('fa-solid text-white');
+            icon.removeClass('fa-regular text-white').addClass('fa-solid').css('color', '#42D1EB');
+            showFeedback('Procedimento adicionado aos favoritos!', true);
           } else {
-            icon.removeClass('fa-solid text-white').addClass('fa-regular text-white');
+            icon.removeClass('fa-solid').addClass('fa-regular text-white').css('color', '');
+            showFeedback('Procedimento removido dos favoritos', true);
           }
           modal.addClass('hidden');
           blur.addClass('hidden');
         },
         error: function() {
-          alert('Erro ao salvar favorito');
+          showFeedback('Erro ao salvar favorito. Tente novamente.', false);
         }
       });
     });
   });
 </script>
+
+<style>
+  /* Animações personalizadas */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -20px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -20px);
+    }
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  /* Hover effects consistentes com o sistema */
+  .procedure-code-copy {
+    user-select: none;
+    position: relative;
+  }
+
+  .procedure-code-copy:hover {
+    transform: translateY(-2px);
+  }
+
+  .record-card {
+    transition: all 0.3s ease;
+  }
+
+  .record-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .folder-item label:hover {
+    transform: translateX(2px);
+  }
+
+  /* Checkbox customizado */
+  .checkbox-custom {
+    cursor: pointer;
+    accent-color: #1f2937;
+  }
+
+  /* Responsividade adicional */
+  @media (max-width: 768px) {
+    .procedure-header-modern {
+      padding: 1.5rem;
+    }
+
+    .record-card {
+      padding: 1rem;
+    }
+
+    .info-card {
+      padding: 1rem;
+    }
+  }
+</style>
+
 {% endblock %}

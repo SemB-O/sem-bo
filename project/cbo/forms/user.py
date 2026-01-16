@@ -85,6 +85,11 @@ class LoginAuthenticationForm(forms.Form):
             self.add_error('email', 'O email que você inseriu não está conectado a uma conta.')
             return
 
+        # Verifica se o usuário já verificou o email
+        if not user.is_active:
+            self.add_error('email', 'Sua conta ainda não foi ativada. Por favor, verifique seu email e clique no link de ativação.')
+            return
+
         user = authenticate(username=email, password=password)
         if user is None:
             self.add_error('password', 'A senha que você inseriu está incorreta.')

@@ -192,7 +192,10 @@ class CheckFavoriteView(View):
         user = request.user
 
         if procedure_id:
-            favorites = FavoriteProceduresFolderHasProcedure.objects.filter(user=user, procedure_id=procedure_id)
+            favorites = FavoriteProceduresFolderHasProcedure.objects.filter(
+                favorite_procedures_folder__user=user, 
+                procedure_id=procedure_id
+            )
             favorite_folders = []
             is_favorite = False
 

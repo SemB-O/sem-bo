@@ -416,9 +416,6 @@ Sistema: SEM B.O
                 self.update_progress(8, 'Sincronizando competências...', 95)
                 
                 # Sincroniza tabela de competências
-                from cbo.process_files import DataImporter
-                from cbo.models import Competence
-                
                 try:
                     comp_stats = DataImporter.sync_competences()
                     sync_history.competences_synced = comp_stats['total']

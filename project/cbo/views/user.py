@@ -231,3 +231,46 @@ def send_info_user_email(to_email):
     email = EmailMessage(mail_subject, message, to=[to_email])
     email.content_subtype = 'html' 
     email.send()
+
+
+class ResendVerificationEmailView(View):
+    """View para reenviar email de verificação"""
+    
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        
+        if not email:
+            messages.error(request, 'Email não fornecido.')
+            return redirect('login')
+        
+        try:
+            user = get_user_model().objects.get(email=email)
+            
+            # Verifica se o usuário já está ativo
+            if user.is_active and user.email_verified:
+                messages.info(request, 'Sua conta já está ativada! Faça login.')
+                return redirect('login')
+            
+            # Reenvia o email de verificação
+            mail_subject = "Ativação da sua conta Sem B.O"
+            message = render_to_string('email/email_verification.html', {
+                'user': user.first_name,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+                'protocol': 'https' if request.is_secure() else 'http',
+                'domain': settings.DOMAIN,
+            })
+            
+            email_msg = EmailMessage(mail_subject, message, to=[user.email])
+            email_msg.content_subtype = 'html'
+            
+            if email_msg.send():
+                messages.success(request, f'Email de verificação reenviado para {user.email}. Verifique sua caixa de entrada.')
+            else:
+                messages.error(request, 'Erro ao enviar email. Tente novamente mais tarde.')
+                
+        except get_user_model().DoesNotExist:
+            # Por segurança, não informar que o email não existe
+            messages.info(request, 'Se o email existir em nosso sistema, você receberá um link de verificação.')
+        
+        return redirect('login')

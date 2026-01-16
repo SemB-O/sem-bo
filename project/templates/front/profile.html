@@ -133,7 +133,31 @@
       flatpickr("#id_date_of_birth", {
         dateFormat: "Y-m-d",
         altInput: true,
-        altFormat: "d/m/Y"
+        altFormat: "d/m/Y",
+        allowInput: true, // Permite digitação manual
+        placeholder: "dd/mm/aaaa",
+        onReady: function(selectedDates, dateStr, instance) {
+          // Aplica máscara no input alternativo (visível)
+          $(instance.altInput).mask('00/00/0000', {
+            placeholder: "dd/mm/aaaa",
+            onComplete: function(value) {
+              // Converte dd/mm/yyyy para yyyy-mm-dd
+              const parts = value.split('/');
+              if (parts.length === 3) {
+                const day = parts[0];
+                const month = parts[1];
+                const year = parts[2];
+                const isoDate = `${year}-${month}-${day}`;
+                
+                // Valida e define a data no flatpickr
+                const date = new Date(isoDate);
+                if (!isNaN(date.getTime())) {
+                  instance.setDate(isoDate, true);
+                }
+              }
+            }
+          });
+        }
       });
     
       $(".chosen-select").chosen();

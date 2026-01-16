@@ -14,6 +14,10 @@ urlpatterns = [
     path('admin/benefits/create/', admin_panel.BenefitCreateView.as_view(), name='admin-benefit-create'),
     path('admin/benefits/<int:pk>/edit/', admin_panel.BenefitEditView.as_view(), name='admin-benefit-edit'),
     path('admin/benefits/<int:pk>/delete/', admin_panel.BenefitDeleteView.as_view(), name='admin-benefit-delete'),
+    path('admin/users/', admin_panel.UserListView.as_view(), name='admin-user-list'),
+    path('admin/users/<int:pk>/toggle-active/', admin_panel.UserToggleActiveView.as_view(), name='admin-user-toggle-active'),
+    path('admin/users/<int:pk>/delete/', admin_panel.UserDeleteView.as_view(), name='admin-user-delete'),
+    path('admin/users/<int:pk>/detail/', admin_panel.UserDetailView.as_view(), name='admin-user-detail'),
     path('admin/upload-sigtap/', admin_panel.AdminUploadSigtapView.as_view(), name='admin-upload-sigtap'),
     path('admin/sync-sigtap-now/', admin_panel.SyncSigtapNowView.as_view(), name='admin-sync-sigtap-now'),
     path('admin/sync-sigtap-progress/', admin_panel.SyncSigtapProgressView.as_view(), name='admin-sync-sigtap-progress'),
@@ -48,5 +52,6 @@ urlpatterns = [
     path('password_reset/', user.PasswordResetView.as_view(), name='password_reset'),
     path('password_reset/<uidb64>/<token>/', user.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('activate/<uidb64>/<token>', user.activate, name='verify_email'),
+    path('resend-verification-email/', user.ResendVerificationEmailView.as_view(), name='resend-verification-email'),
     path('cid_autocomplete/', medical_record.CidAutocompleteView.as_view(), name='cid-autocomplete'),
 ]

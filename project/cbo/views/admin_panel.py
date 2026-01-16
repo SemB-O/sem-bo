@@ -455,4 +455,141 @@ class SigtapStatsView(View):
             },
         }
         
+        
         return JsonResponse(data)
+
+
+@admin_required
+class UserListView(View):
+    """View para listagem e gerenciamento de usuários"""
+    template_name = 'admin/user_list.html'
+
+    def get(self, request):
+        users = User.objects.select_related('plan').prefetch_related('occupations').order_by('-id')
+        
+        # Filtros
+        search = request.GET.get('search', '')
+        plan_filter = request.GET.get('plan', '')
+        verified_filter = request.GET.get('verified', '')
+        active_filter = request.GET.get('active', '')
+        
+        if search:
+            users = users.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search) |
+                Q(CPF__icontains=search) |
+                Q(telephone__icontains=search)
+            )
+        
+        if plan_filter:
+            users = users.filter(plan_id=plan_filter)
+        
+        if verified_filter:
+            users = users.filter(email_verified=(verified_filter == 'true'))
+        
+        if active_filter:
+            users = users.filter(is_active=(active_filter == 'true'))
+        
+        # Estatísticas
+        total_users = User.objects.count()
+        verified_users = User.objects.filter(email_verified=True).count()
+        active_users = User.objects.filter(is_active=True).count()
+        users_with_plan = User.objects.filter(plan__isnull=False).count()
+        
+        # Lista de planos para o filtro
+        plans = Plan.objects.all().order_by('name')
+        
+        context = {
+            'users': users,
+            'plans': plans,
+            'search': search,
+            'plan_filter': plan_filter,
+            'verified_filter': verified_filter,
+            'active_filter': active_filter,
+            'total_users': total_users,
+            'verified_users': verified_users,
+            'active_users': active_users,
+            'users_with_plan': users_with_plan,
+        }
+        return render(request, self.template_name, context)
+
+
+@admin_required
+class UserDetailView(View):
+    """View para detalhes de um usuário específico"""
+    
+    def get(self, request, pk):
+        user = get_object_or_404(User.objects.select_related('plan').prefetch_related('occupations'), pk=pk)
+        
+        # Busca pastas de favoritos do usuário
+        from cbo.models import Folder
+        folders = Folder.objects.filter(user=user).prefetch_related('procedures').order_by('-id')
+        
+        # Serializa os dados do usuário
+        user_data = {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'CPF': user.CPF,
+            'telephone': user.telephone,
+            'date_of_birth': str(user.date_of_birth) if user.date_of_birth else None,
+            'occupational_registration': user.occupational_registration,
+            'is_active': user.is_active,
+            'email_verified': user.email_verified,
+            'is_superuser': user.is_superuser,
+            'plan': {
+                'name': user.plan.name,
+                'description': user.plan.description
+            } if user.plan else None,
+            'occupations': [
+                {'name': occ.name, 'code': occ.code}
+                for occ in user.occupations.all()
+            ]
+        }
+        
+        # Serializa pastas
+        folders_data = [
+            {
+                'id': folder.id,
+                'name': folder.name,
+                'procedures_count': folder.procedures.count()
+            }
+            for folder in folders
+        ]
+        
+        context = {
+            'user_obj': user_data,
+            'folders': folders_data,
+        }
+        
+        return JsonResponse(context)
+
+
+@admin_required
+class UserToggleActiveView(View):
+    """View para ativar/desativar usuário"""
+    
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        user.is_active = not user.is_active
+        user.save()
+        
+        status = 'ativado' if user.is_active else 'desativado'
+        messages.success(request, f'Usuário {user.get_full_name()} foi {status} com sucesso!')
+        
+        return redirect('admin-user-list')
+
+
+@admin_required
+class UserDeleteView(View):
+    """View para deletar usuário"""
+    
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        user_name = user.get_full_name()
+        user.delete()
+        
+        messages.success(request, f'Usuário {user_name} foi deletado com sucesso!')
+        return redirect('admin-user-list')

@@ -38,8 +38,6 @@ body {
     width: 100%;
     align-self: center;
     justify-self: center;
-    height: 64vh;
-    overflow: auto;
     display: flex;
     flex-direction: column;
 }
@@ -52,6 +50,37 @@ body {
     overflow: auto;
     display: flex;
     flex-direction: column;
+}
+
+/* Scroll apenas dentro da listagem de procedimentos de cada pasta */
+.folder-procedures {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 1rem;
+}
+
+.folder-procedures::-webkit-scrollbar {
+    width: 6px;
+}
+
+.folder-procedures::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.folder-procedures::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.folder-procedures::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Espaçamento extra na área de favoritos para não ser cortada pelo menu */
+.favorite-folders {
+    padding-bottom: 6rem;
 }
 
 .results-container {
@@ -180,12 +209,50 @@ body {
     opacity: 0.8;
 }
 
+.records_tags {
+    margin-top: 0.5rem;
+}
+
 .records_tags a {
     background-color: #f3f3f899;
     padding: 6px;
     border-radius: 5px;
     color: black;
     margin-right: 5px;
+}
+
+.more-tags {
+    background-color: #0F0F0F;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+}
+
+.more-tags-indicator {
+    background-color: #42D1EB;
+    color: #0F0F0F;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.more-tags-indicator:hover {
+    background-color: #0F0F0F;
+    color: #42D1EB;
+    transform: scale(1.05);
 }
 
 .modal-content {

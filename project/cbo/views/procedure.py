@@ -54,8 +54,10 @@ class ListView(ListView):
             & Q(procedures_has_occupation__occupation__in=user_occupations)
         )
 
-        if record_name != 'all' and record_name:
-            procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
+        # Suporte para múltiplos tipos de registro (separados por vírgula)
+        if record_name and record_name != 'all':
+            record_names = [name.strip() for name in record_name.split(',')]
+            procedures_list = procedures_list.filter(procedures_has_record__record__name__in=record_names)
 
         procedures_list = procedures_list.prefetch_related('procedures_has_record__record')
 
@@ -115,8 +117,10 @@ class LoadMoreView(View):
                 & Q(procedures_has_occupation__occupation__in=user_occupations)
             ).order_by('name')
 
-            if record_name != 'all':
-                procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
+            # Suporte para múltiplos tipos de registro (separados por vírgula)
+            if record_name and record_name != 'all':
+                record_names = [name.strip() for name in record_name.split(',')]
+                procedures_list = procedures_list.filter(procedures_has_record__record__name__in=record_names)
 
             procedures_list = procedures_list.prefetch_related('procedures_has_record__record')
 
@@ -125,8 +129,10 @@ class LoadMoreView(View):
                 Q(procedures_has_occupation__occupation__in=user_occupations)
             ).prefetch_related('procedures_has_record__record').order_by('name')
 
-            if record_name != 'all' and record_name:
-                procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
+            # Suporte para múltiplos tipos de registro (separados por vírgula)
+            if record_name and record_name != 'all':
+                record_names = [name.strip() for name in record_name.split(',')]
+                procedures_list = procedures_list.filter(procedures_has_record__record__name__in=record_names)
 
             procedures_list = procedures_list.prefetch_related('procedures_has_record__record')
 

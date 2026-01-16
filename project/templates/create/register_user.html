@@ -17,6 +17,43 @@ Sem B.O
    $(document).ready(function () {
        $('select.select2').select2({
            width: '100%',
+           placeholder: 'Selecione suas ocupações',
+           allowClear: true,
+           closeOnSelect: false, // Mantém aberto para múltiplas seleções
+           language: {
+               noResults: function() {
+                   return "Nenhuma ocupação encontrada";
+               },
+               searching: function() {
+                   return "Buscando...";
+               }
+           }
+       });
+       
+       // Limpa o texto de pesquisa após selecionar um item
+       $('select.select2').on('select2:select', function(e) {
+           const $selection = $(this).next('.select2-container').find('.select2-selection--multiple');
+           
+           // Limpa o campo de busca
+           const $searchField = $selection.find('.select2-search__field');
+           setTimeout(() => {
+               $searchField.val('');
+           }, 10);
+           
+           // Animação
+           $selection.addClass('pulse-animation');
+           setTimeout(() => {
+               $selection.removeClass('pulse-animation');
+           }, 300);
+       });
+       
+       // Animação ao remover
+       $('select.select2').on('select2:unselect', function(e) {
+           const $selection = $(this).next('.select2-container').find('.select2-selection--multiple');
+           $selection.addClass('pulse-animation');
+           setTimeout(() => {
+               $selection.removeClass('pulse-animation');
+           }, 300);
        });
    });      
 </script>
@@ -25,23 +62,204 @@ Sem B.O
 <style>
    .select2-container .select2-selection--single,
    .select2-container .select2-selection--multiple {
-   margin-top: 0.25rem;
-   display: flex;                        /* ← muda para flex */
-   align-items: center;                 /* ← centraliza verticalmente */
-   width: 100%;
-   border-radius: 0.375rem;
-   border: 1px solid #d1d5db;
-   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-   font-size: 0.875rem;
-   transition: border-color 0.2s, box-shadow 0.2s;
-   background-color: #F2F2F7 !important;
-   min-height: 2.25rem;
-   padding: 0 0.5rem;
-   box-sizing: border-box;
+       margin-top: 0.25rem;
+       display: flex;
+       align-items: center;
+       width: 100%;
+       border-radius: 0.375rem;
+       border: 1px solid #d1d5db;
+       box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+       font-size: 0.875rem;
+       transition: border-color 0.2s, box-shadow 0.2s;
+       background-color: #F2F2F7 !important;
+       min-height: 2.25rem;
+       padding: 0.25rem 0.5rem;
+       box-sizing: border-box;
    }
+   
    .select2-container--focus .select2-selection {
-   border-color: black !important;  /* focus:border-blue-500 */
-   box-shadow: 0 0 0 1px black;      /* focus:ring-blue-500 */
+       border-color: black !important;
+       box-shadow: 0 0 0 1px black;
+   }
+   
+   /* Estilização das tags/badges selecionadas */
+   .select2-container--default .select2-selection--multiple .select2-selection__choice {
+       background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
+       border: none !important;
+       border-radius: 0.5rem !important;
+       padding: 0.375rem 0.75rem !important;
+       margin: 0.125rem !important;
+       color: white !important;
+       font-size: 0.875rem !important;
+       font-weight: 500 !important;
+       display: inline-flex !important;
+       align-items: center !important;
+       gap: 0.5rem !important;
+       box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3) !important;
+       transition: all 0.2s ease !important;
+   }
+   
+   .select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+       background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%) !important;
+       box-shadow: 0 4px 6px rgba(6, 182, 212, 0.4) !important;
+       transform: translateY(-1px) !important;
+   }
+   
+   /* Botão de remover (X) dentro da tag */
+   .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+       color: white !important;
+       font-size: 1.125rem !important;
+       font-weight: bold !important;
+       margin-right: 0 !important;
+       margin-left: 0 !important;
+       border: none !important;
+       opacity: 0.8 !important;
+       transition: opacity 0.2s ease !important;
+       cursor: pointer !important;
+       order: 2 !important;
+   }
+   
+   .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+       background: transparent !important;
+       opacity: 1 !important;
+       color: #fee2e2 !important;
+   }
+   
+   /* Botão "X" para limpar tudo - posicionado à direita */
+   .select2-container--default .select2-selection--multiple .select2-selection__clear {
+       position: absolute !important;
+       right: 0.75rem !important;
+       top: 50% !important;
+       transform: translateY(-50%) !important;
+       width: 1.5rem !important;
+       height: 1.5rem !important;
+       display: flex !important;
+       align-items: center !important;
+       justify-content: center !important;
+       background: rgba(156, 163, 175, 0.5) !important; /* Cinza mais discreto e transparente */
+       border-radius: 50% !important;
+       color: white !important;
+       font-size: 0.875rem !important; /* Tamanho do X reduzido */
+       font-weight: bold !important;
+       line-height: 1.5rem !important; /* Centraliza verticalmente */
+       cursor: pointer !important;
+       z-index: 10 !important;
+       transition: all 0.2s ease !important;
+       opacity: 0.7 !important; /* Mais discreto */
+       padding: 0 !important;
+       margin: 0 !important;
+       text-align: center !important;
+   }
+   
+   .select2-container--default .select2-selection--multiple .select2-selection__clear:hover {
+       background: rgba(107, 114, 128, 0.8) !important; /* Cinza mais escuro no hover */
+       opacity: 1 !important;
+       transform: translateY(-50%) scale(1.05) !important; /* Scale mais sutil */
+   }
+   
+   /* Ajusta o container para dar espaço ao botão de limpar */
+   .select2-container--default.select2-container--focus .select2-selection--multiple {
+       position: relative !important;
+       padding-right: 3rem !important;
+   }
+   
+   .select2-container--default .select2-selection--multiple {
+       position: relative !important;
+       padding-right: 3rem !important;
+   }
+   
+   /* Input de busca dentro do multiselect */
+   .select2-container--default .select2-search--inline .select2-search__field {
+       margin-top: 0 !important;
+       padding: 0.25rem !important;
+       font-size: 0.875rem !important;
+       color: #374151 !important;
+   }
+   
+   .select2-container--default .select2-search--inline .select2-search__field::placeholder {
+       color: #9CA3AF !important;
+       opacity: 1 !important;
+   }
+   
+   /* Container dos itens selecionados */
+   .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+       display: flex !important;
+       flex-wrap: wrap !important;
+       gap: 0.25rem !important;
+       padding: 0 !important;
+       padding-right: 0 !important;
+       width: 100% !important;
+       box-sizing: border-box !important;
+   }
+   
+   /* Garante que os itens não quebrem quando o botão X aparece */
+   .select2-container--default .select2-selection--multiple .select2-selection__rendered li {
+       max-width: calc(100% - 3rem) !important;
+   }
+   
+   /* Dropdown de opções */
+   .select2-container--default .select2-results__option--highlighted[aria-selected] {
+       background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
+       color: white !important;
+   }
+   
+   .select2-container--default .select2-results__option[aria-selected=true] {
+       background-color: #dbeafe !important;
+       color: #1e40af !important;
+   }
+   
+   /* Animação suave ao adicionar/remover */
+   .select2-container--default .select2-selection--multiple .select2-selection__choice {
+       animation: slideIn 0.2s ease-out;
+   }
+   
+   @keyframes slideIn {
+       from {
+           opacity: 0;
+           transform: scale(0.8);
+       }
+       to {
+           opacity: 1;
+           transform: scale(1);
+       }
+   }
+   
+   /* Animação de pulse no container */
+   .pulse-animation {
+       animation: pulse 0.3s ease-out;
+   }
+   
+   @keyframes pulse {
+       0%, 100% {
+           transform: scale(1);
+       }
+       50% {
+           transform: scale(1.02);
+       }
+   }
+   
+   /* Scroll suave no dropdown */
+   .select2-results__options {
+       max-height: 250px !important;
+       overflow-y: auto !important;
+   }
+   
+   .select2-results__options::-webkit-scrollbar {
+       width: 8px;
+   }
+   
+   .select2-results__options::-webkit-scrollbar-track {
+       background: #f1f5f9;
+       border-radius: 10px;
+   }
+   
+   .select2-results__options::-webkit-scrollbar-thumb {
+       background: linear-gradient(180deg, #06b6d4 0%, #3b82f6 100%);
+       border-radius: 10px;
+   }
+   
+   .select2-results__options::-webkit-scrollbar-thumb:hover {
+       background: linear-gradient(180deg, #0891b2 0%, #2563eb 100%);
    }
 </style>
 <section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_1fr] justify-items-center py-6 md:py-0 w-full">
@@ -123,19 +341,21 @@ Sem B.O
                {{ form.password1.label_tag }}
                <div class="relative">
                   {{ form.password1 }}
-                  <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                  <span class="material-symbols-outlined toggle-password absolute top-1/2 -translate-y-1/2 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem] z-10">
                   visibility
                   </span>
                </div>
+               <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
             </div>
             <div>
                {{ form.password2.label_tag }}
                <div class="relative">
                   {{ form.password2 }}
-                  <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                  <span class="material-symbols-outlined toggle-password absolute top-1/2 -translate-y-1/2 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem] z-10">
                   visibility
                   </span>
                </div>
+               <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
             </div>
             <div class="flex gap-2 my-2">
                <button type="button"
@@ -207,17 +427,42 @@ Sem B.O
    $(document).ready(function(){
        $('#id_telephone').mask('(00) 00000-0000');
        $('#id_CPF').mask('000.000.000-00', {reverse: true});
-   });
-</script>    
-<script>
-   flatpickr("#id_date_of_birth", {
-       dateFormat: "Y-m-d",
-       altInput: true,
-       altFormat: "d/m/Y",
-       placeholder: "Data de nascimento",
-       onChange: function(selectedDates, dateStr, instance) {
-           instance.element.value = dateStr;
-       }
+       
+       // Máscara de data no input alternativo do flatpickr
+       const dateInput = document.querySelector('#id_date_of_birth');
+       
+       flatpickr("#id_date_of_birth", {
+           dateFormat: "Y-m-d",
+           altInput: true,
+           altFormat: "d/m/Y",
+           allowInput: true, // Permite digitação manual
+           placeholder: "dd/mm/aaaa",
+           onChange: function(selectedDates, dateStr, instance) {
+               instance.element.value = dateStr;
+           },
+           onReady: function(selectedDates, dateStr, instance) {
+               // Aplica máscara no input alternativo (visível)
+               $(instance.altInput).mask('00/00/0000', {
+                   placeholder: "dd/mm/aaaa",
+                   onComplete: function(value) {
+                       // Converte dd/mm/yyyy para yyyy-mm-dd
+                       const parts = value.split('/');
+                       if (parts.length === 3) {
+                           const day = parts[0];
+                           const month = parts[1];
+                           const year = parts[2];
+                           const isoDate = `${year}-${month}-${day}`;
+                           
+                           // Valida e define a data no flatpickr
+                           const date = new Date(isoDate);
+                           if (!isNaN(date.getTime())) {
+                               instance.setDate(isoDate, true);
+                           }
+                       }
+                   }
+               });
+           }
+       });
    });
 </script>
 <script>
@@ -329,6 +574,7 @@ Sem B.O
        
                const userNameRaw = $('#id_first_name').val() || 'Usuário';
                const userName = userNameRaw.trim().charAt(0).toUpperCase() + userNameRaw.trim().slice(1).toLowerCase();
+               const userEmail = $('#id_email').val() || '';
 
                LoadingButtonHandler.toggleAllButtons(this, true);       
                StepNavigator.advanceStepIfValid(this, false).then((isValid) => {
@@ -338,8 +584,14 @@ Sem B.O
                        Swal.fire({
                            icon: 'success',
                            title: `Seja bem-vindo, ${userName}!`,
-                           text: `Seu registro foi finalizado com sucesso.`,
-                           confirmButtonText: 'Entrar',
+                           html: `
+                               <p class="mb-2">Seu registro foi finalizado com sucesso!</p>
+                               <p class="text-sm text-gray-600">
+                                   Enviamos um email de verificação para <strong>${userEmail}</strong>. 
+                                   Por favor, verifique sua caixa de entrada e clique no link para ativar sua conta.
+                               </p>
+                           `,
+                           confirmButtonText: 'Entendi',
                            customClass: {
                                confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
                                popup: 'rounded-xl',
@@ -435,8 +687,15 @@ Sem B.O
                $field.removeClass('border-gray-300')
                      .addClass('border-red-500 bg-red-50');
    
-               const $container = $field.closest('div');
-               let $error = $container.find('.error-message');
+               // Para campos de senha, busca o container pai (que contém label + div relativo + error)
+               let $container;
+               if (field === 'password1' || field === 'password2') {
+                   $container = $field.closest('div').parent(); // Sobe um nível extra
+               } else {
+                   $container = $field.closest('div');
+               }
+               
+               let $error = $container.find('.error-message').first();
    
                if (!$error.length) {
                    $error = $('<div class="error-message text-sm text-red-600 mt-1"></div>').appendTo($container);

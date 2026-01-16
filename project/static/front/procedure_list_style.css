@@ -148,6 +148,10 @@ body {
     opacity: 0.8;
 }
 
+.records_tags {
+    margin-top: 0.5rem;
+}
+
 .records_tags a {
     background-color: #f3f3f899;
     padding: 6px;
@@ -159,6 +163,40 @@ body {
 .procedure-occupation {
     background-color: #7d838b !important;
     color: white !important;
+}
+
+.more-tags {
+    background-color: #0F0F0F;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+}
+
+.more-tags-indicator {
+    background-color: #42D1EB;
+    color: #0F0F0F;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.more-tags-indicator:hover {
+    background-color: #0F0F0F;
+    color: #42D1EB;
+    transform: scale(1.05);
 }
 
 .modal-content {

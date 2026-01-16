@@ -79,266 +79,625 @@ Sem B.O
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
+    /**
+     * Home Page Search & Favorites Manager
+     * Refatorado para melhor performance, manutenibilidade e prevenção de erros
+     */
     $(document).ready(function () {
-        const searchForm = $('#search-form');
-        const searchResults = $('.search_results');
-        const banner = $('.banner');
-        const searchIcon = $('#search');
-        const closeIcon = $('#close-filter');
+        // ========================================
+        // CONFIGURAÇÃO E ESTADO DA APLICAÇÃO
+        // ========================================
+        const CONFIG = {
+            INITIAL_PAGE: 2,
+            FEEDBACK_DURATION: 2000,
+            FEEDBACK_FADE_DURATION: 500
+        };
 
-        let page = 2;
-        let loading = false;
-        let searchActive = false;
+        const STATE = {
+            page: CONFIG.INITIAL_PAGE,
+            loading: false,
+            searchActive: false,
+            currentQuery: ''
+        };
 
-        function toggleCloseVisibility() {
-            if (searchActive) {
-                searchIcon.hide();
-                closeIcon.show();
-            } else {
-                searchIcon.show();
-                closeIcon.hide();
+        // ========================================
+        // CACHE DE ELEMENTOS DOM
+        // ========================================
+        const ELEMENTS = {
+            searchForm: $('#search-form'),
+            searchResults: $('.search_results'),
+            searchInput: null, // Será inicializado
+            banner: $('.banner'),
+            searchIcon: $('#search'),
+            closeIcon: $('#close-filter'),
+            modal: $('#favorite-modal'),
+            blurOverlay: $('.blur'),
+            confirmFavoriteButton: $('#confirm-favorite')
+        };
+
+        // Inicializa elementos que dependem de outros
+        ELEMENTS.searchInput = ELEMENTS.searchForm.find('input[name="q"]');
+
+        // ========================================
+        // UTILIDADES
+        // ========================================
+        const Utils = {
+            /**
+             * Escapa HTML para prevenir XSS
+             */
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return String(text).replace(/[&<>"']/g, m => map[m]);
+            },
+
+            /**
+             * Copia texto para clipboard de forma moderna
+             */
+            async copyToClipboard(text) {
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(text);
+                        return true;
+                    } else {
+                        // Fallback para navegadores antigos
+                        const tempTextArea = $('<textarea>')
+                            .val(text)
+                            .css({
+                                position: 'fixed',
+                                left: '-9999px',
+                                top: '-9999px'
+                            })
+                            .appendTo('body');
+                        
+                        tempTextArea.select();
+                        const success = document.execCommand('copy');
+                        tempTextArea.remove();
+                        return success;
+                    }
+                } catch (err) {
+                    console.error('Erro ao copiar:', err);
+                    return false;
+                }
+            },
+
+            /**
+             * Debounce para otimizar eventos
+             */
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
             }
-        }
+        };
 
-        function createProcedureHTML(procedure) {
-            const baseUrl = "{% url 'procedure_detail' procedure_code='__PROCEDURE_CODE__' %}";
-            const helpUrl = baseUrl.replace("__PROCEDURE_CODE__", procedure.code);
+        // ========================================
+        // FEEDBACK VISUAL
+        // ========================================
+        const Feedback = {
+            /**
+             * Mostra mensagem de feedback ao usuário
+             */
+            show(message, success = true) {
+                // Remove feedbacks anteriores
+                $('.feedback-message').remove();
 
-            const procedureDiv = $('<div class="procedure p-4 my-2 border rounded-lg"></div>');
-            const nameLink = $('<div class="title_tags"><a class="title_procedure" href="' + helpUrl + '">' + procedure.name + '</a></div>');
-            const records = $('<div class="records_tags hidden md:flex"></div>')
-            const codeProcedure = $('<div class="procedure_code w-[70%] md:w-[8rem]"></div>')
-            const rightInfo = $('<div class="right_info"></div>')
+                const feedback = $('<div class="feedback-message"></div>')
+                    .css({
+                        position: 'fixed',
+                        top: '20px',
+                        right: '20px',
+                        backgroundColor: success ? '#10B981' : '#EF4444',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '8px',
+                        zIndex: '9999',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        fontWeight: '500',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    })
+                    .html(`
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            ${success 
+                                ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>'
+                                : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>'
+                            }
+                        </svg>
+                        <span>${Utils.escapeHtml(message)}</span>
+                    `)
+                    .appendTo('body')
+                    .hide()
+                    .fadeIn(200);
 
-            procedure.occupations_names.forEach(function (occupation_name) {
-                nameLink.append(records);
-            });
-        
-            procedure.records_names.forEach(function (recordName) {
-                const recordLink = $('<a>' + recordName + '</a>');
-                records.append(recordLink)
-                nameLink.append(records);
-            });
-
-            codeProcedure.append(procedure.code)
-            const icon = $('<ion-icon name="' + (procedure.favorite ? 'bookmark' : 'bookmark-outline') + '" class="w-[10%] md:w-10 h-5 favorite-icon" data-procedure-id="' + procedure.code + '"></ion-icon>');
-            const help = $('<a class="help-icon w-[20%] md:w-10 md:mr-4" href="' + helpUrl + '"><div class="help "><ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon></div></a>');
-
-            rightInfo.append(icon, codeProcedure, help)
-            procedureDiv.append(nameLink, rightInfo);
-            searchResults.append(procedureDiv);
-
-            if($('#load-more')){
-                const loadMoreButton = $('#load-more');
-                procedureDiv.insertBefore(loadMoreButton);
+                setTimeout(() => {
+                    feedback.fadeOut(CONFIG.FEEDBACK_FADE_DURATION, function() {
+                        $(this).remove();
+                    });
+                }, CONFIG.FEEDBACK_DURATION);
             }
+        };
 
-            captureFavoriteButtons()
-            return procedureDiv;
-        }
+        // ========================================
+        // GERENCIAMENTO DE UI
+        // ========================================
+        const UI = {
+            /**
+             * Alterna visibilidade dos ícones de busca/fechar
+             */
+            toggleSearchIcons() {
+                if (STATE.searchActive) {
+                    ELEMENTS.searchIcon.hide();
+                    ELEMENTS.closeIcon.show();
+                } else {
+                    ELEMENTS.searchIcon.show();
+                    ELEMENTS.closeIcon.hide();
+                }
+            },
 
-        function handleLoadMore(query) {
-            if (!loading) {
-                loading = true;
+            /**
+             * Mostra estado de loading
+             */
+            showLoading() {
                 $('#load-more').hide();
                 $('.loading').show();
+            },
+
+            /**
+             * Esconde estado de loading
+             */
+            hideLoading() {
+                $('.loading').hide();
+                $('#load-more').show();
+            },
+
+            /**
+             * Limpa resultados de busca
+             */
+            clearResults() {
+                ELEMENTS.searchResults.empty();
+                STATE.page = CONFIG.INITIAL_PAGE;
+            },
+
+            /**
+             * Reseta estado da busca
+             */
+            resetSearch() {
+                STATE.searchActive = false;
+                this.toggleSearchIcons();
+                this.clearResults();
+                ELEMENTS.searchInput.val('');
+                ELEMENTS.banner.removeClass('none');
+                ELEMENTS.searchResults.parent().removeClass('block').addClass('none');
+            },
+
+            /**
+             * Mostra modal de favoritos
+             */
+            showModal() {
+                ELEMENTS.modal.removeClass('hidden');
+                ELEMENTS.blurOverlay.show();
+            },
+
+            /**
+             * Esconde modal de favoritos
+             */
+            hideModal() {
+                ELEMENTS.modal.addClass('hidden');
+                ELEMENTS.blurOverlay.hide();
+            }
+        };
+
+        // ========================================
+        // RENDERIZAÇÃO DE PROCEDIMENTOS
+        // ========================================
+        const ProcedureRenderer = {
+            /**
+             * Cria URL de detalhes do procedimento
+             */
+            createDetailUrl(procedureCode) {
+                const baseUrl = "{% url 'procedure_detail' procedure_code='__PROCEDURE_CODE__' %}";
+                return baseUrl.replace("__PROCEDURE_CODE__", encodeURIComponent(procedureCode));
+            },
+
+            /**
+             * Cria HTML do procedimento de forma segura
+             */
+            create(procedure) {
+                if (!procedure || !procedure.code) {
+                    console.warn('Procedimento inválido:', procedure);
+                    return null;
+                }
+
+                const detailUrl = this.createDetailUrl(procedure.code);
+                const escapedName = Utils.escapeHtml(procedure.name || 'Sem nome');
+                const escapedCode = Utils.escapeHtml(procedure.code);
+
+                const procedureDiv = $('<div class="procedure p-4 my-2 border rounded-lg"></div>');
+                
+                // Title e tags
+                const nameLink = $(`
+                    <div class="title_tags">
+                        <a class="title_procedure" href="${detailUrl}">${escapedName}</a>
+                    </div>
+                `);
+
+                const records = $('<div class="records_tags mt-2 md:mt-0 flex"></div>');
+                
+                // Combina ocupações e registros
+                const allTags = [];
+                if (Array.isArray(procedure.occupations_names)) {
+                    allTags.push(...procedure.occupations_names.map(o => ({ text: o, isOccupation: true })));
+                }
+                if (Array.isArray(procedure.records_names)) {
+                    allTags.push(...procedure.records_names.map(r => ({ text: r, isOccupation: false })));
+                }
+                
+                // Renderiza tags com limite máximo de 2
+                const maxVisibleTags = 2;
+                const visibleTags = allTags.slice(0, maxVisibleTags);
+                const hiddenCount = allTags.length - maxVisibleTags;
+                
+                // Tags visíveis (com truncamento)
+                visibleTags.forEach(tag => {
+                    const truncated = tag.text.length > 20 ? tag.text.substring(0, 20) + '...' : tag.text;
+                    const escapedText = Utils.escapeHtml(truncated);
+                    const className = tag.isOccupation ? 'procedure-occupation tag-item' : 'tag-item';
+                    records.append(`<a class="${className}">${escapedText}</a>`);
+                });
+                
+                // Indicador de mais tags se houver
+                if (hiddenCount > 0) {
+                    records.append(`<span class="more-tags-indicator" title="Clique no procedimento para ver todos os detalhes">+${hiddenCount}</span>`);
+                }
+                
+                nameLink.append(records);
+
+                // Info da direita
+                const rightInfo = $('<div class="right_info"></div>');
+                const codeProcedure = $(`<div class="procedure_code w-[70%] md:w-[8rem]">${escapedCode}</div>`);
+                
+                const favoriteIconName = procedure.favorite ? 'bookmark' : 'bookmark-outline';
+                const icon = $(`
+                    <ion-icon 
+                        name="${favoriteIconName}" 
+                        class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer" 
+                        data-procedure-id="${escapedCode}"
+                    ></ion-icon>
+                `);
+                
+                const help = $(`
+                    <a class="help-icon w-[20%] md:w-10 md:mr-4" href="${detailUrl}">
+                        <div class="help">
+                            <ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon>
+                        </div>
+                    </a>
+                `);
+
+                rightInfo.append(icon, codeProcedure, help);
+                procedureDiv.append(nameLink, rightInfo);
+
+                return procedureDiv;
+            },
+
+            /**
+             * Adiciona procedimento aos resultados
+             */
+            append(procedure) {
+                const procedureElement = this.create(procedure);
+                if (!procedureElement) return;
+
+                const loadMoreButton = $('#load-more');
+                if (loadMoreButton.length) {
+                    procedureElement.insertBefore(loadMoreButton);
+                } else {
+                    ELEMENTS.searchResults.append(procedureElement);
+                }
+            },
+
+            /**
+             * Adiciona botão "Carregar Mais"
+             */
+            addLoadMoreButton() {
+                const loadMoreBtn = $(`
+                    <button 
+                        id="load-more" 
+                        class="flex items-center justify-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition w-full mt-4"
+                    >
+                        Carregar Mais
+                    </button>
+                `);
+
+                const loadingDiv = $(`
+                    <div 
+                        class="loading flex items-center justify-center rounded-md border border-gray-300 shadow-sm sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] w-full mt-4" 
+                        style="display: none;"
+                    >
+                        <svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Carregando...
+                    </div>
+                `);
+
+                ELEMENTS.searchResults.append(loadMoreBtn, loadingDiv);
+            },
+
+            /**
+             * Remove botão "Carregar Mais"
+             */
+            removeLoadMoreButton() {
+                $('#load-more, .loading').remove();
+            },
+
+            /**
+             * Mostra mensagem de "não encontrado"
+             */
+            showNoResults() {
+                const message = $(`
+                    <div class="no-procedures text-center py-8 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-medium">Procedimento não encontrado</p>
+                        <p class="text-sm mt-1">ou não disponível para sua ocupação</p>
+                    </div>
+                `);
+                ELEMENTS.searchResults.append(message);
+            }
+        };
+
+        // ========================================
+        // AJAX & BUSCA
+        // ========================================
+        const Search = {
+            /**
+             * Carrega mais procedimentos (paginação)
+             */
+            loadMore(query) {
+                if (STATE.loading) return;
+
+                STATE.loading = true;
+                UI.showLoading();
 
                 $.ajax({
-                    type: "GET",
-                    url: searchForm.attr('action'),
-                    data: { 'q': query, 'page': page },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.procedures && data.procedures.length > 0) {
-                            data.procedures.map(createProcedureHTML);
+                    type: 'GET',
+                    url: ELEMENTS.searchForm.attr('action'),
+                    data: { q: query, page: STATE.page },
+                    dataType: 'json',
+                    success: (data) => {
+                        if (data.procedures && Array.isArray(data.procedures) && data.procedures.length > 0) {
+                            data.procedures.forEach(proc => ProcedureRenderer.append(proc));
 
-                            if (!data.procedures[0].has_more_results) {
-                                $('#load-more').remove();
-                                $('.loading').remove();
+                            const hasMoreResults = data.procedures[0]?.has_more_results;
+                            if (!hasMoreResults) {
+                                ProcedureRenderer.removeLoadMoreButton();
+                            } else {
+                                STATE.page++;
                             }
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        console.error('Erro ao carregar mais procedimentos:', error);
+                        Feedback.show('Erro ao carregar procedimentos', false);
+                    },
+                    complete: () => {
+                        STATE.loading = false;
+                        UI.hideLoading();
+                    }
+                });
+            },
 
-                            page++;
+            /**
+             * Carrega procedimentos iniciais
+             */
+            load(query) {
+                if (!query || !query.trim()) {
+                    Feedback.show('Digite um termo para buscar', false);
+                    return;
+                }
+
+                STATE.currentQuery = query;
+
+                $.ajax({
+                    type: 'GET',
+                    url: ELEMENTS.searchForm.attr('action'),
+                    data: { q: query },
+                    dataType: 'json',
+                    success: (data) => {
+                        if (data.procedures && Array.isArray(data.procedures) && data.procedures.length > 0) {
+                            data.procedures.forEach(proc => ProcedureRenderer.append(proc));
+
+                            const hasMoreResults = data.procedures[0]?.has_more_results;
+                            if (hasMoreResults) {
+                                ProcedureRenderer.addLoadMoreButton();
+                            }
+                        } else {
+                            ProcedureRenderer.showNoResults();
                         }
 
-                        loading = false;
-                        $('.loading').hide();
-                        $('#load-more').show();
+                        UI.toggleSearchIcons();
+                        ELEMENTS.banner.addClass('none');
+                        ELEMENTS.searchResults.parent().removeClass('none').addClass('block');
+                    },
+                    error: (xhr, status, error) => {
+                        console.error('Erro na busca:', error);
+                        Feedback.show('Erro ao buscar procedimentos', false);
+                        ProcedureRenderer.showNoResults();
                     }
                 });
             }
-        }
+        };
 
-        function loadProcedures(query) {
-            $.ajax({
-                type: "GET",
-                url: searchForm.attr('action'),
-                data: { 'q': query },
-                success: function (data) {
-                    if (data.procedures && data.procedures.length > 0) {
-                        data.procedures.map(createProcedureHTML);
+        // ========================================
+        // GERENCIAMENTO DE FAVORITOS
+        // ========================================
+        const Favorites = {
+            currentProcedureCode: null,
 
-                        if (data.procedures[0].has_more_results) {
-                            searchResults.append('<button id="load-more" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: block;">Carregar Mais</button>');
-                            searchResults.append('<div class="loading flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: none;">Carregando...</div>');
-                        }
-                    } else {
-                        const noProceduresMessage = $('<p class="no-procedures">Procedimento não encontrado ou não disponível para sua ocupação</p>');
-                        searchResults.append(noProceduresMessage);
-                    }
-
-                    toggleCloseVisibility();
-                    banner.addClass('none')
-                    searchResults.parent().removeClass('none').addClass('block');
-                    
-                    $('#load-more').on('click', function () {
-                        handleLoadMore(query);
-                    });
-                }
-            });
-        }
-
-        searchForm.on('submit', function (e) {
-            e.preventDefault();
-
-            searchActive = true;
-            toggleCloseVisibility();
-
-            searchResults.empty();
-            const query = searchForm.find('input[name="q"]').val().trim();
-
-            if (query) {
-                loadProcedures(query)
-            }
-        });
-
-        closeIcon.on('click', function () {
-            searchActive = false;
-            toggleCloseVisibility();
-
-            searchResults.empty();
-            closeIcon.hide();
-            searchIcon.show();
-            banner.removeClass('none');
-
-            searchForm.find('input[name="q"]').val('');
-            searchResults.parent().removeClass('block').addClass('none');
-        });
-        
-        searchIcon.on('click', function () {
-            searchForm.submit();
-        });
-
-        function showFeedbackMessage(message, success = true) {
-            const feedback = $('<div class="feedback-message"></div>').css({
-                position: 'fixed',
-                top: '20px',
-                right: '20px',
-                backgroundColor: success ? '#4CAF50' : '#F44336',
-                color: 'white',
-                padding: '10px',
-                borderRadius: '5px',
-                zIndex: '1000',
-                boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.3)'
-            }).text(message).appendTo('body').delay(2000).fadeOut(500, function () {
-                $(this).remove();
-            });
-        }
-
-        function captureFavoriteButtons() {
-            const modal = $('#favorite-modal');
-            const blurOverlay = $(".blur");
-            const confirmFavoriteButton = $('#confirm-favorite');
-            let procedureCode;
-
-            blurOverlay.on('click', function () {
-                modal.addClass('hidden');
-                blurOverlay.hide();
-            });
-
-            $(document).off('click', '.favorite-icon');
-
-            $(document).on('click', '.favorite-icon', function () {
-                procedureCode = $(this).data('procedureId');
-                modal.removeClass('hidden');
-                blurOverlay.show();
-
+            /**
+             * Verifica status de favorito e atualiza modal
+             */
+            checkStatus(procedureCode) {
                 $.ajax({
                     url: '/check_favorite/',
                     type: 'POST',
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-                    data: { 'procedure_id': procedureCode },
-                    success: function (data) {
+                    data: { procedure_id: procedureCode },
+                    success: (data) => {
                         $('input[name="folders"]').prop('checked', false);
 
-                        if (data.is_favorite) {
-                            data.favorite_folders.forEach(function (folderId) {
-                                $('input[name="folders"][value="' + folderId + '"]').prop('checked', true);
+                        if (data.is_favorite && Array.isArray(data.favorite_folders)) {
+                            data.favorite_folders.forEach(folderId => {
+                                $(`input[name="folders"][value="${folderId}"]`).prop('checked', true);
                             });
                         } else {
+                            // Marca pasta "Geral" por padrão
                             $('input[name="folders"][value="1"]').prop('checked', true);
                         }
                     },
-                    error: function (error) {
+                    error: (xhr, status, error) => {
                         console.error('Erro ao verificar favorito:', error);
+                        Feedback.show('Erro ao verificar favorito', false);
                     }
                 });
-            });
+            },
 
-            $('.modal .close, #confirm-favorite').on('click', function () {
-                modal.addClass('hidden');
-                blurOverlay.hide();
-            });
+            /**
+             * Adiciona/remove favorito
+             */
+            toggle(procedureCode) {
+                const selectedFolderIds = $('input[name="folders"]:checked')
+                    .map(function() { return $(this).val(); })
+                    .get();
 
-            confirmFavoriteButton.off('click');
+                if (selectedFolderIds.length === 0) {
+                    Feedback.show('Selecione pelo menos uma pasta', false);
+                    return;
+                }
 
-            confirmFavoriteButton.on('click', function () {
-                confirmFavoriteButton.prop('disabled', true);
-
-                const selectedFolderIds = $('input[name="folders"]:checked').map(function () {
-                    return $(this).val();
-                }).get();
+                ELEMENTS.confirmFavoriteButton.prop('disabled', true);
 
                 $.ajax({
                     url: '/add-remove-favorite/',
                     type: 'POST',
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                     data: {
-                        'folders': selectedFolderIds,
-                        'procedure_id': procedureCode
+                        folders: selectedFolderIds,
+                        procedure_id: procedureCode
                     },
-                    success: function (data) {
-                        const icon = $('.favorite-icon[data-procedure-id="' + procedureCode + '"]');
-                        icon.attr('name', data.is_favorite ? 'bookmark' : 'bookmark-outline');
-                        confirmFavoriteButton.prop('disabled', false);
+                    success: (data) => {
+                        const icon = $(`.favorite-icon[data-procedure-id="${procedureCode}"]`);
+                        const newIconName = data.is_favorite ? 'bookmark' : 'bookmark-outline';
+                        icon.attr('name', newIconName);
 
-                        $('#favorite-modal').addClass('hidden');
-                        $(".blur").hide();
-
-                        showFeedbackMessage(data.is_favorite ? 'Procedimento favoritado!' : 'Procedimento desfavoritado!');
+                        UI.hideModal();
+                        
+                        const message = data.is_favorite 
+                            ? 'Procedimento favoritado!' 
+                            : 'Procedimento removido dos favoritos';
+                        Feedback.show(message, true);
                     },
-                    error: function (error) {
-                        console.error('Erro ao enviar dados:', error);
-                        confirmFavoriteButton.prop('disabled', false);
-
-                        showFeedbackMessage('Erro ao favoritar procedimento.', false);
+                    error: (xhr, status, error) => {
+                        console.error('Erro ao favoritar:', error);
+                        Feedback.show('Erro ao favoritar procedimento', false);
+                    },
+                    complete: () => {
+                        ELEMENTS.confirmFavoriteButton.prop('disabled', false);
                     }
                 });
-            });
-        }
+            },
 
-        function copyText(code) {
-            const tempTextArea = $('<textarea>').val(code).appendTo('body');
-            tempTextArea.select();
-            document.execCommand('copy');
-            tempTextArea.remove();
+            /**
+             * Abre modal de favoritos
+             */
+            openModal(procedureCode) {
+                if (!procedureCode) {
+                    console.error('Código de procedimento inválido');
+                    return;
+                }
 
-            showFeedbackMessage('Código Copiado!');
-        }
+                this.currentProcedureCode = procedureCode;
+                UI.showModal();
+                this.checkStatus(procedureCode);
+            }
+        };
 
-        $(document).on('click', '.procedure_code', function () {
-            copyText($(this).text().trim());
+        // ========================================
+        // EVENT LISTENERS
+        // ========================================
+        
+        // Submissão do formulário de busca
+        ELEMENTS.searchForm.on('submit', function(e) {
+            e.preventDefault();
+            
+            STATE.searchActive = true;
+            UI.clearResults();
+            
+            const query = ELEMENTS.searchInput.val().trim();
+            if (query) {
+                Search.load(query);
+            }
         });
-    });
 
+        // Botão de fechar busca
+        ELEMENTS.closeIcon.on('click', () => UI.resetSearch());
+
+        // Ícone de busca
+        ELEMENTS.searchIcon.on('click', () => ELEMENTS.searchForm.submit());
+
+        // Delegação de evento: Carregar mais procedimentos
+        $(document).on('click', '#load-more', function() {
+            Search.loadMore(STATE.currentQuery);
+        });
+
+        // Delegação de evento: Ícone de favorito
+        $(document).on('click', '.favorite-icon', function() {
+            const procedureCode = $(this).data('procedureId');
+            Favorites.openModal(procedureCode);
+        });
+
+        // Delegação de evento: Copiar código do procedimento
+        $(document).on('click', '.procedure_code', async function() {
+            const code = $(this).text().trim();
+            const success = await Utils.copyToClipboard(code);
+            Feedback.show(success ? 'Código copiado!' : 'Erro ao copiar código', success);
+        });
+
+        // Fechar modal
+        $('.modal .close').on('click', () => UI.hideModal());
+        ELEMENTS.blurOverlay.on('click', () => UI.hideModal());
+
+        // Confirmar favorito
+        ELEMENTS.confirmFavoriteButton.on('click', function() {
+            if (Favorites.currentProcedureCode) {
+                Favorites.toggle(Favorites.currentProcedureCode);
+            }
+        });
+
+        // Fechar modal com ESC
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && !ELEMENTS.modal.hasClass('hidden')) {
+                UI.hideModal();
+            }
+        });
+
+        // Inicialização
+        UI.toggleSearchIcons();
+    });
 </script>
 {% endblock %}

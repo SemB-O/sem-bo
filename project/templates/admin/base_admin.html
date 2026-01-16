@@ -61,6 +61,11 @@
                     <span class="ml-3">Benefícios</span>
                 </a>
                 
+                <a href="{% url 'admin-user-list' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'user' in request.resolver_match.url_name %}sidebar-active{% endif %}">
+                    <i class="fas fa-users w-5"></i>
+                    <span class="ml-3">Usuários</span>
+                </a>
+                
                 <a href="{% url 'admin-upload-sigtap' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 transition {% if 'upload-sigtap' in request.resolver_match.url_name %}sidebar-active{% endif %}">
                     <i class="fas fa-upload w-5"></i>
                     <span class="ml-3">Upload SIGTAP</span>
@@ -130,7 +135,7 @@
     <script>
         {% for message in messages %}
         Swal.fire({
-            text: '{{ message }}',
+            text: '{{ message|escapejs }}',
             icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% elif message.tags == "warning" %}warning{% else %}info{% endif %}',
             confirmButtonText: 'OK',
             customClass: {
