@@ -1,0 +1,199 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block page_title %}Pesquisa de CIDs{% endblock %}
+
+{% block content %}
+<!-- Header com Busca -->
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-heartbeat text-red-500 mr-3"></i>
+                Pesquisa de CIDs (Classificação Internacional de Doenças)
+            </h2>
+            <p class="text-sm text-gray-600 mt-1">Busque CIDs por código ou descrição</p>
+        </div>
+        <a href="{% url 'admin-dashboard' %}" class="text-primary hover:text-primary-dark font-medium text-sm">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+    
+    <!-- Formulário de Busca -->
+    <form method="get" class="mt-6">
+        <div class="flex gap-3">
+            <div class="flex-1">
+                <input type="text" 
+                       name="search" 
+                       value="{{ search_term }}"
+                       placeholder="Digite o código CID ou descrição da doença..." 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm">
+            </div>
+            <button type="submit" 
+                    class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-red-600 hover:to-pink-600 transition font-medium">
+                <i class="fas fa-search mr-2"></i>
+                Buscar
+            </button>
+        </div>
+    </form>
+    
+    <!-- Estatísticas -->
+    {% if search_term %}
+    <div class="mt-4 flex items-center gap-4 text-sm">
+        <span class="text-gray-600">
+            <i class="fas fa-search text-red-500 mr-1"></i>
+            Termo buscado: <strong>{{ search_term }}</strong>
+        </span>
+        <span class="text-gray-600">
+            <i class="fas fa-list text-blue-500 mr-1"></i>
+            Total de resultados: <strong>{{ total_results }}</strong>
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Resultados -->
+{% if cids %}
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-red-50 to-pink-50">
+                <tr>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Código CID
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Descrição
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Tipo Agravo
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Sexo
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Estádio
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for cid in cids %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-file-medical text-red-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-mono font-bold text-gray-900">{{ cid.cid_code }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900">{{ cid.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        {% if cid.grievance_type == 'A' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Agudo
+                        </span>
+                        {% elif cid.grievance_type == 'C' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            Crônico
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ cid.grievance_type }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        {% if cid.sex_type == 'M' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <i class="fas fa-mars mr-1"></i> Masculino
+                        </span>
+                        {% elif cid.sex_type == 'F' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                            <i class="fas fa-venus mr-1"></i> Feminino
+                        </span>
+                        {% elif cid.sex_type == 'A' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <i class="fas fa-venus-mars mr-1"></i> Ambos
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ cid.sex_type }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ cid.stadium_stype }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ total_results }} resultados
+            </div>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?search={{ search_term }}&page=1" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?search={{ search_term }}&page={{ page_obj.previous_page_number }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium">
+                    {{ page_obj.number }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?search={{ search_term }}&page={{ page_obj.next_page_number }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?search={{ search_term }}&page={{ page_obj.paginator.num_pages }}" 
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<!-- Mensagem quando não há resultados -->
+<div class="bg-white rounded-xl shadow-sm p-12 text-center">
+    <div class="w-24 h-24 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+        <i class="fas fa-search text-4xl text-gray-400"></i>
+    </div>
+    {% if search_term %}
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Nenhum resultado encontrado</h3>
+    <p class="text-gray-600">
+        Não encontramos CIDs para "<strong>{{ search_term }}</strong>".<br>
+        Tente usar termos diferentes ou mais genéricos.
+    </p>
+    {% else %}
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Digite um termo para pesquisar</h3>
+    <p class="text-gray-600">
+        Use o campo de busca acima para encontrar CIDs<br>
+        por código ou descrição da doença.
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

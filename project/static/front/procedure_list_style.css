@@ -9,19 +9,6 @@ body {
     box-sizing: border-box;
 }
 
-.menu-top {
-    margin-bottom: 1.5rem;
-}
-
-.menu-top a {
-    display: flex;
-    align-items: center;
-}
-
-.menu-top a img {
-    width: 10rem;
-}
-
 .search {
     width: 100%;
 }
@@ -47,13 +34,6 @@ body {
     font-size: 12px;
 }
 
-.search input{
-    background-color: #F4F4F8;
-    border-radius: 10px;
-    width: 100%;
-    padding-left: 5rem;
-}
-
 .search ion-icon {
     left: 4rem;
 }
@@ -77,7 +57,7 @@ body {
 }
 
 .results {
-    width: 97.5vw;
+    width: 100%;
     align-self: center;
     justify-self: center;
     max-height: 64vh;
@@ -113,14 +93,6 @@ body {
     align-items: center;
     transition: 0.3s;
     cursor: pointer;
-}
-
-.help:hover {
-    background-color: #dfdfe499;
-    transition: 0.5s;
-    width: 4rem;
-    align-items: center;
-    height: 3.2rem;
 }
 
 .help ion-icon{
@@ -176,6 +148,10 @@ body {
     opacity: 0.8;
 }
 
+.records_tags {
+    margin-top: 0.5rem;
+}
+
 .records_tags a {
     background-color: #f3f3f899;
     padding: 6px;
@@ -187,6 +163,40 @@ body {
 .procedure-occupation {
     background-color: #7d838b !important;
     color: white !important;
+}
+
+.more-tags {
+    background-color: #0F0F0F;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+}
+
+.more-tags-indicator {
+    background-color: #42D1EB;
+    color: #0F0F0F;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.more-tags-indicator:hover {
+    background-color: #0F0F0F;
+    color: #42D1EB;
+    transform: scale(1.05);
 }
 
 .modal-content {
@@ -205,7 +215,7 @@ body {
 }
 
 .modal {
-    z-index: 10;
+    z-index: 99;
 }
 
 .blur {
@@ -294,7 +304,7 @@ body {
 }
 
 .checkbox-custom:checked {
-    background-color: #5bcd3e;
+    background-color: black;
 }
 
 .checkbox-custom:checked::after {
@@ -426,7 +436,6 @@ body {
 
     .right_info {
         display: flex;
-        justify-content: space-evenly;
         justify-content: center;
         background: #F4F4F8;
         padding: 0.8rem;
@@ -447,15 +456,7 @@ body {
         align-items: center;
         transition: 0.3s;
         cursor: pointer;
-    }
-
-    .help:hover {
-        background-color: #dfdfe499;
-        width: 3.5rem;
-        height: 2rem;
-        transition: 0.5s;
-    }
-    
+    }    
 }
 
 @media (max-width: 800px) and (min-height: 880px) and (max-height: 900px) {

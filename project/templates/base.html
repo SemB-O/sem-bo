@@ -1,8 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     {% include 'parciais/head.html' %}
     <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'front/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        .select2-container .select2-selection--single,
+        .select2-container .select2-selection--multiple {
+        margin-top: 0.25rem;
+        display: flex;                        /* ← muda para flex */
+        align-items: center;                 /* ← centraliza verticalmente */
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        font-size: 0.875rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: #F2F2F7 !important;
+        min-height: 2.25rem;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
+        }
+        .select2-container--focus .select2-selection {
+        border-color: black !important;  /* focus:border-blue-500 */
+        box-shadow: 0 0 0 1px black;      /* focus:ring-blue-500 */
+        }
+     </style>
     {% block head %}{% endblock %}
 </head>
 <body class="min-h-screen">    
@@ -11,5 +39,19 @@
 
 
 {% endblock %}
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        text: '{{ message }}',
+        icon: '{% if message.tags == "error" %}error{% elif message.tags == "success" %}success{% endif %}',
+        confirmButtonText: 'OK',
+        customClass: {
+            confirmButton: 'bg-black text-white hover:bg-gray-900 px-4 py-2 rounded',
+            popup: 'rounded-xl',
+        },                    });
+</script>
+{% endfor %}
+{% endif %}
 </body>
 </html>

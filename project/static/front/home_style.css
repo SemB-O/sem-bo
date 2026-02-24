@@ -7,15 +7,6 @@ body {
     box-sizing: border-box;
 }
 
-.menu-top a {
-    display: flex;
-    align-items: center;
-}
-
-.menu-top a img {
-    width: 12rem;
-}
-
 .search {
     width: 93%;
 }
@@ -24,7 +15,6 @@ body {
     background-color: #F4F4F8;
     border-radius: 10px;
     width: 100%;
-    padding-left: 5rem;
 }
 
 .search ion-icon {
@@ -57,8 +47,8 @@ body {
 
 .banner img {
     border-radius: 10px;
-    width: 93.2vw;
-    height: 50vh;   
+    width: 100%;
+    height: 58vh;   
 }
 
 .banner video {
@@ -73,7 +63,7 @@ body {
 }
 
 .search_results {
-    width: 93.2%;
+    width: 100%;
     max-height: 49vh;
     overflow-y: auto;
 }
@@ -106,16 +96,18 @@ body {
     height: 3.2rem;
     border-radius: 0 1rem 1rem 0;
     align-items: center;
-    transition: 0.3s;
+    transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .help:hover {
-    background-color: #dfdfe499;
-    transition: 0.5s;
-    width: 4rem;
-    align-items: center;
-    height: 3.2rem;
+    background-color: #e0e0e0;
+    transform: translateX(2px);
+}
+
+.help:active {
+    transform: translateX(0);
+    background-color: #d5d5d5;
 }
 
 .help ion-icon{
@@ -129,6 +121,16 @@ body {
 .procedure ion-icon {
     cursor: pointer;
     align-self: center;
+    transition: all 0.3s ease;
+}
+
+.procedure ion-icon:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+}
+
+.procedure ion-icon:active {
+    transform: scale(1.1);
 }
 
 .procedure ion-icon:last-child {
@@ -164,6 +166,18 @@ body {
     background-color: RGB(245, 245, 249);
     padding: 10px;
     border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+#load-more:hover {
+    background-color: RGB(235, 235, 239);
+    transform: translateY(-2px);
+}
+
+#load-more:active {
+    transform: translateY(0);
 }
 
 .loading {
@@ -181,12 +195,55 @@ body {
     opacity: 0.8;
 }
 
+.records_tags {
+    margin-top: 0.5rem;
+}
+
 .records_tags a {
     background-color: #f3f3f899;
     padding: 6px;
     border-radius: 5px;
     color: black;
     margin-right: 5px;
+}
+
+.more-tags {
+    background-color: #0F0F0F;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+}
+
+.more-tags-indicator {
+    background-color: #42D1EB;
+    color: #0F0F0F;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.more-tags-indicator:hover {
+    background-color: #0F0F0F;
+    color: #42D1EB;
+    transform: scale(1.05);
+}
+
+.procedure-occupation {
+    background-color: #7d838b !important;
+    color: white !important;
 }
 
 .no-procedures {
@@ -259,7 +316,7 @@ body {
 }
 
 .checkbox-custom:checked {
-    background-color: #5bcd3e;
+    background-color: black;
 }
 
 .checkbox-custom:checked::after {
@@ -282,12 +339,6 @@ body {
     color: white !important;
 }
 
-.content-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    height: 100vh;
-}
 
 .content-search {
     padding: 0 1rem;
@@ -296,6 +347,7 @@ body {
 .right_info {
     display: flex;
     gap: 1rem;
+    align-items: center;
 }
 
 .procedure_code {
@@ -305,13 +357,44 @@ body {
     height: 3.2rem;
     border-radius: 0.3rem;
     align-items: center;
-    transition: 0.3s;
+    transition: all 0.3s ease;
     cursor: pointer;
     color: white;
     text-align: center;
     align-items: center;
     justify-content: center;
     font-size: 12px;
+    font-weight: 500;
+    position: relative;
+    user-select: none;
+}
+
+.procedure_code:hover {
+    background-color: #5a6069;
+    transform: translateY(-2px);
+}
+
+.procedure_code:active {
+    transform: translateY(0);
+}
+
+.procedure_code::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.procedure_code:hover::after {
+    opacity: 0.8;
 }
 
 @media (max-width: 800px) {
@@ -323,22 +406,8 @@ body {
         padding: 0 1rem 0 0.7rem;
     }
 
-    .content-page {
-        gap: 1.5rem;
-        justify-content: start ;
-    }
-
     .welcome-div {
         display: none !important;
-    }
-
-    .menu-top a img {
-        width: 10rem;
-    }    
-
-    .menu-top a {
-        display: flex;
-        align-items: baseline;
     }
 
     .search_results {
@@ -367,17 +436,8 @@ body {
         margin-right: 5px;
     }
 
-    .content-page {
-        padding: 0;
-    }
-
     .central-container {
         height: 80vh;
-    }
-
-    .bg-white {
-        --tw-bg-opacity: none !important; 
-        background-color: transparent !important;
     }
 
     ::-webkit-scrollbar {
@@ -430,7 +490,6 @@ body {
 
     .right_info {
         display: flex;
-        justify-content: space-evenly;
         justify-content: center;
         background: #F4F4F8;
         padding: 0.8rem;
@@ -439,7 +498,16 @@ body {
     }
 
     .procedure_code {
-        height: auto;
+        height: 3rem;
+    }
+
+    .procedure_code:hover {
+        background-color: #5a6069;
+        transform: translateY(-1px);
+    }
+
+    .procedure_code:active {
+        transform: translateY(0);
     }
 
     .help {
@@ -449,25 +517,16 @@ body {
         height: 2rem;
         border-radius: 0.5rem;
         align-items: center;
-        transition: 0.3s;
+        transition: all 0.3s ease;
         cursor: pointer;
     }
-}
 
-@media (max-width: 380px) {
-    .content-page {
-        gap: 0.7rem;
+    .help:hover {
+        background-color: #d5d5d5;
+        transform: scale(1.01);
     }
-}
 
-@media (min-width: 387px) and (max-width: 393px) {
-    .content-page {
-        gap: 0.6rem;
-    }
-}
-
-@media (max-width: 360px) {
-    .content-page {
-        gap: 0.3rem;
+    .help:active {
+        transform: scale(1);
     }
 }

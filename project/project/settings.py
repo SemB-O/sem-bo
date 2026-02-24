@@ -9,13 +9,14 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
 from pathlib import Path
 import os
+import boto3
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'local')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -31,7 +32,6 @@ DOMAIN = os.getenv('DOMAIN', 'localhost:8000')
 ALLOWED_HOSTS = ['0.0.0.0', '192.168.0.108', 'localhost', '127.0.0.1', DOMAIN, '*']
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,7 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_crontab',
     'cbo',
+    'rest_framework',
+    'drf_spectacular',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -123,7 +129,6 @@ LANGUAGE_CODE = 'pt-br'  # Defina o idioma padrão
 TIME_ZONE = 'America/Sao_Paulo'  # Defina o fuso horário padrão
 
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -153,23 +158,90 @@ EMAIL_FROM = 'sembooficial@gmail.com'
 EMAIL_HOST_USER = 'sembooficial@gmail.com'
 EMAIL_HOST_PASSWORD = 'ksghszfbpazriqiq'
 EMAIL_USE_TLS = True
-PASSWORD_RESET_TIMEOUT = 14400 
+PASSWORD_RESET_TIMEOUT = 14400
+
+# Email para notificações de sistema (SIGTAP, etc)
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'sembooficial@gmail.com')
 
 #Midia
 MEDIA_URL = '/media/'
 
-#STRORAGE
+#AWS CREDENTIALS
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') 
+AWS_REGION = os.getenv('AWS_REGION') 
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+#BOTO3 SESSION
+CLOUDWATCH_CLIENT = boto3.client(
+    'logs',
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_REGION
+) if  AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY else None
+
+#LOGGERS CLOUDWATCH
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{name}] [{funcName}] [{levelname}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'cloudwatch': {
+            'level': 'DEBUG',
+            'class': 'cbo.logging_handlers.LoggerNameAsStreamHandler',
+            'log_group': f'sem-bo/{ENVIRONMENT}',      
+            'create_log_group': True,
+            'use_queues': False,
+            'send_interval': 15,
+            'formatter': 'verbose',
+            'boto3_client': CLOUDWATCH_CLIENT,
+        },
+    },
+    'loggers': {
+        # '': {
+        #     'handlers': ['console', 'cloudwatch'],
+        #     'level': 'DEBUG',
+        #     'propagate': False,
+        # },
+        'django': {
+            'handlers': ['console', 'cloudwatch'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
+if not CLOUDWATCH_CLIENT:
+    LOGGING['handlers'].pop('cloudwatch', None)
+    for logger in LOGGING['loggers'].values():
+        if 'cloudwatch' in logger['handlers']:
+            logger['handlers'].remove('cloudwatch')
+
+#STORAGE 4S3
 # Check if AWS_STORAGE_BUCKET_NAME is defined
-
 USE_S3 = os.getenv('USE_S3') == 'TRUE'
+
+# Definir variáveis de localização (sempre disponíveis)
+STATICFILES_LOCATION = 'static'
+MEDIAFILES_LOCATION = 'media'
+
 if USE_S3:
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') 
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-
-    STATICFILES_LOCATION = 'static'
-    STATICFILES_STORAGE = 'cbo.utils.storages.S3StaticStorage'
-
-    MEDIAFILES_LOCATION = 'media'
-    DEFAULT_FILE_STORAGE = 'cbo.utils.storages.S3MediaStorage'
+    STORAGES = {
+        "default": {
+            "BACKEND": "cbo.utils.storages.S3MediaStorage",  
+        },
+        "staticfiles": {
+            "BACKEND": "cbo.utils.storages.S3StaticStorage",
+        },
+    }

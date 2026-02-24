@@ -14,25 +14,228 @@ Sem B.O
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap">
     
+    <style>
+        /* ========== CUSTOMIZAÇÃO SELECT2 - PADRÃO DO SISTEMA ========== */
+        
+        /* Container principal do Select2 */
+        .select2-container--default .select2-selection--multiple {
+            background-color: #F2F2F7 !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.375rem !important;
+            padding: 0.25rem 0.5rem !important;
+            min-height: 42px !important;
+        }
+
+        .select2-container .select2-selection--single, .select2-container .select2-selection--multiple {
+            align-items: baseline;
+            margin-top: 0 !important;
+        }
+        
+        /* Tags selecionadas */
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0F0F0F !important;
+            border: 1px solid #000000 !important;
+            border-radius: 0.25rem !important;
+            padding: 4px 8px !important;
+            margin: 4px 4px 4px 0 !important;
+            color: white !important;
+            font-size: 0.875rem !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important; /* Espaço entre X e texto */
+        }
+
+        .select2-selection__choice__display {
+            margin-left: 0.7rem;
+        }
+        
+        /* Botão X para remover tag */
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            margin-right: 0 !important; /* Removido margin, usando gap no pai */
+            font-size: 1rem !important;
+            font-weight: bold !important;
+            border: none !important;
+            margin-top: 0.2rem;
+            background: transparent !important;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #0F0F0F !important;
+            background: transparent !important;
+        }
+        
+        /* Campo de busca dentro do select */
+        .select2-container--default .select2-search--inline .select2-search__field {
+            margin-top: 4px !important;
+            padding: 0 !important;
+            font-size: 0.875rem !important;
+        }
+        
+        /* Dropdown */
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #42D1EB !important;
+            color: white !important;
+        }
+        
+        /* Opção selecionada no dropdown */
+        .select2-container--default .select2-results__option[aria-selected="true"] {
+            background-color: #e5f6fb !important;
+            color: #0F0F0F !important;
+        }
+        
+        /* Dropdown container */
+        .select2-dropdown {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.375rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Mensagem "Pesquisando..." */
+        .select2-container--default .select2-results__option--disabled {
+            color: #6b7280 !important;
+        }
+
+        /* Placeholder */
+        .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+            color: #6b7280 !important;
+        }
+        
+        /* Centralizar texto do helper */
+        .modal-content p.text-xs {
+            text-align: left;
+            margin-top: 0.5rem;
+        }
+
+        /* ========== HOVERS E ANIMAÇÕES (PADRÃO HOME) ========== */
+        
+        /* Ícone de favorito */
+        .favorite-icon {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-icon:hover {
+            transform: scale(1.2);
+            filter: brightness(1.2);
+        }
+
+        .favorite-icon:active {
+            transform: scale(1.1);
+        }
+
+        /* Código do procedimento */
+        .procedure_code {
+            background-color: #7d838b;
+            display: flex;
+            width: 8rem;
+            height: 3.2rem;
+            border-radius: 0.3rem;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            position: relative;
+            user-select: none;
+        }
+
+        .procedure_code:hover {
+            background-color: #5a6069;
+            transform: translateY(-2px);
+        }
+
+        .procedure_code:active {
+            transform: translateY(0);
+        }
+
+        /* Ícone de copiar no hover */
+        .procedure_code::after {
+            content: '';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .procedure_code:hover::after {
+            opacity: 0.8;
+        }
+
+        .right_info {
+            align-items: center;
+        }
+
+        /* Botão de ajuda */
+        .help {
+            background-color: #f3f3f899;
+            display: flex;
+            width: 3.5rem;
+            height: 3.2rem;
+            border-radius: 0 1rem 1rem 0;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .help:hover {
+            background-color: #e0e0e0;
+            transform: translateX(2px);
+        }
+
+        .help:active {
+            transform: translateX(0);
+            background-color: #d5d5d5;
+        }
+
+        .help ion-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Botão Load More */
+        #load-more {
+            transition: all 0.3s ease;
+        }
+
+        #load-more:hover {
+            background-color: RGB(235, 235, 239);
+            transform: translateY(-2px);
+        }
+
+        #load-more:active {
+            transform: translateY(0);
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
 
 {% include 'parciais/menu.html' %}
 
-
+<div class="mx-[1rem] md:mx-[5rem]">
 <form id="search-form" class="form-search" method="GET" action="{% url 'procedure_more' %}">
     {% csrf_token %}
-    <div class="flex justify-center ml-4 mr-4">
-        <div class="search flex items-center bg-transparent p-2">
-            <input type="text" class="search bg-white focus:outline-none w-full p-2.5 opacity-90" placeholder="Digite o procedimento" name="q">
-            <ion-icon class="w-6 h-6 absolute text-gray-600 opacity-40" name="search-outline"></ion-icon>
+    <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
+        <div class="mr-2 w-full">
+            <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
         </div>
-        <div id="filter" class="filter bg-F4F4F8 flex justify-center items-center">
-            <ion-icon name="options-outline" class="w-6 h-6"></ion-icon>
-        </div>
-        <div id="close-filter" class="filter bg-F4F4F8 flex justify-center items-center" style="display: none; background-color: rgb(243 106 106 / 85%)">
-            <ion-icon name="close-outline" style="color: white;" class="w-6 h-6"></ion-icon>
+        <div class="grid grid-cols-2 gap-2">
+            <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                <ion-icon name="search-outline" class="w-5 h-5 md hydrated" role="img"></ion-icon>
+            </button>
+            <button type="button" id="filter" id="open-filter-modal" aria-label="filter" class="flex items-center justify-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                <ion-icon name="options-outline" class="w-6 h-6 md hydrated" role="img"></ion-icon>
+            </button>
         </div>
     </div>
 </form>
@@ -41,24 +244,37 @@ Sem B.O
     {% for procedure in procedures %}
         <div class="procedure p-4 my-2 border rounded-lg">
             <div class="title_tags">
-                <a class="title_procedure">{{ procedure }}</a>
-                <div class="records_tags">
+                <a class="font-bold opacity-80" style="font-size: 14px;" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">{{ procedure }}</a>
+                <div class="records_tags mt-2 md:mt-0 flex">
+                    {% with total_tags=procedure.related_occupations_names|length|add:procedure.get_records_names|length %}
+                    
                     {% for occupation in procedure.related_occupations_names %}
-                        <a class="procedure-occupation" href="#">{{ occupation }}</a>
+                        <a class="procedure-occupation tag-item" {% if forloop.counter > 2 %}style="display: none;"{% endif %}>
+                            {% if occupation|length > 20 %}{{ occupation|slice:":20" }}...{% else %}{{ occupation }}{% endif %}
+                        </a>
                     {% endfor %}
+                    
                     {% for record in procedure.get_records_names %}
-                        <a href="#">{{ record }}</a>
+                        <a class="tag-item" {% if procedure.related_occupations_names|length|add:forloop.counter > 2 %}style="display: none;"{% endif %}>
+                            {% if record|length > 20 %}{{ record|slice:":20" }}...{% else %}{{ record }}{% endif %}
+                        </a>
                     {% endfor %}
+                    
+                    {% if total_tags > 2 %}
+                        <span class="more-tags-indicator" title="Clique no procedimento para ver todos os detalhes">+{{ total_tags|add:"-2" }}</span>
+                    {% endif %}
+                    
+                    {% endwith %}
                 </div>
             </div>
             <div class="right_info">
                 {% if procedure.procedure_code in favorite %}
-                    <ion-icon name="bookmark" class="w-5 h-5 md hydrated favorite-icon" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
+                    <ion-icon name="bookmark" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
                 {% else %}
-                    <ion-icon name="bookmark-outline" class="w-5 h-5 md hydrated favorite-icon" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
+                    <ion-icon name="bookmark-outline" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
                 {% endif %}
-                <div class="procedure_code">{{ procedure.procedure_code }}</div>
-                <a class="help-icon" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">
+                <div class="procedure_code w-[70%] md:w-[8rem]">{{ procedure.procedure_code }}</div>
+                <a class="help-icon w-[20%] md:w-10 md:mr-4" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">
                     <div class="help">
                         <ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon>
                     </div>
@@ -66,32 +282,40 @@ Sem B.O
             </div>
         </div>
     {% endfor %}
-    <button id="load-more" style="display: {% if procedures.has_next %}block{% else %}none{% endif %};">Carregar Mais</button>
-    <div class="loading" style="display: none;">carregando...</div>
+    <button id="load-more" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: {% if procedures.has_next %}block{% else %}none{% endif %};">Carregar Mais</button>
+    <div class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: none;">Carregando...</div>
 </div>
 
-<div class="content-principal">
-    <div class="modal-content bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 hidden">
-        <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-700">Filtro de Resultados</h2>
-            <span class="close text-2xl cursor-pointer" id="close-modal">&times;</span>
+    <div class="content-principal">
+        <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 shadow-lg hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Filtro de Resultados</h2>
+                <span class="close text-2xl cursor-pointer text-gray-500 hover:text-gray-800 transition" id="close-modal">&times;</span>
+            </div>
+        
+            <div class="mt-2">
+                <label for="record-name-filter" class="text-gray-700 font-medium block mb-2">Tipos de Registro</label>
+                <select id="record-name-filter" class="block w-full px-4 py-2 border rounded-lg bg-white focus:outline-none filter-results" multiple="multiple">
+                    {% for record in records %}
+                        {% if record.name %}
+                        <option value="{{ record.name }}">{{ record.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <p class="text-xs text-gray-500 mt-2">💡 Selecione um ou mais tipos de registro</p>
+            </div>
+        
+            <div class="mt-6 flex gap-3">
+                <button id="clear-filter" class="bg-gray-200 text-gray-700 font-medium flex-1 py-2.5 px-4 rounded-md hover:bg-gray-300 transition">
+                    Limpar
+                </button>
+                <button id="apply-filter" class="bg-[#0F0F0F] text-white font-medium flex-1 py-2.5 px-4 rounded-md hover:bg-black transition shadow-sm">
+                    Aplicar Filtro
+                </button>
+            </div>
         </div>
-    
-        <div class="mt-2">
-            <label for="record-name-filter" class="text-gray-600">Nome de Registros</label>
-            <select id="record-name-filter" class="block w-full px-4 py-2 mt-1 border rounded-lg bg-gray-200 focus:outline-none filter-results">
-                <option value="all">Todos</option>
-                {% for record in records %}
-                    <option value="{{ record.name }}">{{ record.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    
-        <div class="mt-4">
-            <button id="apply-filter" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Aplicar</button>
-        </div>
+        <div class="blur hidden"></div>
     </div>
-    <div class="blur hidden"></div>
 </div>
 
 <div class="content-principal folder-modal">
@@ -99,12 +323,12 @@ Sem B.O
         <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6">
             <div class="sup-folder">
                 <div></div>
-                <h2 class="text-xl ml-2 mb-2 title-modal-folders">Adicione a uma <b>pasta de Favoritos</b></h2>
+                <h2 class="text-xl ml-2 mb-2 title-modal-folders">Adicione a uma <b>Pasta de Favoritos</b></h2>
                 <span class="close text-gray-600 cursor-pointer">&times;</span>
             </div>
             <ul class="mb-4">
                 {% for folder in favorite_folders %}
-                <li class="folder mb-2">
+                <li class="folder mb-2 shadow">
                     <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders">
                         <label for="folder-{{ folder.id }}">{{ folder.name }}</label>
                         <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>
@@ -112,7 +336,7 @@ Sem B.O
                 </li>
                 {% endfor %}
             </ul>
-            <button id="confirm-favorite" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg">Confirmar</button>
+            <button id="confirm-favorite" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Confirmar</button>
         </div>
     </div>
     <div class="blur hidden"></div>
@@ -120,388 +344,371 @@ Sem B.O
 
 {% include 'parciais/menu_inferior.html' %}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
 <script>
-    $(document).ready(function () {
-        const form = $('#search-form');
-        const searchResults = $('.search_results');
-        const resultsAll = $('.results')
-        const banner = $('.banner');
-        const loadingIndicator = $('.loading');
-        const optionsIcon = $('.filter ion-icon[name="options-outline"]');
-        const closeIcon = $('.filter ion-icon[name="close-outline"]');
-        const filterIcon = $('.filter ion-icon');
-        const recordNameFilter = document.getElementById("record-name-filter");
+/**
+ * Procedure List Page - Refatorado
+ * Arquitetura modular com prevenção de XSS e event delegation
+ */
+$(document).ready(function() {
+    // ================== CONFIGURAÇÃO ==================
+    const CONFIG = {
+        INITIAL_PAGE: 2,
+        FEEDBACK_DURATION: 2000
+    };
 
-        let loading = false;
-        let page = 2;
+    const STATE = {
+        page: CONFIG.INITIAL_PAGE,
+        loading: false
+    };
 
-        function createProcedureHTML(procedure, procedure_url=null) {
-            const procedureDiv = $('<div class="procedure p-4 my-2 border rounded-lg"></div>');
-            const nameLink = $('<div class="title_tags"><a class="title_procedure" href="' + procedure_url + '">' + procedure.name + '</a></div>');
-            const records = $('<div class="records_tags"></div>')
-            const codeProcedure = $('<div class="procedure_code"></div>')
-            const rightInfo = $('<div class="right_info"></div>')
+    // ================== UTILITÁRIOS ==================
+    const Utils = {
+        escapeHtml: function(text) {
+            if (!text) return '';
+            const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        },
 
-            procedure.occupations_of_users.forEach(function (occupation) {
-                const occupation_link = $('<a class="procedure-occupation">' + occupation + '</a>');
-                records.append(occupation_link);
-                nameLink.append(records);
-            });
-            procedure.records_names.forEach(function (recordName) {
-                const recordLink = $('<a>' + recordName + '</a>');
-                records.append(recordLink),
-                nameLink.append(records);
-            });
-            const baseUrl = "{% url 'procedure_detail' procedure_code='__PROCEDURE_CODE__' %}";
-            const helpUrl = baseUrl.replace("__PROCEDURE_CODE__", procedure.code);
-
-            if(procedure.favorite){
-                var icon = $('<ion-icon name="bookmark" class="w-5 h-5 md hydrated favorite-icon" data-procedure-id='+ procedure.code +'></ion-icon>');
+        copyToClipboard: function(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => Feedback.show('Código copiado!', true))
+                    .catch(() => this.fallbackCopy(text));
             } else {
-                var icon = $('<ion-icon name="bookmark-outline" class="w-5 h-5 md hydrated favorite-icon" data-procedure-id='+ procedure.code +'></ion-icon>');
+                this.fallbackCopy(text);
             }
-            const help = $('<a class="help-icon" href="' + helpUrl + '"><div class="help"><ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon></div></a>');
-            codeProcedure.append(procedure.code)
+        },
 
-            rightInfo.append(icon, codeProcedure, help);
-            procedureDiv.append(nameLink, rightInfo);
-            resultsAll.append(procedureDiv);
-
-            if($('#load-more')){
-                const loadMoreButton = $('#load-more');
-                procedureDiv.insertBefore(loadMoreButton);
+        fallbackCopy: function(text) {
+            const textarea = $('<textarea>').val(text).css({position: 'fixed', opacity: 0});
+            $('body').append(textarea);
+            textarea[0].select();
+            try {
+                document.execCommand('copy');
+                Feedback.show('Código copiado!', true);
+            } catch (err) {
+                Feedback.show('Falha ao copiar', false);
             }
-
-            captureFavoriteButtons()
-            return procedureDiv;
+            textarea.remove();
         }
+    };
 
-        function toggleFilterVisibility() {
-            if (searchActive) {
-                $('#filter').hide();
-                $('#close-filter').show();
-            } else {
-                $('#filter').show();
-                $('#close-filter').hide();
-            }
-        }
-
-        $(document).on('click', '#load-more', function(){
-            if (!loading) {
-                loading = true;
-                $('#load-more').hide();
-                $('.loading').show();
-
-                $.ajax({
-                    type: "GET",
-                    url: "{% url 'procedure_more' %}",
-                    data: {'page': page },
-                    success: function (data) {
-                        if (data.procedures && data.procedures.length > 0) {
-                            const proceduresHTML = data.procedures.map(createProcedureHTML);
-
-                            if (!data.procedures[0].has_more_results) {
-                                $('#load-more').remove();
-                                $('.loading').remove();
-                            }
-
-                            page++;
-                        }
-
-                        loading = false;
-                        $('.loading').hide();
-                        $('#load-more').show();
-                    }
+    // ================== FEEDBACK ==================
+    const Feedback = {
+        show: function(message, success = true) {
+            $('.copy-feedback').remove();
+            const icon = success ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>';
+            const feedback = $('<div class="copy-feedback"></div>')
+                .html(icon + ' <span>' + Utils.escapeHtml(message) + '</span>')
+                .css({
+                    position: 'fixed', top: '20px', right: '20px',
+                    backgroundColor: success ? '#10b981' : '#ef4444',
+                    color: 'white', padding: '12px 20px', borderRadius: '8px',
+                    zIndex: '10001', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    display: 'flex', alignItems: 'center', gap: '8px'
                 });
+            $('body').append(feedback);
+            setTimeout(() => feedback.fadeOut(300, function() { $(this).remove(); }), CONFIG.FEEDBACK_DURATION);
+        }
+    };
+
+    // ================== RENDERIZAÇÃO ==================
+    const ProcedureRenderer = {
+        truncateText: function(text, maxLength = 20) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        },
+        
+        create: function(procedure) {
+            const baseUrl = "{% url 'procedure_detail' procedure_code='__CODE__' %}";
+            const url = baseUrl.replace('__CODE__', procedure.code);
+            const icon = procedure.favorite ? 'bookmark' : 'bookmark-outline';
+            
+            // Combina ocupações e registros
+            let allTags = [];
+            if (procedure.occupations_of_users) {
+                allTags = allTags.concat(procedure.occupations_of_users.map(o => ({
+                    text: o,
+                    isOccupation: true
+                })));
             }
-        });
+            if (procedure.records_names) {
+                allTags = allTags.concat(procedure.records_names.map(r => ({
+                    text: r,
+                    isOccupation: false
+                })));
+            }
+            
+            // Renderiza tags com limite máximo de 2
+            let tagsHTML = '';
+            const maxVisibleTags = 2;
+            const visibleTags = allTags.slice(0, maxVisibleTags);
+            const hiddenCount = Math.max(0, allTags.length - maxVisibleTags);
+            
+            visibleTags.forEach(tag => {
+                const truncated = this.truncateText(tag.text, 20);
+                const className = tag.isOccupation ? 'procedure-occupation' : '';
+                tagsHTML += '<a class="' + className + ' tag-item">' + Utils.escapeHtml(truncated) + '</a>';
+            });
+            
+            // Adiciona indicador de mais tags se houver
+            if (hiddenCount > 0) {
+                tagsHTML += '<span class="more-tags-indicator" title="Clique no procedimento para ver todos os detalhes">+' + hiddenCount + '</span>';
+            }
 
-        form.submit(function (e) {
-            e.preventDefault();
+            return '<div class="procedure p-4 my-2 border rounded-lg">' +
+                '<div class="title_tags">' +
+                '<a class="font-bold opacity-80" style="font-size: 14px;" href="' + url + '">' + Utils.escapeHtml(procedure.name) + '</a>' +
+                '<div class="records_tags mt-2 md:mt-0 flex">' + tagsHTML + '</div>' +
+                '</div>' +
+                '<div class="right_info">' +
+                '<ion-icon name="' + icon + '" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated" data-procedure-id="' + Utils.escapeHtml(procedure.code) + '"></ion-icon>' +
+                '<div class="procedure_code w-[70%] md:w-[8rem]">' + Utils.escapeHtml(procedure.code) + '</div>' +
+                '<a class="help-icon w-[20%] md:w-10 md:mr-4" href="' + url + '"><div class="help"><ion-icon name="help-circle-outline"></ion-icon></div></a>' +
+                '</div>' +
+                '</div>';
+        }
+    };
 
-            searchActive = true;
-            toggleFilterVisibility(searchActive);
+    // ================== LOAD MORE ==================
+    $(document).on('click', '#load-more', function() {
+        if (STATE.loading) return;
+        STATE.loading = true;
+        $('#load-more').hide();
+        $('.loading').show();
 
-            resultsAll.empty();
-            const query = form.find('input[name="q"]').val().trim();
-            const record_name = recordNameFilter.value;
+        const query = $('input[name="q"]').val().trim();
+        const records = $('#record-name-filter').val(); // Array de múltiplos valores
 
-            $.ajax({
-                type: "GET",
-                url: form.attr('action'),
-                data: { 'q': query, 'record_name': record_name },
-                success: function (data) {
-                    if (data.procedures && data.procedures.length > 0) {
-                        const proceduresHTML = data.procedures.map(createProcedureHTML);
-
-                        if (data.procedures[0].has_more_results) {
-                            resultsAll.append('<button id="load-more" style="display: block;">Carregar Mais</button>');
-                            resultsAll.append('<div class="loading" style="display: none;">carregando...</div>');
-                        }
-
-                        optionsIcon.hide();
-                        closeIcon.show();
-                    } else {
-                        const noProceduresMessage = $('<p class="no-procedures">Procedimento não encontrado ou não disponível para sua ocupação</p>');
-                        resultsAll.append(noProceduresMessage);
-                    }
-
-                    banner.addClass('none')
-                    const div_search = searchResults.parent()
-
-                    div_search.removeClass('none')
-                    div_search.addClass('block')
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'procedure_more' %}",
+            data: { 
+                page: STATE.page, 
+                q: query, 
+                record_name: records ? records.join(',') : '' 
+            },
+            success: function(data) {
+                if (data.procedures && data.procedures.length > 0) {
+                    const html = data.procedures.map(p => ProcedureRenderer.create(p)).join('');
+                    $('#load-more').before(html);
                     
-                    const loadMoreButton = $('#load-more');
-                    const loadingIndicator = $('.loading');
-
-                    loadMoreButton.click(function () {
-                        if (!loading) {
-                            loading = true;
-                            loadMoreButton.hide();
-                            loadingIndicator.show();
-                            const query = form.find('input[name="q"]').val().trim();
-
-                            $.ajax({
-                                type: "GET",
-                                url: form.attr('action'),
-                                data: { 'q': query, 'record_name': record_name, 'page': page },
-                                dataType: "json",
-                                success: function (data) {
-                                    if (data.procedures && data.procedures.length > 0) {
-                                        const proceduresHTML = data.procedures.map(createProcedureHTML);
-
-                                        if(data.procedures[0].has_more_results==false) {
-                                            loadMoreButton.remove();
-                                            loadingIndicator.remove()
-                                        }
-
-                                        page++;
-
-                                    }
-
-                                    loading = false;
-                                    loadingIndicator.hide();
-                                    loadMoreButton.show();
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        });
-
-        closeIcon.parent().click(function() {
-            searchActive = false;
-            toggleFilterVisibility(searchActive);
-
-            resultsAll.empty();
-            closeIcon.hide();
-            optionsIcon.show();
-            banner.removeClass('none');
-            const div_search = searchResults.parent();
-            div_search.removeClass('block');
-            div_search.addClass('none');
-            let page_close = 1;
-
-            $.ajax({
-                    type: "GET",
-                    url: "{% url 'procedure_more' %}",
-                    data: {'page': page_close },
-                    success: function (data) {
-                        if (data.procedures && data.procedures.length > 0) {
-                            const proceduresHTML = data.procedures.map(createProcedureHTML);
-
-                            if (data.procedures[0].has_more_results) {
-                                resultsAll.append('<button id="load-more" style="display: block;">Carregar Mais</button>');
-                                resultsAll.append('<div class="loading" style="display: none;">carregando...</div>');
-                            }
-                        }
-
-                        loading = false;
-                        $('.loading').hide();
-                        $('#load-more').show();
-                    }
-            });
-        });
-
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const modal = document.querySelector(".modal-content");
-        const filterButton = document.getElementById("filter");
-        const closeModalButton = document.getElementById("close-modal");
-        const blurOverlay = document.querySelector(".blur");
-        const applyFilterButton = document.getElementById("apply-filter");
-
-        filterButton.addEventListener("click", function () {
-            modal.style.display = "block";
-            blurOverlay.style.display = "block"
-        });
-
-        closeModalButton.addEventListener("click", function () {
-            modal.style.display = "none";
-            blurOverlay.style.display = "none";
-        });
-
-        blurOverlay.addEventListener("click", function () {
-            modal.style.display = "none";
-            blurOverlay.style.display = "none";
-        });
-
-        applyFilterButton.addEventListener("click", function () {
-            modal.style.display = "none";
-            blurOverlay.style.display = "none";
-        });
-    });
-</script>
-
-<script>
-    function captureFavoriteButtons() {
-        const favoriteButtons = document.querySelectorAll('.favorite-icon');
-        const modal = document.getElementById('favorite-modal');
-        const closeModal = document.querySelector('.modal .close');
-        const confirmFavorite = document.getElementById('confirm-favorite');
-        const blurOverlay = document.querySelector(".blur");
-        let procedureCode;
-
-        blurOverlay.addEventListener("click", function () {
-            modal.classList.add('hidden');
-            blurOverlay.style.display = "none";
-        });
-
-        favoriteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                procedureCode = button.dataset.procedureId;
-                modal.classList.remove('hidden');
-                blurOverlay.style.display = "block"
-
-                $.ajax({
-                    url: '/check_favorite/',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    data: {
-                        'procedure_id': procedureCode
-                    },
-                    success: function(data) {
-                        const allCheckboxes = document.querySelectorAll('input[name="folders"]');
-                        allCheckboxes.forEach(checkbox => {
-                            checkbox.checked = false;
-                        });
-
-                        if (data.is_favorite) {
-                            const favoriteFolders = data.favorite_folders;
-
-                            favoriteFolders.forEach(folderId => {
-                                const checkbox = document.querySelector(`input[name="folders"][value="${folderId}"]`);
-                                if (checkbox) {
-                                    checkbox.checked = true;
-                                }
-                            });
-                        } else {
-                            const geralCheckbox = document.querySelector('input[name="folders"][value="1"]');
-                            if (geralCheckbox) {
-                                geralCheckbox.checked = true;
-                            }
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Erro ao verificar favorito:', error);
-                    }
-                });
-            });
-        });
-
-        closeModal.addEventListener('click', function() {
-            modal.classList.add('hidden');
-            blurOverlay.style.display = "none";
-        });
-
-        confirmFavorite.addEventListener('click', function() {
-            const selectedFolders = document.querySelectorAll('input[name="folders"]:checked');
-            const selectedFolderIds = Array.from(selectedFolders).map(folder => folder.value);
-
-            $.ajax({
-                url: '/add-remove-favorite/',
-                type: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                data: {
-                    'folders': selectedFolderIds,
-                    'procedure_id': procedureCode
-                },
-                success: function(data) {
-                    const icon = document.querySelector(`[data-procedure-id="${procedureCode}"]`);
-                    if (data.is_favorite) {
-                        icon.setAttribute('name', 'bookmark');
+                    if (!data.procedures[0].has_more_results) {
+                        $('#load-more').remove();
+                        $('.loading').remove();
                     } else {
-                        icon.setAttribute('name', 'bookmark-outline');
+                        STATE.page++;
                     }
-                },
-                error: function(error) {
-                    console.error('Erro ao enviar dados:', error);
                 }
-            });
-
-            modal.classList.add('hidden');
-            blurOverlay.style.display = "none";
+                STATE.loading = false;
+                $('.loading').hide();
+                $('#load-more').show();
+            },
+            error: function() {
+                Feedback.show('Erro ao carregar mais procedimentos', false);
+                STATE.loading = false;
+                $('.loading').hide();
+                $('#load-more').show();
+            }
         });
-    }
-
-    document.addEventListener("DOMContentLoaded", captureFavoriteButtons);
-
-    function copyText(code) {
-        const tempTextArea = $('<textarea>');
-        tempTextArea.val(code);
-        $('body').append(tempTextArea);
-
-        tempTextArea.select();
-        document.execCommand('copy');
-
-        tempTextArea.remove();
-
-        const feedback = $('<div class="copy-feedback">Código Copiado!</div>');
-        feedback.css({
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            zIndex: '1000',
-            boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.3)',
-        });
-        $('body').append(feedback);
-
-        setTimeout(function () {
-            feedback.remove();
-        }, 2000);
-    }
-
-    $(document).on('click', '.procedure_code', function () {
-        const code = $(this).text().trim();
-        copyText(code);
     });
+
+    // ================== BUSCA ==================
+    $('#search-form').submit(function(e) {
+        e.preventDefault();
+        const query = $('input[name="q"]').val().trim();
+        const records = $('#record-name-filter').val(); // Array de múltiplos valores
+
+        $('.results').empty();
+        STATE.page = CONFIG.INITIAL_PAGE;
+
+        $.ajax({
+            type: 'GET',
+            url: $(this).attr('action'),
+            data: { 
+                q: query, 
+                record_name: records ? records.join(',') : '' 
+            },
+            success: function(data) {
+                if (data.procedures && data.procedures.length > 0) {
+                    const html = data.procedures.map(p => ProcedureRenderer.create(p)).join('');
+                    $('.results').html(html);
+                    
+                    if (data.procedures[0].has_more_results) {
+                        $('.results').append('<button id="load-more" class="flex items-center rounded-md border border-gray-300 shadow-sm px-3 py-2.5 bg-[#F2F2F7] hover:bg-gray-200 transition">Carregar Mais</button>');
+                        $('.results').append('<div class="loading flex items-center rounded-md border border-gray-300 shadow-sm px-3 py-2.5 bg-[#F2F2F7]" style="display: none;">Carregando...</div>');
+                    }
+                } else {
+                    $('.results').html('<p class="no-procedures p-4 text-center text-gray-600">Procedimento não encontrado ou não disponível para sua ocupação</p>');
+                }
+            },
+            error: function() {
+                Feedback.show('Erro na busca', false);
+            }
+        });
+    });
+
+    // ================== EVENT DELEGATION - COPIAR ==================
+    $(document).on('click', '.procedure_code', function() {
+        const code = $(this).text().trim();
+        Utils.copyToClipboard(code);
+    });
+});
 </script>
 
 <script>
-    document.getElementById('apply-filter').addEventListener('click', function() {
-        let selectedRecord = document.getElementById('record-name-filter').value;
-        let queryParams = new URLSearchParams(window.location.search);
+// ================== MODAL DE FILTRO ==================
+document.addEventListener("DOMContentLoaded", function() {
+    const filterModal = document.querySelector(".modal-content");
+    const filterBtn = document.getElementById("filter");
+    const closeBtn = document.getElementById("close-modal");
+    const applyBtn = document.getElementById("apply-filter");
+    const clearBtn = document.getElementById("clear-filter");
+    const blur = document.querySelector(".blur");
 
-        queryParams.set('record_name', selectedRecord);
+    if (filterBtn && filterModal) {
+        filterBtn.addEventListener("click", function() {
+            filterModal.style.display = "block";
+            blur.style.display = "block";
+            
+            // Inicializa Select2 com configuração de múltipla seleção
+            $('#record-name-filter').select2({
+                placeholder: 'Selecione os tipos de registro',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: filterModal,
+                language: {
+                    noResults: function() {
+                        return "Nenhum resultado encontrado";
+                    }
+                }
+            });
+        });
 
-        window.location.href = '/procedures/?' + queryParams.toString();
-    });
+        closeBtn.addEventListener("click", function() {
+            filterModal.style.display = "none";
+            blur.style.display = "none";
+            $('#record-name-filter').select2('destroy');
+        });
+
+        blur.addEventListener("click", function() {
+            filterModal.style.display = "none";
+            blur.style.display = "none";
+            $('#favorite-modal').addClass('hidden');
+            $('#record-name-filter').select2('destroy');
+        });
+
+        // Botão Limpar - reseta o filtro e recarrega
+        if (clearBtn) {
+            clearBtn.addEventListener("click", function() {
+                $('#record-name-filter').val(null).trigger('change');
+                filterModal.style.display = "none";
+                blur.style.display = "none";
+                $('#record-name-filter').select2('destroy');
+                window.location.href = '/procedures/';
+            });
+        }
+
+        // Botão Aplicar - aplica o filtro com seleções múltiplas
+        applyBtn.addEventListener("click", function() {
+            filterModal.style.display = "none";
+            blur.style.display = "none";
+            
+            const selected = $('#record-name-filter').val(); // Array
+            $('#record-name-filter').select2('destroy');
+            
+            const params = new URLSearchParams(window.location.search);
+            if (selected && selected.length > 0) {
+                params.set('record_name', selected.join(','));
+            } else {
+                params.delete('record_name');
+            }
+            window.location.href = '/procedures/?' + params.toString();
+        });
+    }
+});
 </script>
 
+<script>
+// ================== MODAL DE FAVORITOS - EVENT DELEGATION ==================
+$(document).ready(function() {
+    const favoriteModal = $('#favorite-modal');
+    const blur = $('.blur');
+    let currentProcedureCode = '';
+
+    // Event delegation para ícones de favorito (funciona com elementos dinâmicos)
+    $(document).on('click', '.favorite-icon', function() {
+        currentProcedureCode = $(this).data('procedure-id');
+        favoriteModal.removeClass('hidden');
+        blur.show();
+
+        // Buscar status do favorito
+        $.ajax({
+            url: '/check_favorite/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: { 'procedure_id': currentProcedureCode },
+            success: function(data) {
+                // Desmarcar todos primeiro
+                $('input[name="folders"]').prop('checked', false);
+
+                if (data.is_favorite && data.favorite_folders) {
+                    // Marcar os folders onde está favoritado
+                    data.favorite_folders.forEach(function(folderId) {
+                        $('input[name="folders"][value="' + folderId + '"]').prop('checked', true);
+                    });
+                } else {
+                    // Marcar "Geral" por padrão
+                    $('input[name="folders"][value="1"]').prop('checked', true);
+                }
+            },
+            error: function(error) {
+                console.error('Erro ao verificar favorito:', error);
+            }
+        });
+    });
+
+    // Fechar modal
+    $('#favorite-modal .close').on('click', function() {
+        favoriteModal.addClass('hidden');
+        blur.hide();
+    });
+
+    // Confirmar favorito
+    $('#confirm-favorite').on('click', function() {
+        const selectedFolders = $('input[name="folders"]:checked').map(function() {
+            return $(this).val();
+        }).get();
+
+        $.ajax({
+            url: '/add-remove-favorite/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: {
+                'folders': selectedFolders,
+                'procedure_id': currentProcedureCode
+            },
+            success: function(data) {
+                // Atualizar ícone
+                const icon = $('[data-procedure-id="' + currentProcedureCode + '"]');
+                if (data.is_favorite) {
+                    icon.attr('name', 'bookmark');
+                } else {
+                    icon.attr('name', 'bookmark-outline');
+                }
+                
+                favoriteModal.addClass('hidden');
+                blur.hide();
+            },
+            error: function(error) {
+                console.error('Erro ao salvar favorito:', error);
+                alert('Erro ao salvar favorito. Tente novamente.');
+            }
+        });
+    });
+});
+</script>
 
 {% endblock %}

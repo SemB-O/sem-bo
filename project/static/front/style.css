@@ -1,0 +1,70 @@
+.errorlist {
+    color: #dc2626; 
+    font-size: 0.875rem; 
+    margin-top: 0.25rem;
+    list-style: none;
+    padding-left: 0;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.relative input.border-red-500 {
+    padding-right: 2.5rem; /* espaço pro olhinho só quando há erro */
+}
+
+/* Género global: aplicar somente no modal com "icon-success" */
+.swal2-icon.swal2-success {
+    border-color: #54d6ee !important;
+    color: #54d6ee !important;
+  }
+  
+/* Linhas do "tick" */
+.swal2-icon.swal2-success .swal2-success-line-tip,
+.swal2-icon.swal2-success .swal2-success-line-long {
+  background-color: #54d6ee !important;
+}
+
+/* Anel circular */
+.swal2-icon.swal2-success .swal2-success-ring {
+  border: 0.25em solid rgba(84, 214, 238, 0.3) !important;
+}
+
+
+.swal2-icon.swal2-error {
+  border-color: #54d6ee !important;
+  color: #54d6ee !important;
+}
+
+/* Linhas do "X" */
+.swal2-icon.swal2-error .swal2-x-mark-line-left,
+.swal2-icon.swal2-error .swal2-x-mark-line-right {
+  background-color: #54d6ee !important;
+}
+
+.swal2-icon.swal2-warning {
+  border-color: #54d6ee !important;
+  color: #54d6ee !important;
+}
+
+/* Ícone de pergunta azul */
+.swal2-icon.swal2-question {
+  border-color: #54d6ee !important;
+  color: #54d6ee !important;
+}
+
+/* Ícone de informação azul */
+.swal2-icon.swal2-info {
+  border-color: #54d6ee !important;
+  color: #54d6ee !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 26px;
+  position: absolute;
+  top: 10px !important;
+  right: 1px;
+  width: 20px
+}

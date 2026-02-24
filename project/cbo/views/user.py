@@ -1,5 +1,6 @@
 import json
-from django.contrib.auth.views import LogoutView
+import logging
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.views.generic.edit import FormView
 from django.contrib.auth import authenticate, login
 from django.views import View
@@ -18,72 +19,78 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from django.db.models import Q
 from ..forms.user import LoginAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
-from ..models import Occupation, Plan, FavoriteFolder, User
+from ..models import Plan, FavoriteProceduresFolder, User
+
+logger = logging.getLogger(__name__)
 
 
 class LoginView(FormView):
     template_name = 'front/login.html'
     form_class = LoginAuthenticationForm
+    success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        email = form.cleaned_data['email']
-        password = form.cleaned_data['password']
-
-        user = authenticate(self.request, username=email, password=password)
-        if user is not None:
+        user = form.cleaned_data.get('user')
+        if user:
             login(self.request, user)
-            return redirect('home')
-        else:
-            messages.error(self.request, 'Credenciais inválidas. Tente novamente.')
-            return redirect('login')
+            
+            if user.is_superuser:
+                self.success_url = reverse_lazy('admin-dashboard')
+        
+        return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Erro no formulário. Verifique os dados.')
-        return redirect('login')
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class RegisterView(View):
     template_name = 'create/register_user.html'
 
     def get(self, request, selected_plan, *args, **kwargs):
-        form = UserRegisterForm(initial={'plan': selected_plan}, use_required_attribute=False)
-        occupations = Occupation.objects.all()
-
-        plans = Plan.objects.all()
-        plans_json = json.dumps(list(plans.values('id', 'name', 'max_occupations', 'description')))
+        plan_obj = Plan.objects.filter(id=selected_plan).first() 
+        form = UserRegisterForm(
+            use_required_attribute=False,
+            plan=plan_obj  
+        )
 
         context = {
             'form': form,
-            'occupations': occupations,
-            'selected_plan': request.GET.get('selected_plan'),
-            'plans_json': plans_json,
+            'selected_plan': selected_plan,
         }
 
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, selected_plan, *args, **kwargs):
         form = UserRegisterForm(request.POST, use_required_attribute=False)
+
+        plan_obj = Plan.objects.filter(id=selected_plan).first() 
+        form = UserRegisterForm(
+            data=request.POST,
+            use_required_attribute=False,
+            plan=plan_obj  
+        )
+
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
+            try:
+                user = form.save()
+                self._create_default_folder(user)
+                # self.activateEmail(request, user, form.cleaned_data.get('email'))
+                return redirect('login')
+            except Exception as e:
+                logger.exception(f"Erro ao criar usuário: {e}")
+                messages.error(request, "Erro ao criar conta. Tente novamente.")
 
-            selected_occupations = form.cleaned_data['occupation']
-            for occupation in selected_occupations:
-                user.occupations.add(occupation)
-            user.save()
+        return render(request, self.template_name, {
+            'form': form,
+            'selected_plan': selected_plan,
+        })
 
-            default_folder, _ = FavoriteFolder.objects.get_or_create(
-                user=user,
-                name="Geral",
-                description="Meus Favoritos"
-            )
-
-            self.activateEmail(request, user, form.cleaned_data.get('email'))
-
-            return redirect('login')
-        else:
-            return render(request, self.template_name, {'form': form})
+    def _create_default_folder(self, user):
+        FavoriteProceduresFolder.objects.get_or_create(
+            user=user,
+            name="General",
+            description="My Favorites"
+        )
 
     def activateEmail(self, request, user, to_email):
         mail_subject = "Ativação da sua conta Sem B.O"
@@ -102,8 +109,8 @@ class RegisterView(View):
             messages.error(request, f'Tivemos um problema ao enviar a validação para seu email ({to_email}), por favor cheque se você digitou seu email corretamente!')
 
 
-class LogoutView(LogoutView):
-    next_page = reverse_lazy('login')
+class LogoutView(DjangoLogoutView):
+    next_page = reverse_lazy('login') 
 
 
 class PasswordResetView(TemplateView):
@@ -224,3 +231,46 @@ def send_info_user_email(to_email):
     email = EmailMessage(mail_subject, message, to=[to_email])
     email.content_subtype = 'html' 
     email.send()
+
+
+class ResendVerificationEmailView(View):
+    """View para reenviar email de verificação"""
+    
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        
+        if not email:
+            messages.error(request, 'Email não fornecido.')
+            return redirect('login')
+        
+        try:
+            user = get_user_model().objects.get(email=email)
+            
+            # Verifica se o usuário já está ativo
+            if user.is_active and user.email_verified:
+                messages.info(request, 'Sua conta já está ativada! Faça login.')
+                return redirect('login')
+            
+            # Reenvia o email de verificação
+            mail_subject = "Ativação da sua conta Sem B.O"
+            message = render_to_string('email/email_verification.html', {
+                'user': user.first_name,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+                'protocol': 'https' if request.is_secure() else 'http',
+                'domain': settings.DOMAIN,
+            })
+            
+            email_msg = EmailMessage(mail_subject, message, to=[user.email])
+            email_msg.content_subtype = 'html'
+            
+            if email_msg.send():
+                messages.success(request, f'Email de verificação reenviado para {user.email}. Verifique sua caixa de entrada.')
+            else:
+                messages.error(request, 'Erro ao enviar email. Tente novamente mais tarde.')
+                
+        except get_user_model().DoesNotExist:
+            # Por segurança, não informar que o email não existe
+            messages.info(request, 'Se o email existir em nosso sistema, você receberá um link de verificação.')
+        
+        return redirect('login')

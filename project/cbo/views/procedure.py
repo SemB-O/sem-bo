@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse
 from django.shortcuts import render
-from ..models import Procedure, FavoriteFolder, FavoriteProcedure, Record
+from ..models import Procedure, FavoriteProceduresFolder, FavoriteProceduresFolderHasProcedure, Record
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -31,7 +31,7 @@ class DetailView(DetailView):
         favorites = procedure.is_favorite(user)
         
         context['procedure'] = procedure
-        context['favorite_folders'] = FavoriteFolder.objects.filter(user=user)
+        context['favorite_folders'] = FavoriteProceduresFolder.objects.filter(user=user)
         context['favorite'] = favorites
         context['procedure_urls'] = {procedure.procedure_code: reverse('procedure_detail', args=[procedure.procedure_code])}
         return context
@@ -54,8 +54,10 @@ class ListView(ListView):
             & Q(procedures_has_occupation__occupation__in=user_occupations)
         )
 
-        if record_name != 'all' and record_name:
-            procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
+        # Suporte para múltiplos tipos de registro (separados por vírgula)
+        if record_name and record_name != 'all':
+            record_names = [name.strip() for name in record_name.split(',')]
+            procedures_list = procedures_list.filter(procedures_has_record__record__name__in=record_names)
 
         procedures_list = procedures_list.prefetch_related('procedures_has_record__record')
 
@@ -73,8 +75,10 @@ class ListView(ListView):
 
         user = request.user
 
-        favorite_procedures_codes = FavoriteProcedure.objects.filter(user=user).values_list('procedure__procedure_code', flat=True)
-        favorite_folders = FavoriteFolder.objects.filter(user=user)
+        favorite_procedures_codes = FavoriteProceduresFolderHasProcedure.objects.filter(
+            favorite_procedures_folder__user=user
+        ).values_list('procedure__procedure_code', flat=True)
+        favorite_folders = FavoriteProceduresFolder.objects.filter(user=user)
 
         for procedure in procedures:
             procedure.favorite = procedure.procedure_code in favorite_procedures_codes
@@ -113,8 +117,10 @@ class LoadMoreView(View):
                 & Q(procedures_has_occupation__occupation__in=user_occupations)
             ).order_by('name')
 
-            if record_name != 'all':
-                procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
+            # Suporte para múltiplos tipos de registro (separados por vírgula)
+            if record_name and record_name != 'all':
+                record_names = [name.strip() for name in record_name.split(',')]
+                procedures_list = procedures_list.filter(procedures_has_record__record__name__in=record_names)
 
             procedures_list = procedures_list.prefetch_related('procedures_has_record__record')
 
@@ -123,8 +129,10 @@ class LoadMoreView(View):
                 Q(procedures_has_occupation__occupation__in=user_occupations)
             ).prefetch_related('procedures_has_record__record').order_by('name')
 
-            if record_name != 'all' and record_name:
-                procedures_list = procedures_list.filter(procedures_has_record__record__name=record_name)
+            # Suporte para múltiplos tipos de registro (separados por vírgula)
+            if record_name and record_name != 'all':
+                record_names = [name.strip() for name in record_name.split(',')]
+                procedures_list = procedures_list.filter(procedures_has_record__record__name__in=record_names)
 
             procedures_list = procedures_list.prefetch_related('procedures_has_record__record')
 

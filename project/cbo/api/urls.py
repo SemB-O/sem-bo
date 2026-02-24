@@ -1,8 +1,7 @@
-from django.urls import path
-from . import views
+
+from django.urls import path, include
 
 urlpatterns = [
-    path('run_migrations/', views.run_migrations, name='run_migrations'),
-    path('run_collectstatic/', views.run_collectstatic, name='run_collectstatic'),
-    path('create_superuser/', views.create_superuser, name='create_superuser'),
+    path('account/', include('cbo.api.account.urls')),
+    path('sigtap/', include('cbo.api.sigtap.urls'))
 ]

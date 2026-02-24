@@ -1,8 +1,34 @@
-from django.urls import path, include
-from .views import upload_data, home, search_view, user, profile, chat, procedure, favorite, plan, medical_record, cid
+from django.urls import path
+from .views import (
+    home, search_view, upload_files, user, profile, chat, 
+    procedure, favorite, plan, medical_record, cid, admin_panel, sigtap_search
+)
 
 urlpatterns = [
-    path('upload_files/', upload_data.UploadDataView.as_view(), name='upload_files'),
+    path('admin/', admin_panel.AdminDashboardView.as_view(), name='admin-dashboard'),
+    path('admin/plans/', admin_panel.PlanListView.as_view(), name='admin-plan-list'),
+    path('admin/plans/create/', admin_panel.PlanCreateView.as_view(), name='admin-plan-create'),
+    path('admin/plans/<int:pk>/edit/', admin_panel.PlanEditView.as_view(), name='admin-plan-edit'),
+    path('admin/plans/<int:pk>/delete/', admin_panel.PlanDeleteView.as_view(), name='admin-plan-delete'),
+    path('admin/benefits/', admin_panel.BenefitListView.as_view(), name='admin-benefit-list'),
+    path('admin/benefits/create/', admin_panel.BenefitCreateView.as_view(), name='admin-benefit-create'),
+    path('admin/benefits/<int:pk>/edit/', admin_panel.BenefitEditView.as_view(), name='admin-benefit-edit'),
+    path('admin/benefits/<int:pk>/delete/', admin_panel.BenefitDeleteView.as_view(), name='admin-benefit-delete'),
+    path('admin/users/', admin_panel.UserListView.as_view(), name='admin-user-list'),
+    path('admin/users/<int:pk>/toggle-active/', admin_panel.UserToggleActiveView.as_view(), name='admin-user-toggle-active'),
+    path('admin/users/<int:pk>/delete/', admin_panel.UserDeleteView.as_view(), name='admin-user-delete'),
+    path('admin/users/<int:pk>/detail/', admin_panel.UserDetailView.as_view(), name='admin-user-detail'),
+    path('admin/upload-sigtap/', admin_panel.AdminUploadSigtapView.as_view(), name='admin-upload-sigtap'),
+    path('admin/sync-sigtap-now/', admin_panel.SyncSigtapNowView.as_view(), name='admin-sync-sigtap-now'),
+    path('admin/sync-sigtap-progress/', admin_panel.SyncSigtapProgressView.as_view(), name='admin-sync-sigtap-progress'),
+    path('admin/sigtap-stats/', admin_panel.SigtapStatsView.as_view(), name='admin-sigtap-stats'),
+    
+    # Pesquisas SIGTAP
+    path('admin/search/procedures/', sigtap_search.ProcedureSearchView.as_view(), name='admin-search-procedures'),
+    path('admin/search/cids/', sigtap_search.CidSearchView.as_view(), name='admin-search-cids'),
+    path('admin/search/occupations/', sigtap_search.OccupationSearchView.as_view(), name='admin-search-occupations'),
+    
+    path('upload_files/', upload_files.UploadFilesView.as_view(), name='upload_files'),
     path('', home.Home.as_view(), name='home'),
     path('search/', search_view.SearchView.as_view(), name='search'),
     path('login/', user.LoginView.as_view(), name='login'),
@@ -21,12 +47,11 @@ urlpatterns = [
     path('search_favorites/', favorite.FavoriteProceduresListView.as_view(), name='search_favorites'),
     path('add_new_favorite_folder/', favorite.CreateFolderView.as_view(), name='add_new_favorite_folder'),
     path('select_plan/', plan.PlanView.as_view(), name='select_plan'),
-    path('medical_record/', medical_record.MedicalRecordView.as_view(), name='medical_record'),
     path('procedure-autocomplete/', procedure.ProcedureAutocomplete.as_view(), name='procedure-autocomplete'),
     path('cid-autocomplete/', cid.CidAutocomplete.as_view(), name='cid-autocomplete'),
     path('password_reset/', user.PasswordResetView.as_view(), name='password_reset'),
     path('password_reset/<uidb64>/<token>/', user.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('activate/<uidb64>/<token>', user.activate, name='verify_email'),
+    path('resend-verification-email/', user.ResendVerificationEmailView.as_view(), name='resend-verification-email'),
     path('cid_autocomplete/', medical_record.CidAutocompleteView.as_view(), name='cid-autocomplete'),
-    path('api/', include('cbo.api.urls'), name='cbo_api')
 ]

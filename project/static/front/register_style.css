@@ -31,54 +31,6 @@ form div select {
     bottom: 14px;
 }
 
-.select2-container .select2-selection--multiple, .select2-container .select2-selection--single {
-    outline: none;
-    border: 0 !important;
-    padding: 0.5rem !important;
-    border-radius: 0.375rem !important;
-    background: #F2F2F7 !important;
-}
-
-.select2-container .select2-selection--multiple {
-    padding: 0.2rem 0 0 0.4rem !important;
-}
-
-.select2-container .select2-selection__rendered {
-    color: #9CA4B1 !important;
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 1rem !important;
-    padding-left: 0.5rem !important;
-}
-
-.select2-container .select2-selection__choice {
-    color: #9CA4B1 !important;
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 1rem !important;
-    padding-left: 0.5rem !important;
-    background: #F2F2F7 !important;
-    border-radius: 0.375rem !important;
-}
-
-.select2-container .select2-selection--single {
-    height: 2.7rem !important;
-}
-
-.select2-container .select2-search--inline .select2-search__field {
-    color: #9CA4B1 !important;
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 1rem !important;
-    padding-left: 0.5rem !important;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    display: none !important;
-}
-
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-    width: auto;
-    font-size: 0.85rem !important;
-}
-
 .eye-icon {
     color: #9CA4B1;
     font-size: 1.2rem !important;

@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from ..forms.user import UserEditForm
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -23,4 +25,14 @@ class ProfileView(View):
         else:
             messages.error(request, 'Ocorreu um erro ao atualizar o perfil. Por favor, verifique os dados e tente novamente.')
             return render(request, self.template_name, {'form': form})
-        
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserEditFormValidationView(View):
+    def post(self, request, *args, **kwargs):
+        form = UserEditForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            return JsonResponse({'valid': True})
+        return JsonResponse({'valid': False, 'errors': form.errors}, status=400)
+    

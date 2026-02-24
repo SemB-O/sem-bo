@@ -10,19 +10,6 @@ body {
     height: 100vh;
 }
 
-.menu-top {
-    margin-bottom: 1.5rem;
-}
-
-.menu-top a {
-    display: flex;
-    align-items: center;
-}
-
-.menu-top a img {
-    width: 10rem;
-}
-
 .buttons {
     width: 65%;
 }
@@ -217,11 +204,6 @@ body {
 }
 
 @media (max-width: 800px) {
-    .menu-top {
-        position: fixed;
-        top: 0.5rem;
-    }
-
     .content-page {
         justify-content: center;
     }

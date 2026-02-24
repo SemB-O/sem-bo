@@ -16,29 +16,64 @@ Sem B.O
             <div class="w-full md:w-2/3 lg:w-1/2 sm:w-full flex justify-center items-center">
                 <img src="{% static 'assets/logo.png' %}" alt="Logo" class="w-3/4 md:w-full">
             </div>
-            <div class="w-full flex flex-col gap-2">
-                <h2 class="text-left text-[1.5rem] md:text-[2rem] font-bold hidden md:block">Entrar</h2>
-    
+            <div class="w-full max-w-md md:max-w-xl md:px-0 px-4 mx-auto flex flex-col gap-2">    
                 {% include 'parciais/messages.html' %}
         
                 <form action="{% url 'login' %}" method="post" class="flex flex-col gap-4">
                     {% csrf_token %}
                     <div>
-                        {{ form.email }}
-                    </div>
+                        {{ form.email.label_tag }}
+                        <div class="relative">
+                            <input type="email" name="email" id="id_email"
+                                class="mt-1 block w-full rounded-md shadow-sm sm:text-sm px-3 py-2
+                                focus:border-blue-500 focus:ring-blue-500
+                                border {% if form.email.errors %}border-red-500 bg-red-50{% else %}border-gray-300 bg-gray-100{% endif %}"
+                                placeholder="seuemail@exemplo.com"
+                                autocomplete="email" maxlength="320" required
+                                value="{{ form.email.value|default_if_none:'' }}">
+                        </div>
+                        {% if form.email.errors %}
+                        <ul class="errorlist text-sm text-red-600 mt-1">
+                            {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>                    
         
-                    <div class="relative">
-                        {{ form.password }}
-                        <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
-                            visibility
-                        </span>
+                    <div>
+                        {{ form.password.label_tag }}
+                        <div class="relative">
+                            <input type="password" name="password" id="id_password"
+                                class="mt-1 block w-full rounded-md shadow-sm sm:text-sm px-3 py-2
+                                focus:border-blue-500 focus:ring-blue-500
+                                border {% if form.password.errors %}border-red-500 bg-red-50{% else %}border-gray-300 bg-gray-100{% endif %}"
+                                placeholder="********" autocomplete="current-password" required
+                                value="{{ form.password.value|default_if_none:'' }}">
+                            <span class="material-symbols-outlined toggle-password absolute inset-y-0 right-3 flex items-center cursor-pointer text-[#9CA4B1] text-[1.2rem]">
+                                visibility
+                            </span>
+                        </div>
+                        {% if form.password.errors %}
+                        <ul class="errorlist text-sm text-red-600 mt-1">
+                            {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
-        
+                    
+
+                    <div class="error-message text-sm text-red-600 hidden"></div>
                     <button id="save-button" type="submit" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Entrar</button>
                 </form>
-
-                <div class="justify-center md:justify-end w-full mt-2 flex items-center">
-                    <a href="{% url 'password_reset' %}" class="text-blue-500">Esqueceu sua senha?</a>
+                
+                <div class="w-full mt-2 flex flex-col gap-2 text-center">
+                    <a href="{% url 'password_reset' %}" class="text-blue-500 text-sm">Esqueceu sua senha?</a>
+                    <p class="text-xs text-gray-500">
+                        Não recebeu o email de verificação? 
+                        <button onclick="showResendEmailModal()" class="text-blue-500 underline">Reenviar</button>
+                    </p>
                 </div>
             </div>
         </div>
@@ -49,4 +84,52 @@ Sem B.O
             </div>
         </div>
     </section>
+
+    <!-- Modal de Reenvio de Email -->
+    <div id="resendEmailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-bold mb-4">Reenviar Email de Verificação</h3>
+            <p class="text-gray-600 mb-4 text-sm">Digite seu email para receber novamente o link de verificação:</p>
+            
+            <form action="{% url 'resend-verification-email' %}" method="post">
+                {% csrf_token %}
+                <input type="email" name="email" id="resend_email" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="seuemail@exemplo.com">
+                
+                <div class="flex gap-2">
+                    <button type="button" onclick="hideResendEmailModal()" 
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                        class="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
+                        Reenviar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showResendEmailModal() {
+            document.getElementById('resendEmailModal').classList.remove('hidden');
+            // Preenche com o email do campo de login se disponível
+            const loginEmail = document.getElementById('id_email').value;
+            if (loginEmail) {
+                document.getElementById('resend_email').value = loginEmail;
+            }
+        }
+
+        function hideResendEmailModal() {
+            document.getElementById('resendEmailModal').classList.add('hidden');
+        }
+
+        // Fecha o modal ao clicar fora dele
+        document.getElementById('resendEmailModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideResendEmailModal();
+            }
+        });
+    </script>
 {% endblock %}

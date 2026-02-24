@@ -1,98 +1,210 @@
-from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord
-from .models.description import Description
+import logging
+from .models import Procedure, Occupation, Record, Cid, ProcedureHasCid, ProcedureHasOccupation, ProcedureHasRecord, Competence
+from .models.descricao import Description
 from django.utils import timezone
+from django.db import transaction
+
+logger = logging.getLogger(__name__)
+
+
+def safe_int(value, default=0):
+    """Converte string para int de forma segura, retornando default se vazio ou inválido"""
+    if value is None:
+        return default
+    if isinstance(value, int):
+        return value
+    if not value or not str(value).strip():
+        return default
+    try:
+        return int(str(value).strip())
+    except (ValueError, AttributeError, TypeError):
+        return default
+
 
 class DataImporter:
-    def __init__(self, encoding='iso-8859-1'):
+    def __init__(self, encoding='iso-8859-1', allow_overwrite=False):
         self.encoding = encoding
-
-    def import_procedure_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip() if len(linha) >= 10 else ''
-            no_procedimento = linha[10:260].strip() if len(linha) >= 260 else ''
-            tp_complexidade = linha[260].strip() if len(linha) >= 260 else ''
-            tp_sexo = linha[261].strip() if len(linha) >= 261 else ''
-            qt_maxima_execucao = int(linha[262:266].strip()) if len(linha) >= 266 else 0
-            qt_dias_permanencia = int(linha[267:270].strip()) if len(linha) >= 270 else 0
-            qt_pontos = int(linha[271:274].strip()) if len(linha) >= 274 else 0
-            vl_idade_minima = int(linha[275:278].strip()) if len(linha) >= 278 else 0
-            vl_idade_maxima = int(linha[279:282].strip()) if len(linha) >= 282 else 0
-            vl_sh = int(linha[283:292].strip()) if len(linha) >= 292 else 0
-            vl_sa = int(linha[293:302].strip()) if len(linha) >= 302 else 0
-            vl_sp = int(linha[303:312].strip()) if len(linha) >= 312 else 0
-            qt_tempo_permanencia = int(linha[320:324].strip()) if len(linha) >= 324 else 0
-            dt_competencia = linha[324:330].strip() if len(linha) >= 330 else ''
-            created_at = timezone.now()
-
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-                defaults={
-                    'name': no_procedimento,
-                    'complexity_type': tp_complexidade,
-                    'sex_type': tp_sexo,
-                    'maximum_execution_amount': qt_maxima_execucao,
-                    'stay_day_number': qt_dias_permanencia,
-                    'points_number': qt_pontos,
-                    'minimum_age_value': vl_idade_minima,
-                    'maximum_age_value': vl_idade_maxima,
-                    'SH_value': vl_sh,
-                    'SA_value': vl_sa,
-                    'SP_value': vl_sp,
-                    'stay_time_number': qt_tempo_permanencia,
-                    'competence_date': dt_competencia,
-                    'created_at': created_at
-                }
-            )
-
-            if not created:
-                procedure.name = no_procedimento
-                procedure.complexity_type = tp_complexidade
-                procedure.sex_type = tp_sexo
-                procedure.maximum_execution_amount = qt_maxima_execucao
-                procedure.stay_day_number = qt_dias_permanencia
-                procedure.points_number = qt_pontos
-                procedure.minimum_age_value = vl_idade_minima
-                procedure.maximum_age_value = vl_idade_maxima
-                procedure.SH_value = vl_sh
-                procedure.SA_value = vl_sa
-                procedure.SP_value = vl_sp
-                procedure.stay_time_number = qt_tempo_permanencia
-                procedure.competence_date = dt_competencia
-                procedure.created_at = created_at
-
-            procedure.save()
-
-    def import_occupation_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-
-        for linha in content_str.split('\n'):
-            if len(linha) >= 6:
-                co_ocupacao = linha[0:6].strip()
+        self.allow_overwrite = allow_overwrite
+        self._warned_competences = set()  # Para evitar warnings repetidos
+    
+    def check_competence_conflict(self, new_competence_code):
+        """
+        Verifica se há conflito de competência antes de importar.
+        Retorna True se pode prosseguir, False se deve abortar.
+        """
+        if not new_competence_code or new_competence_code.endswith('9999'):
+            # Competências atemporais podem ser atualizadas sempre
+            return True
+        
+        # Verifica se já existe no banco
+        existing = Competence.objects.filter(
+            code=new_competence_code,
+            is_atemporal=False
+        ).exists()
+        
+        if existing:
+            if self.allow_overwrite:
+                # Avisa apenas uma vez por competência
+                if new_competence_code not in self._warned_competences:
+                    logger.warning(
+                        f"Competência {new_competence_code} já existe. "
+                        f"Sobrescrevendo conforme allow_overwrite=True"
+                    )
+                    self._warned_competences.add(new_competence_code)
+                return True
             else:
-                co_ocupacao = ''
+                logger.error(
+                    f"BLOQUEADO: Tentativa de sobrescrever competência {new_competence_code} "
+                    f"que já existe no banco. Use allow_overwrite=True para forçar."
+                )
+                return False
+        
+        return True
 
-            if len(linha) >= 156:
-                no_ocupacao = linha[6:156].strip()
-            else:
-                no_ocupacao = ''
+    @transaction.atomic
+    def import_procedure_data(self, file):
+        try:
+            logger.info("Starting import of procedure data.")
 
-            occupation, created = Occupation.objects.get_or_create(
-                occupation_code=co_ocupacao,
-                defaults={
-                    'name': no_ocupacao,
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
+
+            procedure_data = {}
+
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
+
+                co_procedimento = line[0:10].strip() if len(line) >= 10 else ''
+                if not co_procedimento:
+                    logger.warning(f"Line {index} missing procedure code, skipping: {line}")
+                    continue
+
+                procedure_data[co_procedimento] = {
+                    'name': line[10:260].strip() if len(line) >= 260 else '',
+                    'complexity_type': line[260].strip() if len(line) >= 260 else '',
+                    'sex_type': line[261].strip() if len(line) >= 261 else '',
+                    'maximum_execution_amount': safe_int(line[262:266]),
+                    'stay_day_number': safe_int(line[267:270]),
+                    'points_number': safe_int(line[271:274]),
+                    'minimum_age_value': safe_int(line[275:278]),
+                    'maximum_age_value': safe_int(line[279:282]),
+                    'SH_value': safe_int(line[283:292]),
+                    'SA_value': safe_int(line[293:302]),
+                    'SP_value': safe_int(line[303:312]),
+                    'stay_time_number': safe_int(line[320:324]),
+                    'competence_date': line[324:330].strip() if len(line) >= 330 else '',
                 }
+
+            logger.info(f"Parsed {len(procedure_data)} procedures from file.")
+
+            existing_procedures = Procedure.objects.filter(
+                procedure_code__in=procedure_data.keys()
             )
+            logger.info(f"Found {existing_procedures.count()} existing procedures in database.")
 
-            if not created:
-                occupation.name = no_ocupacao
+            to_update = []
+            existing_codes = set()
 
-            occupation.save()
+            for procedure in existing_procedures:
+                existing_codes.add(procedure.procedure_code)
+                data = procedure_data[procedure.procedure_code]
 
-    def import_record_data(file):
+                updated = False
+                for field, value in data.items():
+                    if getattr(procedure, field) != value:
+                        setattr(procedure, field, value)
+                        updated = True
+
+                if updated:
+                    to_update.append(procedure)
+
+            to_create = [
+                Procedure(procedure_code=code, **data)
+                for code, data in procedure_data.items()
+                if code not in existing_codes
+            ]
+
+            if to_create:
+                Procedure.objects.bulk_create(to_create, batch_size=500)
+                logger.info(f"Created {len(to_create)} new procedures.")
+
+            if to_update:
+                fields_to_update = list(procedure_data[next(iter(procedure_data))].keys())
+                Procedure.objects.bulk_update(to_update, fields_to_update, batch_size=500)
+                logger.info(f"Updated {len(to_update)} existing procedures.")
+
+            logger.info("Procedure import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during procedure data import: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def import_occupation_data(self, file):
+        try:
+            logger.info("Starting import of occupation data.")
+
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
+
+            occupation_data = {}
+
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
+
+                co_ocupacao = line[0:6].strip() if len(line) >= 6 else ''
+                no_ocupacao = line[6:156].strip() if len(line) >= 156 else ''
+
+                if not co_ocupacao:
+                    logger.warning(f"Line {index} missing occupation code, skipping: {line}")
+                    continue
+
+                occupation_data[co_ocupacao] = no_ocupacao
+
+            logger.info(f"Parsed {len(occupation_data)} occupation entries from file.")
+
+            existing_occupations = Occupation.objects.filter(
+                occupation_code__in=occupation_data.keys()
+            )
+            logger.info(f"Found {existing_occupations.count()} existing occupations in database.")
+
+            to_update = []
+            existing_codes = set()
+
+            for occupation in existing_occupations:
+                existing_codes.add(occupation.occupation_code)
+                new_name = occupation_data[occupation.occupation_code]
+                if occupation.name != new_name and new_name:
+                    occupation.name = new_name
+                    to_update.append(occupation)
+
+            to_create = [
+                Occupation(occupation_code=code, name=name)
+                for code, name in occupation_data.items()
+                if code not in existing_codes
+            ]
+
+            if to_create:
+                Occupation.objects.bulk_create(to_create, batch_size=500)
+                logger.info(f"Created {len(to_create)} new occupations.")
+
+            if to_update:
+                Occupation.objects.bulk_update(to_update, ['name'], batch_size=500)
+                logger.info(f"Updated {len(to_update)} existing occupations.")
+
+            logger.info("Occupation import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during occupation data import: {str(e)}")
+            raise
+
+    def import_record_data(self, file):
         content = file.read()
         content_str = content.decode('iso-8859-1')
 
@@ -126,154 +238,350 @@ class DataImporter:
 
             record.save()
 
-    def import_cid_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
+    @transaction.atomic
+    def import_cid_data(self, file):
+        try:
+            logger.info("Starting import of CID data.")
 
-        for linha in content_str.split('\n'):
-            if len(linha) >= 4:
-                co_cid = linha[0:4].strip()
-            else:
-                co_cid = ''
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            if len(linha) >= 104:
-                no_cid = linha[4:104].strip()
-            else:
-                no_cid = ''
+            cid_data = {}
 
-            if len(linha) >= 105:
-                tp_agravo = linha[104:105].strip()
-            else:
-                tp_agravo = ''
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
 
-            if len(linha) >= 106:
-                tp_sexo = linha[105:106].strip()
-            else:
-                tp_sexo = ''
+                co_cid = line[0:4].strip() if len(line) >= 4 else ''
+                if not co_cid:
+                    logger.warning(f"Line {index} missing CID code, skipping: {line}")
+                    continue
 
-            if len(linha) >= 107:
-                tp_estadio = linha[106:107].strip()
-            else:
-                tp_estadio = ''
+                # Garantir que irradiated_fields_value seja sempre um inteiro válido
+                irradiated_value = safe_int(line[110:114] if len(line) >= 114 else '', 0)
+                if irradiated_value is None:
+                    logger.warning(f"Line {index}: irradiated_fields_value is None for CID {co_cid}, setting to 0")
+                    irradiated_value = 0
 
-            if len(linha) >= 111:
-                vl_campos_irradiados = int(linha[110:114].strip())
-            else:
-                vl_campos_irradiados = 0
-
-            cid, created = Cid.objects.get_or_create(
-                cid_code=co_cid,
-                defaults={
-                    'name': no_cid,
-                    'grievance_type': tp_agravo,
-                    'sex_type': tp_sexo,
-                    'stadium_stype': tp_estadio,
-                    'irradiated_fields_value': vl_campos_irradiados,
+                cid_data[co_cid] = {
+                    'name': line[4:104].strip() if len(line) >= 104 else '',
+                    'grievance_type': line[104:105].strip() if len(line) >= 105 else '',
+                    'sex_type': line[105:106].strip() if len(line) >= 106 else '',
+                    'stadium_stype': line[106:107].strip() if len(line) >= 107 else '',
+                    'irradiated_fields_value': irradiated_value
                 }
+
+            logger.info(f"Parsed {len(cid_data)} CID entries from file.")
+            
+            # Verificar se há valores None no dicionário
+            for code, data in cid_data.items():
+                if data['irradiated_fields_value'] is None:
+                    logger.error(f"CID {code} has None irradiated_fields_value! Fixing to 0")
+                    data['irradiated_fields_value'] = 0
+
+            existing_cids = Cid.objects.filter(
+                cid_code__in=cid_data.keys()
             )
+            logger.info(f"Found {existing_cids.count()} existing CIDs in database.")
 
-            if not created:
-                cid.name = no_cid
-                cid.grievance_type = tp_agravo
-                cid.sex_type = tp_sexo
-                cid.stadium_stype = tp_estadio
-                cid.irradiated_fields_value = vl_campos_irradiados
+            to_update = []
+            existing_codes = set()
 
-            cid.save()
+            for cid in existing_cids:
+                existing_codes.add(cid.cid_code)
+                data = cid_data[cid.cid_code]
 
-    def import_procedure_has_cid_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_cid = linha[10:14].strip()
-            st_principal = linha[14:15].strip()
-            dt_competencia = linha[15:21].strip()
+                updated = False
+                for field, value in data.items():
+                    # Garantir que irradiated_fields_value nunca seja None
+                    if field == 'irradiated_fields_value' and value is None:
+                        value = 0
+                    if getattr(cid, field) != value:
+                        setattr(cid, field, value)
+                        updated = True
 
-            if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
-                continue
+                if updated:
+                    to_update.append(cid)
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
+            to_create = [
+                Cid(
+                    cid_code=code,
+                    name=data['name'],
+                    grievance_type=data['grievance_type'],
+                    sex_type=data['sex_type'],
+                    stadium_stype=data['stadium_stype'],
+                    irradiated_fields_value=data['irradiated_fields_value'] if data['irradiated_fields_value'] is not None else 0
+                )
+                for code, data in cid_data.items()
+                if code not in existing_codes
+            ]
 
-            cid, created = Cid.objects.get_or_create(
-                cid_code=co_cid,
-            )
+            if to_create:
+                Cid.objects.bulk_create(to_create, batch_size=500)
+                logger.info(f"Created {len(to_create)} new CIDs.")
 
-            procedure_has_cid = ProcedureHasCid(
-                st_principal=st_principal,
-                competence_date=dt_competencia,
-                procedure=procedure,
-                cid=cid
-            )
-            procedure_has_cid.save()
+            if to_update:
+                fields_to_update = list(cid_data[next(iter(cid_data))].keys())
+                Cid.objects.bulk_update(to_update, fields_to_update, batch_size=500)
+                logger.info(f"Updated {len(to_update)} existing CIDs.")
 
-    def import_procedure_has_occupation_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_ocupacao = linha[10:16].strip()
-            dt_competencia = linha[16:22].strip()
+            logger.info("CID import completed successfully.")
 
-            if not all([co_procedimento, co_ocupacao, dt_competencia]):
-                continue
+        except Exception as e:
+            logger.exception(f"Error during CID data import: {str(e)}")
+            raise
 
-            if len(co_procedimento) > 10:
-                co_procedimento = co_procedimento[:10]
+    @transaction.atomic
+    def import_procedure_has_cid_data(self, file):
+        try:
+            logger.info("Starting import of procedure has CID data.")
 
-            if len(co_ocupacao) > 6:
-                co_ocupacao = co_ocupacao[:6]
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
+            procedure_code_set = set()
+            cid_code_set = set()
+            relationship_data_set = set()
 
-            occupation, created = Occupation.objects.get_or_create(
-                occupation_code=co_ocupacao,
-            )
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
 
-            procedure_has_occupation = ProcedureHasOccupation(
-                competence_date=dt_competencia,
-                procedure=procedure,
-                occupation=occupation
-            )
-            procedure_has_occupation.save()
+                co_procedimento = line[0:10].strip()
+                co_cid = line[10:14].strip()
+                st_principal = line[14:15].strip()
+                dt_competencia = line[15:21].strip()
 
-    def import_procedure_has_record_data(file):
-        content = file.read()
-        content_str = content.decode('iso-8859-1')
-        for linha in content_str.split('\n'):
-            co_procedimento = linha[0:10].strip()
-            co_registro = linha[10:12].strip()
-            dt_competencia = linha[12:18].strip()
+                if not all([co_procedimento, co_cid, st_principal, dt_competencia]):
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
+                    continue
 
-            if not all([co_procedimento, co_registro, dt_competencia]):
-                continue
+                procedure_code_set.add(co_procedimento)
+                cid_code_set.add(co_cid)
+                relationship_data_set.add((co_procedimento, co_cid, st_principal, dt_competencia))
 
-            if len(co_procedimento) > 10:
-                co_procedimento = co_procedimento[:10]
+            logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            logger.info(f"Found {len(cid_code_set)} unique CIDs.")
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
 
-            if len(co_registro) > 2:
-                co_registro = co_registro[:2]
+            existing_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in existing_procedures}
 
-            procedure, created = Procedure.objects.get_or_create(
-                procedure_code=co_procedimento,
-            )
+            existing_cids = Cid.objects.filter(cid_code__in=cid_code_set)
+            cid_map = {cid.cid_code: cid for cid in existing_cids}
 
-            record, created = Record.objects.get_or_create(
-                record_code=co_registro,
-            )
+            logger.info(f"Found {len(procedure_map)} existing procedures in database.")
+            logger.info(f"Found {len(cid_map)} existing CIDs in database.")
 
-            procedure_has_record = ProcedureHasRecord(
-                competence_date=dt_competencia,
-                procedure=procedure,
-                record=record
-            )
-            procedure_has_record.save()     
+            missing_procedure_codes = procedure_code_set - procedure_map.keys()
+            new_procedures = [Procedure(procedure_code=code) for code in missing_procedure_codes]
+            if new_procedures:
+                Procedure.objects.bulk_create(new_procedures, batch_size=500)
+                logger.info(f"Created {len(new_procedures)} new procedures.")
 
-    def import_description_data(file):
+            all_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in all_procedures}
+
+            missing_cid_codes = cid_code_set - cid_map.keys()
+            new_cids = [
+                Cid(
+                    cid_code=code,
+                    name='',
+                    grievance_type='',
+                    sex_type='',
+                    stadium_stype='',
+                    irradiated_fields_value=0
+                )
+                for code in missing_cid_codes
+            ]
+            if new_cids:
+                Cid.objects.bulk_create(new_cids, batch_size=500)
+                logger.info(f"Created {len(new_cids)} new CIDs.")
+
+            all_cids = Cid.objects.filter(cid_code__in=cid_code_set)
+            cid_map = {cid.cid_code: cid for cid in all_cids}
+
+            new_relationships = []
+            for co_procedimento, co_cid, st_principal, dt_competencia in relationship_data_set:
+                procedure = procedure_map.get(co_procedimento)
+                cid = cid_map.get(co_cid)
+
+                if procedure and cid:
+                    new_relationships.append(
+                        ProcedureHasCid(
+                            st_principal=st_principal,
+                            competence_date=dt_competencia,
+                            procedure=procedure,
+                            cid=cid
+                        )
+                    )
+                else:
+                    logger.warning(f"Procedure or CID not found for relationship: {co_procedimento}, {co_cid}")
+
+            if new_relationships:
+                ProcedureHasCid.objects.bulk_create(new_relationships, batch_size=500)
+                logger.info(f"Inserted {len(new_relationships)} procedure-CID relationships.")
+
+            logger.info("ProcedureHasCid import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during procedure has CID data import: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def import_procedure_has_occupation_data(self, file):
+        try:
+            logger.info("Starting import of procedure and occupation data.")
+
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
+
+            procedure_code_set = set()
+            occupation_code_set = set()
+            relationship_data_set = set()
+
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
+
+                procedure_code = line[0:10].strip()[:10]
+                occupation_code = line[10:16].strip()[:6]
+                competence_date = line[16:22].strip()
+
+                if not all([procedure_code, occupation_code, competence_date]):
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
+                    continue
+
+                procedure_code_set.add(procedure_code)
+                occupation_code_set.add(occupation_code)
+                relationship_data_set.add((procedure_code, occupation_code, competence_date))
+
+            logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            new_procedures = [Procedure(procedure_code=code) for code in procedure_code_set]
+            Procedure.objects.bulk_create(new_procedures, batch_size=500, ignore_conflicts=True)
+            logger.info("Procedures successfully inserted.")
+
+            new_occupations = [Occupation(occupation_code=code) for code in occupation_code_set]
+            logger.info(f"Found {len(occupation_code_set)} unique occupations.")
+            Occupation.objects.bulk_create(new_occupations, batch_size=500, ignore_conflicts=True)
+            logger.info("Occupations successfully inserted.")
+
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
+            new_relationships = [
+                ProcedureHasOccupation(
+                    competence_date=competence_date,
+                    procedure_id=procedure_code,
+                    occupation_id=occupation_code
+                )
+                for procedure_code, occupation_code, competence_date in relationship_data_set
+            ]
+            ProcedureHasOccupation.objects.bulk_create(new_relationships, batch_size=500,)
+            logger.info("Relationships successfully inserted.")
+
+        except Exception as e:
+            logger.exception(f"Error during data import: {str(e)}")
+            raise
+
+    @transaction.atomic
+    def import_procedure_has_record_data(self, file):
+        try:
+            logger.info("Starting import of procedure has record data.")
+
+            file_content = file.read()
+            decoded_content = file_content.decode('iso-8859-1')
+            logger.debug("File decoded successfully.")
+
+            procedure_code_set = set()
+            record_code_set = set()
+            relationship_data_set = set()
+
+            for index, line in enumerate(decoded_content.split('\n'), start=1):
+                if not line.strip():
+                    logger.debug(f"Line {index} is empty, skipping.")
+                    continue
+
+                co_procedimento = line[0:10].strip()
+                co_registro = line[10:12].strip()
+                dt_competencia = line[12:18].strip()
+
+                if not all([co_procedimento, co_registro, dt_competencia]):
+                    logger.warning(f"Line {index} contains incomplete data, skipping: {line}")
+                    continue
+
+                if len(co_procedimento) > 10:
+                    co_procedimento = co_procedimento[:10]
+
+                if len(co_registro) > 2:
+                    co_registro = co_registro[:2]
+
+                procedure_code_set.add(co_procedimento)
+                record_code_set.add(co_registro)
+                relationship_data_set.add((co_procedimento, co_registro, dt_competencia))
+
+            logger.info(f"Found {len(procedure_code_set)} unique procedures.")
+            logger.info(f"Found {len(record_code_set)} unique records.")
+            logger.info(f"Prepared to import {len(relationship_data_set)} relationships.")
+
+            existing_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in existing_procedures}
+
+            existing_records = Record.objects.filter(record_code__in=record_code_set)
+            record_map = {rec.record_code: rec for rec in existing_records}
+
+            logger.info(f"Found {len(procedure_map)} existing procedures.")
+            logger.info(f"Found {len(record_map)} existing records.")
+
+            missing_procedure_codes = procedure_code_set - procedure_map.keys()
+            new_procedures = [Procedure(procedure_code=code) for code in missing_procedure_codes]
+            if new_procedures:
+                Procedure.objects.bulk_create(new_procedures, batch_size=500)
+                logger.info(f"Created {len(new_procedures)} new procedures.")
+
+            all_procedures = Procedure.objects.filter(procedure_code__in=procedure_code_set)
+            procedure_map = {proc.procedure_code: proc for proc in all_procedures}
+
+            missing_record_codes = record_code_set - record_map.keys()
+            new_records = [Record(record_code=code) for code in missing_record_codes]
+            if new_records:
+                Record.objects.bulk_create(new_records, batch_size=500)
+                logger.info(f"Created {len(new_records)} new records.")
+
+            all_records = Record.objects.filter(record_code__in=record_code_set)
+            record_map = {rec.record_code: rec for rec in all_records}
+
+            new_relationships = []
+            for co_procedimento, co_registro, dt_competencia in relationship_data_set:
+                procedure = procedure_map.get(co_procedimento)
+                record = record_map.get(co_registro)
+
+                if procedure and record:
+                    new_relationships.append(
+                        ProcedureHasRecord(
+                            competence_date=dt_competencia,
+                            procedure=procedure,
+                            record=record
+                        )
+                    )
+                else:
+                    logger.warning(f"Procedure or Record not found for relationship: {co_procedimento}, {co_registro}")
+
+            if new_relationships:
+                ProcedureHasRecord.objects.bulk_create(new_relationships, batch_size=500)
+                logger.info(f"Inserted {len(new_relationships)} procedure-record relationships.")
+
+            logger.info("ProcedureHasRecord import completed successfully.")
+
+        except Exception as e:
+            logger.exception(f"Error during procedure has record data import: {str(e)}")
+            raise
+    
+    def import_description_data(self, file):
         content = file.read()
         content_str = content.decode('iso-8859-1')
 
@@ -297,4 +605,45 @@ class DataImporter:
                         description_obj.description = description
                         description_obj.competence_date = dt_competencia
 
-                    description_obj.save()   
+                    description_obj.save()
+
+    @staticmethod
+    @transaction.atomic
+    def sync_competences():
+        """
+        Sincroniza a tabela de competências com base em todos os valores 
+        de competence_date encontrados nas tabelas SIGTAP.
+        """
+        logger.info("Starting competence synchronization...")
+        
+        competence_codes = set()
+        
+        # Coleta competências de todas as tabelas que possuem o campo
+        for model in [Procedure, Record, ProcedureHasCid, ProcedureHasRecord, Description]:
+            codes = model.objects.values_list('competence_date', flat=True).distinct()
+            competence_codes.update([code for code in codes if code])
+        
+        logger.info(f"Found {len(competence_codes)} unique competence codes")
+        
+        created_count = 0
+        updated_count = 0
+        
+        for code in competence_codes:
+            competence, created = Competence.objects.get_or_create(code=code)
+            if created:
+                created_count += 1
+            else:
+                # Re-salva para reprocessar (caso a lógica tenha mudado)
+                competence.save()
+                updated_count += 1
+        
+        logger.info(f"Competence sync complete: {created_count} created, {updated_count} updated")
+        
+        # Retorna estatísticas
+        return {
+            'total': len(competence_codes),
+            'created': created_count,
+            'updated': updated_count,
+            'real_competences': Competence.objects.filter(is_atemporal=False).count(),
+            'atemporal_competences': Competence.objects.filter(is_atemporal=True).count(),
+        }

@@ -6,161 +6,269 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
+from collections.abc import Iterable
+from datetime import date
+import re
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django import forms
+from cbo.models import Occupation
+from cbo.forms.fields import CPFField, DateOfBirthField
+
+
+class PlanBasedOccupationField(forms.ModelMultipleChoiceField):
+    def __init__(self, plan=None, *args, **kwargs):
+        multiple = plan and getattr(plan, 'max_occupations', 1) > 1
+        queryset = Occupation.objects.medical_only()
+
+        label = "Ocupações" if multiple else "Ocupação"
+        widget_attrs = {
+            'class': 'select2 requiredField form-control',
+            'id': 'occupation-select',
+            'data-placeholder': (
+                'Selecione uma ou mais ocupações de acordo com seu Plano' if multiple
+                else 'Selecione uma ocupação de acordo com seu Plano'
+            )
+        }
+
+        widget = (
+            forms.SelectMultiple(attrs=widget_attrs) if multiple
+            else forms.Select(attrs=widget_attrs)
+        )
+
+        super().__init__(queryset=queryset, label=label, widget=widget, *args, **kwargs)
+        self.multiple = multiple
+
+    def clean(self, value):
+        value = value if self.multiple else [value]
+        cleaned = super().clean(value)
+        return list(cleaned)
+    
+
+DEFAULT_CLASS = 'mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2'
 
 
 class LoginAuthenticationForm(forms.Form):
     email = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-md focus:outline-none border-gray-300',
-            'placeholder': 'Digite seu email',
+            'class': DEFAULT_CLASS,
+            'placeholder': 'seuemail@exemplo.com',
             'autocomplete': 'email',
         })
     )
     password = forms.CharField(
         label='Senha',
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-md focus:outline-none border-gray-300',
-            'placeholder': 'Digite sua senha',
+            'class': DEFAULT_CLASS,
+            'placeholder': '********',
             'autocomplete': 'current-password',
         })
     )
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
 
     class Meta:
         model = User
         fields = ['email', 'password']
 
 
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
+
+        if not email or not password:
+            return  
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            self.add_error('email', 'O email que você inseriu não está conectado a uma conta.')
+            return
+
+        # Verifica se o usuário já verificou o email
+        if not user.is_active:
+            self.add_error('email', 'Sua conta ainda não foi ativada. Por favor, verifique seu email e clique no link de ativação.')
+            return
+
+        user = authenticate(username=email, password=password)
+        if user is None:
+            self.add_error('password', 'A senha que você inseriu está incorreta.')
+        else:
+            cleaned_data['user'] = user  
+
+        return cleaned_data
+    
+
+def validate_cpf(cpf: str) -> bool:
+    cpf = re.sub(r'\D', '', cpf)
+
+    if len(cpf) != 11 or cpf == cpf[0] * 11:
+        return False
+
+    for i in range(9, 11):
+        sum_val = sum(int(cpf[num]) * ((i + 1) - num) for num in range(0, i))
+        digit = ((sum_val * 10) % 11) % 10
+        if digit != int(cpf[i]):
+            return False
+    return True
+
 class UserRegisterForm(UserCreationForm):
-    def filter_occupations(self):
-        occupations = Occupation.objects.all()
-        
-        medical_keywords = [
-            'Médico', 'Cirurgião', 'Enfermeiro', 'Dentista', 'Farmacêutico',
-            'Fisioterapeuta', 'Nutricionista', 'Psicólogo', 'Psiquiatra', 'Radiologista',
-            'Oncologista', 'Cardiologista', 'Ginecologista', 'Pediatra', 'Ortopedista',
-            'Fonoaudiólogo', 'Terapeuta', 'Ortoptista', 'Psicomotricista', 'Saúde', 'Neuro'
-        ]
-        
-        medic_occupations = occupations.none()
-
-        for keyword in medical_keywords:
-            medic_occupations |= occupations.filter(name__icontains=keyword)
-        
-        return medic_occupations
-
-    plan = forms.ModelChoiceField(
-        queryset=Plan.objects.all(),
-        widget=forms.Select(
-            attrs={
-                'class': 'requiredField plan-select w-full px-4 py-2 rounded-md focus:outline-none',
-                'data-placeholder': 'Selecione seu Plano'
-            }
-        ),
+    CPF = CPFField(
+        widget=forms.TextInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'id': 'id_CPF',
+            'placeholder': 'Digite seu CPF',
+        })
     )
-
-    occupation = forms.ModelMultipleChoiceField(
-        queryset=filter_occupations(None), 
-        widget=forms.SelectMultiple(
-            attrs={
-                'class': 'requiredField occupation-select w-full px-4 py-2 rounded-md focus:outline-none',
-                'id': 'occupation-select',
-                'data-placeholder': 'Selecione uma ou mais ocupações de acordo com seu Plano'
-            },
-        ),
+    date_of_birth = DateOfBirthField(
+        widget=forms.DateInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'placeholder': 'Digite sua Data de nascimento',
+            'type': 'date',
+        }),
+        label=User._meta.get_field('date_of_birth').verbose_name
     )
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'password1', 'password2', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration', 'occupation', 'plan']
+        fields = [
+            'email', 
+            'first_name', 
+            'last_name', 
+            'password1', 
+            'password2', 
+            'CPF', 
+            'telephone', 
+            'date_of_birth', 
+            'occupational_registration', 
+            'occupations'
+        ]
         widgets = {
             'email': forms.EmailInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
-                'placeholder': 'Digite seu Email',
-                'required': 'false'
+                'class': 'requiredField ' + DEFAULT_CLASS,
+                'placeholder': 'seuemail@exemplo.com',
             }),
             'first_name': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Nome',
-                'required': 'false'
             }),
             'last_name': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Sobrenome',
-                'required': 'false'
             }),
             'password1': forms.PasswordInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite sua Senha',
-                'required': 'false'
             }),
             'password2': forms.PasswordInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Confirme sua senha',
-                'required': 'false'
-            }),
-            'CPF': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
-                'id': 'id_CPF',
-                'placeholder': 'Digite seu CPF',
-                'required': 'false'
             }),
             'telephone': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_telephone',
-                'placeholder': 'Digite seu Telefone',
-                'required': 'false'
-            }),
-            'date_of_birth': forms.DateInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
-                'placeholder': 'Digite sua Data de nascimento',
-                'type': 'date',
-                'required': 'false'
+                'placeholder': 'Digite seu Celular',
             }),
             'occupational_registration': forms.TextInput(attrs={
-                'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+                'class': 'requiredField ' + DEFAULT_CLASS,
                 'placeholder': 'Digite seu Registro ocupacional',
-                'required': 'false'
             }),
         }
 
     def __init__(self, *args, **kwargs):
+        self.plan = kwargs.pop('plan', None)
         super(UserRegisterForm, self).__init__(*args, **kwargs)
+        self.fields['occupations'] = PlanBasedOccupationField(plan=self.plan, required=True)
+
         self.fields['password1'].widget.attrs.update({
-            'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+            'class': 'requiredField ' + DEFAULT_CLASS,
             'placeholder': 'Digite sua Senha'
         })
         self.fields['password2'].widget.attrs.update({
-            'class': 'requiredField w-full px-4 py-2 rounded-md focus:outline-none',
+            'class': 'requiredField ' + DEFAULT_CLASS,
             'placeholder': 'Confirme sua Senha'
         })
+                    
+    def clean_occupations(self):
+        occupations = self.cleaned_data.get('occupations')
 
-    def clean(self):
-        cleaned_data = super().clean()
-        plan = cleaned_data.get('plan')
-        occupations = cleaned_data.get('occupation')
+        if isinstance(occupations, Iterable) and self.plan:
+            max_allowed = self.plan.max_occupations
+            if len(occupations) > max_allowed:
+                raise forms.ValidationError(
+                    f'Você pode selecionar no máximo {max_allowed} ocupações para este plano.'
+                )
 
-        if plan and occupations:
-            if plan.name == 'Plano Essencial' and len(occupations) > 1:
-                raise ValidationError('O Plano Essencial permite selecionar apenas uma ocupação.')
-            elif plan.name == 'Plano Essencial +' and len(occupations) > 3:
-                raise ValidationError('O Plano Essencial + permite selecionar até 3 ocupações.')
+        return occupations
 
-        return cleaned_data
+    # def clean_CPF(self):
+    #     cpf = self.cleaned_data.get('CPF')
+    #     if not validate_cpf(cpf):
+    #         raise ValidationError("CPF inválido.")
+    #     return cpf
+
+    # def clean_date_of_birth(self):
+    #     dob = self.cleaned_data.get('date_of_birth')
+    #     if dob:
+    #         today = date.today()
+    #         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    #         if age < 18:
+    #             raise ValidationError("Você precisa ter pelo menos 18 anos.")
+    #     return dob
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        first_name = self.cleaned_data.get('first_name', '') or ''
+        last_name = self.cleaned_data.get('last_name', '') or ''
+        email = self.cleaned_data.get('email', '') or ''
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("As senhas não coincidem.")
+
+        similar_data = [first_name.lower(), last_name.lower(), email.lower()]
+        password_lower = password2.lower() if password2 else ''
+
+        for value in similar_data:
+            if value and value in password_lower:
+                raise ValidationError("A senha não deve conter seu nome ou email.")
+
+        return password2
+    
+    @transaction.atomic
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.plan = self.plan
+        # user.is_active = False
+        
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user
 
 
 class UserEditForm(forms.ModelForm):  
+    CPF = CPFField(
+        widget=forms.TextInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'id': 'id_CPF',
+            'placeholder': 'Digite seu CPF',
+        })
+    )
+    date_of_birth = DateOfBirthField(
+        widget=forms.DateInput(attrs={
+            'class': f'requiredField {DEFAULT_CLASS}',
+            'placeholder': 'Digite sua Data de nascimento',
+            'type': 'date',
+        }),
+        label=User._meta.get_field('date_of_birth').verbose_name
+    )
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'CPF', 'telephone', 'date_of_birth', 'occupational_registration']
         widgets = {
-            'CPF': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'CPF'}),
             'telephone': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Telefone'}),
-            'date_of_birth': forms.DateInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Data de nascimento'}),
             'occupational_registration': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-md focus:outline-none', 'placeholder': 'Registro ocupacional'}),
         }
 

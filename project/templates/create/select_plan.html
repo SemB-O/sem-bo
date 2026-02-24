@@ -1,61 +1,149 @@
 {% extends 'base_auth.html' %}
 {% load static %}
 
-{% block title %}
-Sem B.O
-{% endblock %}
+{% block title %}Escolha seu Plano - Sem B.O{% endblock %}
 
 {% block content %}
-<section class="m-0 h-screen text-black bg-white box-border grid grid-rows-[1fr_2fr_2fr] justify-items-center py-6 md:py-0">
-    <div></div>
-    <div class="flex flex-col gap-2">
-        <div class="text-center py-12 px-8 md:px-0 md:py-8 md:mb-4">
-            <h1 class="text-6xl md:text-7xl">Escolha <b><span class="text-[#43D1EB]">seu Plano</span></b></h1>
-            <p class="text-gray-600">Escolha o plano que mais se adequa às suas necessidades!</p>
+<section class="min-h-screen md:h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-6 md:py-6 px-4 flex items-center overflow-y-auto md:overflow-hidden">
+    <div class="max-w-7xl mx-auto w-full">
+        <!-- Header -->
+        <div class="text-center mb-8 md:mb-14">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-2">
+                Escolha <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">seu Plano</span>
+            </h1>
+            <p class="text-base md:text-lg text-gray-600 px-4">Escolha o plano que mais se adequa às suas necessidades!</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl px-4 md:mb-4">
-            {% for plan in plans %}
-            <div class="bg-white border border-gray-200 rounded-xl shadow-lg p-6 flex flex-col text-center gap-4 {% if forloop.counter == 2 %} md:scale-110 {% endif %}">
-                <h2 class="text-2xl font-bold text-left text-gray-800">{{ plan.name }}</h2>
-                <p class="text-left text-gray-600">{{ plan.description }}</p>
-                <div class="flex">
-                    <p class="text-xl text-left font-bold text-gray-800 mb-4" style="margin-top: 0.5rem;">R$</p>
-                    <p class="text-5xl text-left font-bold text-gray-800 mb-4">{{ plan.price }}</p>
-                    <p class="text-xl text-left font-bold text-gray-800 mb-4 pt-2">/mês</p>
+
+        <!-- Plans Grid -->
+        <div class="grid grid-cols-1 {% if plans_data|length == 2 %}md:grid-cols-2 max-w-4xl{% elif plans_data|length >= 3 %}md:grid-cols-3{% else %}max-w-md{% endif %} gap-4 md:gap-6 lg:gap-8 mx-auto mb-6 md:mb-12 {% if plans_data|length == 3 %}md:items-center{% endif %}">
+            {% for item in plans_data %}
+            {% with plan=item.plan %}
+            <div class="relative group {% if forloop.counter == 2 and plans_data|length == 3 %}md:z-10{% endif %}">
+                <!-- Destaque para o plano do meio (se houver 3) -->
+                {% if forloop.counter == 2 and plans_data|length == 3 %}
+                <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+                {% endif %}
+                
+                <div class="relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col
+                            {% if forloop.counter == 2 and plans_data|length == 3 %}border-2 border-cyan-400 md:scale-110 p-5 md:p-6{% else %}border border-gray-200 p-4 md:p-5{% endif %}">
+                    
+                    <!-- Badge Popular (se for o plano do meio) -->
+                    {% if forloop.counter == 2 and plans_data|length == 3 %}
+                    <div class="absolute -top-3 md:-top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-4 md:px-5 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-bold shadow-lg">
+                            ⭐ Mais Popular
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Plan Header -->
+                    <div class="{% if forloop.counter == 2 and plans_data|length == 3 %}mb-4 md:mb-5{% else %}mb-3 md:mb-4{% endif %}">
+                        <h2 class="{% if forloop.counter == 2 and plans_data|length == 3 %}text-2xl md:text-3xl{% else %}text-xl md:text-2xl{% endif %} font-bold text-gray-900 mb-1">{{ plan.name }}</h2>
+                        <p class="text-xs md:text-sm text-gray-600 line-clamp-2">{{ plan.description }}</p>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="{% if forloop.counter == 2 and plans_data|length == 3 %}mb-4 md:mb-5{% else %}mb-3 md:mb-4{% endif %}">
+                        <div class="flex items-baseline">
+                            <span class="{% if forloop.counter == 2 and plans_data|length == 3 %}text-3xl md:text-5xl{% else %}text-3xl md:text-4xl{% endif %} font-bold text-gray-900">R$ {{ plan.price|floatformat:2 }}</span>
+                            <span class="text-sm md:text-base text-gray-600 ml-2">/mês</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Até {{ plan.max_occupations }} ocupaç{{ plan.max_occupations|pluralize:"ão,ões" }}</p>
+                    </div>
+
+                    <!-- Benefits List -->
+                    <div class="flex-grow {% if forloop.counter == 2 and plans_data|length == 3 %}mb-4 md:mb-5{% else %}mb-3 md:mb-4{% endif %}">
+                        <h3 class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-2 md:mb-3">Benefícios inclusos:</h3>
+                        <ul class="space-y-2 {% if forloop.counter == 2 and plans_data|length == 3 %}max-h-44 md:max-h-56{% else %}max-h-40 md:max-h-48{% endif %} overflow-y-auto pr-2 custom-scrollbar">
+                            {% for association in item.benefit_associations %}
+                            <li class="flex items-start">
+                                {% if association.available %}
+                                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mr-2 mt-0.5">
+                                    <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                {% else %}
+                                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center mr-2 mt-0.5">
+                                    <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <p class="text-sm {% if association.available %}text-gray-900{% else %}text-gray-400 line-through{% endif %}">
+                                        {% if association.plan_benefit.icon %}{{ association.plan_benefit.icon }} {% endif %}
+                                        {{ association.plan_benefit.name }}
+                                    </p>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li class="text-gray-500 text-xs italic">Nenhum benefício configurado</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <div class="mt-auto">
+                        <form action="{% url 'select_plan' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                            <button type="submit" class="w-full {% if forloop.counter == 2 and plans_data|length == 3 %}py-3 md:py-4{% else %}py-2.5 md:py-3{% endif %} px-4 rounded-lg font-semibold text-sm md:text-base transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2
+                                {% if forloop.counter == 2 and plans_data|length == 3 %}
+                                    bg-gradient-to-r from-cyan-400 to-blue-500 text-white hover:from-cyan-500 hover:to-blue-600 shadow-lg hover:shadow-xl focus:ring-cyan-300
+                                {% else %}
+                                    bg-gray-900 text-white hover:bg-gray-800 shadow-sm hover:shadow-md focus:ring-gray-300
+                                {% endif %}">
+                                Selecionar Plano
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <ul class="text-sm text-left text-gray-600 space-y-2">
-                    {% for point_availability in plan.all_points %}
-                        <li class="flex border-b border-gray-300 pb-2">
-                            {% if point_availability.available %}
-                                <svg class="w-6 h-6 mr-2 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" fill="#22c55e"></circle>
-                                    <path d="M9 12l2 2 4-4" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
-                            {% else %}
-                                <svg class="w-6 h-6 mr-2 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" fill="#ef4444"></circle>
-                                    <path d="M9 9l6 6m0-6l-6 6" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
-                            {% endif %}
-                            {{ point_availability.point.point_description }}
-                        </li>
-                    {% endfor %}
-                </ul>
-                <div class="mt-auto">
-                    <form action="{% url 'select_plan' %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="plan_id" value="{{ plan.id }}">
-                        <button type="submit" class="w-full bg-[#0F0F0F] text-white py-2 px-4 rounded-lg transition">Selecionar</button>
-                    </form>
+            </div>
+            {% endwith %}
+            {% empty %}
+            <div class="col-span-full text-center py-8">
+                <div class="inline-block p-6 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <svg class="w-12 h-12 text-yellow-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <p class="text-lg font-semibold text-gray-900 mb-1">Nenhum plano disponível</p>
+                    <p class="text-sm text-gray-600">Entre em contato conosco para mais informações.</p>
                 </div>
             </div>
             {% endfor %}
         </div>
-    </div>
-    <div class="footer mt-12 py-6 md:py-0">
-        <div class="register flex justify-center">
-            <p>Já tem uma conta? <a href="{% url 'login' %}" class="text-blue-500">Faça login</a></p>
+
+        <!-- Footer -->
+        <div class="text-center pb-4 md:pb-0">
+            <p class="text-sm text-gray-600">
+                Já tem uma conta? 
+                <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition">
+                    Faça login
+                </a>
+            </p>
         </div>
     </div>
 </section>
+
+<style>
+    /* Custom scrollbar for benefits list */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+</style>
 {% endblock %}
