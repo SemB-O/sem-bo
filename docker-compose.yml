@@ -19,13 +19,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    working_dir: /usr/src/project
+    working_dir: /usr/src/app
     command: >
       bash -c "
         python manage.py runserver ${HOSTNAME}:${PORT}
       "
     volumes:
-      - ./project/:/usr/src/project
+      - .:/usr/src/app
     ports:
       - "${PORT}:${PORT}"
     environment:
