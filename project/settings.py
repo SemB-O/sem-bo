@@ -31,6 +31,12 @@ DOMAIN = os.getenv('DOMAIN', 'localhost:8000')
 
 ALLOWED_HOSTS = ['0.0.0.0', '192.168.0.108', 'localhost', '127.0.0.1', DOMAIN, '*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://app-producao-sembocombr-bzea.hospedagemelastica.com.br',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
