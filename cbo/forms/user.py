@@ -219,19 +219,9 @@ class UserRegisterForm(UserCreationForm):
     def clean_password2(self):
         password1 = self.cleaned_data.get('password1')
         password2 = self.cleaned_data.get('password2')
-        first_name = self.cleaned_data.get('first_name', '') or ''
-        last_name = self.cleaned_data.get('last_name', '') or ''
-        email = self.cleaned_data.get('email', '') or ''
 
         if password1 and password2 and password1 != password2:
             raise ValidationError("As senhas não coincidem.")
-
-        similar_data = [first_name.lower(), last_name.lower(), email.lower()]
-        password_lower = password2.lower() if password2 else ''
-
-        for value in similar_data:
-            if value and value in password_lower:
-                raise ValidationError("A senha não deve conter seu nome ou email.")
 
         return password2
     

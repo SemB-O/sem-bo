@@ -20,58 +20,68 @@
 
 <!-- Conteúdo Scrollável -->
 <div class="flex flex-col items-center justify-center text-gray-800 px-4 pt-28 pb-40 overflow-y-auto">
-  <div class="w-full max-w-6xl">
+  <div class="w-full max-w-6xl space-y-8">
     
     <!-- HEADER DO PROCEDIMENTO -->
-    <div class="procedure-header-modern bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 md:p-8 rounded-2xl shadow-xl mb-6">
-      <!-- Título e Botão de Favorito -->
-      <div class="flex justify-between items-start gap-4 mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold flex-1 leading-tight">{{ procedure.name }}</h1>
-        <button id="btn-favorite" title="Salvar favorito" aria-label="Salvar favorito" class="favorite-btn focus:outline-none transition-all duration-300 hover:scale-110 flex-shrink-0">
-          {% if favorite %}
-            <i class="fa-solid fa-bookmark text-[#42D1EB] text-3xl drop-shadow-lg"></i>
-          {% else %}
-            <i class="fa-regular fa-bookmark text-white text-3xl hover:text-[#42D1EB] transition-colors"></i>
-          {% endif %}
-        </button>
-      </div>
-
-      <!-- Código do Procedimento -->
-      <div class="mb-5">
-        <span class="text-xs uppercase tracking-wider text-gray-400 block mb-2">Código SIGTAP</span>
-        <div class="procedure-code-copy bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-300 inline-flex items-center gap-2 group" onclick="copyProcedureCode()" id="code-container">
-          <code class="font-mono text-xl font-bold" id="procedure-code">{{ procedure.procedure_code }}</code>
-          <i class="fas fa-copy text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
+    <div class="procedure-header-modern bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-xl">
+      <div class="flex flex-col gap-5 md:gap-6">
+        <!-- Título e Favorito -->
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight">{{ procedure.name }}</h1>
+          </div>
+          <div class="flex-shrink-0 flex md:justify-end">
+            <button id="btn-favorite" title="Salvar favorito" aria-label="Salvar favorito" class="favorite-btn focus:outline-none transition-all duration-300 hover:scale-110">
+              {% if favorite %}
+                <i class="fa-solid fa-bookmark text-[#42D1EB] text-3xl drop-shadow-lg"></i>
+              {% else %}
+                <i class="fa-regular fa-bookmark text-white text-3xl hover:text-[#42D1EB] transition-colors"></i>
+              {% endif %}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Ocupações Relacionadas -->
-      {% if procedure.related_occupations_names %}
-      <div>
-        <span class="text-xs uppercase tracking-wider text-gray-400 block mb-2">Ocupações autorizadas</span>
-        <div class="flex flex-wrap gap-2">
-          {% for occupation in procedure.related_occupations_names %}
-            <span class="bg-white bg-opacity-10 hover:bg-opacity-15 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border border-white border-opacity-20">
-              {{ occupation }}
-            </span>
-          {% endfor %}
+        <!-- Código do Procedimento -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <span class="text-xs uppercase tracking-wider text-gray-400 block mb-1">Código SIGTAP</span>
+            <div class="procedure-code-copy bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-300 inline-flex items-center gap-2 group w-fit" onclick="copyProcedureCode()" id="code-container">
+              <code class="font-mono text-xl font-bold" id="procedure-code">{{ procedure.procedure_code }}</code>
+              <i class="fas fa-copy text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </div>
+          </div>
         </div>
+
+        <!-- Ocupações Relacionadas -->
+        {% if procedure.related_occupations_names %}
+        <div class="space-y-2">
+          <span class="text-xs uppercase tracking-wider text-gray-400 block">Ocupações autorizadas</span>
+          <div class="flex flex-wrap gap-2">
+            {% for occupation in procedure.related_occupations_names %}
+              <span class="bg-white bg-opacity-10 hover:bg-opacity-15 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border border-white border-opacity-20">
+                {{ occupation }}
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
-      {% endif %}
     </div>
 
 
     <!-- TIPOS DE REGISTRO -->
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">
-        Tipos de Registro Disponíveis
-      </h2>
+    <div class="mb-8">
+      <div class="flex flex-col gap-1 mb-4">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Fluxo de registro</p>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">Tipos de Registro Disponíveis</h2>
+        <p class="text-sm text-gray-600 md:text-base max-w-3xl">Veja onde e como cada tipo de registro deve ser utilizado para este procedimento.</p>
+      </div>
       
-      <div class="space-y-4">
+      <div class="space-y-4 md:space-y-5">
         {% for record_name in procedure.get_records_names %}
           
           {% if record_name == 'BPA (Consolidado)' %}
-          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow ring-1 ring-gray-100" style="border-left-color: #42D1EB;">
             <h3 class="text-lg font-bold text-gray-800 mb-3">BPA (Consolidado)</h3>
             <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
               <p class="text-sm font-semibold" style="color: #1a7a8a;">
@@ -90,7 +100,7 @@
           </div>
           
           {% elif record_name == 'BPA (Individualizado)' %}
-          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow ring-1 ring-gray-100" style="border-left-color: #42D1EB;">
             <h3 class="text-lg font-bold text-gray-800 mb-3">BPA (Individualizado)</h3>
             <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
               <p class="text-sm font-semibold" style="color: #1a7a8a;">
@@ -109,7 +119,7 @@
           </div>
 
           {% elif record_name == 'AIH (Proc. Principal)' %}
-          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow ring-1 ring-gray-100" style="border-left-color: #42D1EB;">
             <h3 class="text-lg font-bold text-gray-800 mb-3">AIH (Procedimento Principal)</h3>
             <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
               <p class="text-sm font-semibold" style="color: #1a7a8a;">
@@ -134,7 +144,7 @@
           </div>
 
           {% elif record_name == 'AIH (Proc. Secundário)' %}
-          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow ring-1 ring-gray-100" style="border-left-color: #42D1EB;">
             <h3 class="text-lg font-bold text-gray-800 mb-3">AIH (Procedimento Secundário)</h3>
             <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
               <p class="text-sm font-semibold" style="color: #1a7a8a;">
@@ -153,7 +163,7 @@
           </div>
 
           {% elif record_name == 'AIH (Proc. Especial)' %}
-          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow ring-1 ring-gray-100" style="border-left-color: #42D1EB;">
             <h3 class="text-lg font-bold text-gray-800 mb-3">AIH (Procedimento Especial)</h3>
             <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
               <p class="text-sm font-semibold" style="color: #1a7a8a;">
@@ -172,7 +182,7 @@
           </div>
 
           {% elif record_name == 'APAC (Proc. Principal)' %}
-          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow" style="border-left-color: #42D1EB;">
+          <div class="record-card bg-white border-l-4 rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow ring-1 ring-gray-100" style="border-left-color: #42D1EB;">
             <h3 class="text-lg font-bold text-gray-800 mb-3">APAC (Procedimento Principal)</h3>
             <div class="rounded-lg p-3 mb-3" style="background-color: rgba(66, 209, 235, 0.1); border: 1px solid rgba(66, 209, 235, 0.3);">
               <p class="text-sm font-semibold" style="color: #1a7a8a;">

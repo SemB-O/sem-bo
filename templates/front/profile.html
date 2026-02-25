@@ -14,82 +14,120 @@
   {% endblock %}
 
   {% block content %}
-  <div class="flex flex-col items-center justify-center min-h-screen text-gray-800 pb-28 px-4">
-    <div class="w-full max-w-4xl bg-white p-4 md:p-6 rounded-xl">
-      <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 mb-6 border-b pb-4 text-center md:text-left">
-        <div class="flex md:hidden justify-center items-center px-8 pt-6 w-[18rem] mx-auto mb-5 mt-4">
-            <a href="{% url 'home' %}">
-                <img src="{% static 'assets/logo.png' %}" alt="" class="mt-1.5">
-            </a>
-        </div>
-        <img src="{% static 'assets/procedure.jpg' %}" alt="Foto de perfil" class="w-24 h-24 rounded-full object-cover shadow hidden md:flex">
-        <div>
-          <h2 class="text-2xl font-semibold">{{ request.user.first_name.title }} {{ request.user.last_name.title }}</h2>
-          <p class="text-sm text-gray-600">{{ request.user.email }}</p>
-        </div>
-      </div>
-
-      <div class="flex flex-col md:flex-row gap-4 mb-6">
-        <button onclick="toggleForm()" class="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-900 transition">
-          Editar seu Perfil
-        </button>
-        <form action="/logout/" method="post" class="w-full">
-          {% csrf_token %}
-          <button type="submit" class="w-full bg-black text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 hover:bg-gray-900 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="white" viewBox="0 -960 960 960">
-              <path d="M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h264v72H216v528h264v72H216Zm432-168-51-51 81-81H384v-72h294l-81-81 51-51 168 168-168 168Z"/>
-            </svg>
-            Sair
-          </button>
-        </form>
-      </div>
-
-      <div class="profile-form hidden md:max-h-none max-h-[35vh] overflow-y-auto pr-2">
-        <form id="profile-form" action="{% url 'profile' %}" method="post" class="flex flex-col gap-2 max-h-[35vh] overflow-scroll">
-          {% csrf_token %}
-
-          <div>
-            <label for="id_first_name" class="block text-sm font-medium mb-1">Nome</label>
-            <input type="text" name="first_name" id="id_first_name" class="w-full px-3 py-2 rounded-md border bg-gray-100 focus:ring-blue-500 focus:border-blue-500" value="{{ request.user.first_name }}">
-            <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
+  <div class="flex flex-col items-center justify-center min-h-screen text-gray-800 pb-28 px-4 bg-gradient-to-b from-slate-50 to-white">
+    <div class="w-full max-w-5xl bg-white/90 backdrop-blur my-[3rem] rounded-2xl shadow-xl ring-1 ring-gray-100 p-6 md:p-8">
+      <!-- Header -->
+      <div class="flex flex-col gap-6 md:gap-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div class="flex items-start gap-4">
+            <img src="{% static 'assets/procedure.jpg' %}" alt="Foto de perfil" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-lg border border-gray-200">
+            <div class="min-w-0">
+              <p class="text-xs uppercase tracking-[0.28em] text-gray-500 mb-1">Perfil</p>
+              <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight truncate">{{ request.user.first_name.title }} {{ request.user.last_name.title }}</h2>
+              <p class="text-sm text-gray-600 truncate">{{ request.user.email }}</p>
+            </div>
           </div>
-
-          <div>
-            <label for="id_last_name" class="block text-sm font-medium mb-1">Sobrenome</label>
-            <input type="text" name="last_name" id="id_last_name" class="w-full px-3 py-2 rounded-md border bg-gray-100 focus:ring-blue-500 focus:border-blue-500" value="{{ request.user.last_name }}">
-            <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
-          </div>
-
-          <div>
-            <label for="id_CPF" class="block text-sm font-medium mb-1">CPF</label>
-            <input type="text" name="CPF" id="id_CPF" class="w-full px-3 py-2 rounded-md border bg-gray-100 focus:ring-blue-500 focus:border-blue-500" value="{{ request.user.CPF }}">
-            <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
-          </div>
-
-          <div>
-            <label for="id_telephone" class="block text-sm font-medium mb-1">Telefone</label>
-            <input type="text" name="telephone" id="id_telephone" class="w-full px-3 py-2 rounded-md border bg-gray-100 focus:ring-blue-500 focus:border-blue-500" value="{{ request.user.telephone }}">
-            <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
-          </div>
-
-          <div>
-            <label for="id_date_of_birth" class="block text-sm font-medium mb-1">Data de Nascimento</label>
-            <input type="date" name="date_of_birth" id="id_date_of_birth" class="w-full px-3 py-2 rounded-md border bg-gray-100 focus:ring-blue-500 focus:border-blue-500" value="{{ request.user.date_of_birth }}">
-            <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
-          </div>
-
-          <div>
-            <label for="id_occupational_registration" class="block text-sm font-medium mb-1">Registro Ocupacional</label>
-            <input type="text" name="occupational_registration" id="id_occupational_registration" class="w-full px-3 py-2 rounded-md border bg-gray-100 focus:ring-blue-500 focus:border-blue-500" value="{{ request.user.occupational_registration }}">
-            <div class="error-message text-sm text-red-600 mt-1 hidden"></div>
-          </div>
-
-          <div class="col-span-1 md:col-span-2">
-            <button type="submit" class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-900 transition">
-              Confirmar alterações
+          <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <button onclick="toggleForm()" type="button" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-black text-white text-sm font-semibold shadow hover:bg-gray-900 transition">
+              <i class="fa-regular fa-pen-to-square"></i>
+              Editar perfil
             </button>
+            <form action="/logout/" method="post" class="w-full sm:w-auto">
+              {% csrf_token %}
+              <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gray-100 text-gray-800 text-sm font-semibold border border-gray-200 hover:bg-gray-200 transition">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                Sair
+              </button>
+            </form>
           </div>
-        </form>
+        </div>
+
+        <!-- Key info badges -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+            <div class="w-10 h-10 rounded-full border border-[#42D1EB66] text-[#0f4c5c] flex items-center justify-center shadow-sm">
+              <i class="fa-regular fa-id-card"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs uppercase tracking-[0.15em] text-gray-500">CPF</p>
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ request.user.CPF|default:'—' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+            <div class="w-10 h-10 rounded-full border border-[#42D1EB66] text-[#0f4c5c] flex items-center justify-center shadow-sm">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs uppercase tracking-[0.15em] text-gray-500">Telefone</p>
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ request.user.telephone|default:'—' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+            <div class="w-10 h-10 rounded-full border border-[#42D1EB66] text-[#0f4c5c] flex items-center justify-center shadow-sm">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs uppercase tracking-[0.15em] text-gray-500">Nascimento</p>
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ request.user.date_of_birth|default:'—' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="profile-form hidden md:max-h-none max-h-[35vh] overflow-y-auto pr-1">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Atualizar dados</p>
+              <h3 class="text-lg font-semibold text-gray-900">Informações pessoais</h3>
+            </div>
+            <button onclick="toggleForm()" type="button" class="text-sm text-gray-600 hover:text-gray-900">Fechar</button>
+          </div>
+          <form id="profile-form" action="{% url 'profile' %}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% csrf_token %}
+
+            <div class="space-y-1">
+              <label for="id_first_name" class="block text-sm font-medium text-gray-700">Nome</label>
+              <input type="text" name="first_name" id="id_first_name" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#42D1EB] focus:border-transparent" value="{{ request.user.first_name }}">
+              <div class="error-message text-sm text-red-600 hidden"></div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="id_last_name" class="block text-sm font-medium text-gray-700">Sobrenome</label>
+              <input type="text" name="last_name" id="id_last_name" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#42D1EB] focus:border-transparent" value="{{ request.user.last_name }}">
+              <div class="error-message text-sm text-red-600 hidden"></div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="id_CPF" class="block text-sm font-medium text-gray-700">CPF</label>
+              <input type="text" name="CPF" id="id_CPF" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#42D1EB] focus:border-transparent" value="{{ request.user.CPF }}">
+              <div class="error-message text-sm text-red-600 hidden"></div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="id_telephone" class="block text-sm font-medium text-gray-700">Telefone</label>
+              <input type="text" name="telephone" id="id_telephone" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#42D1EB] focus:border-transparent" value="{{ request.user.telephone }}">
+              <div class="error-message text-sm text-red-600 hidden"></div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="id_date_of_birth" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+              <input type="date" name="date_of_birth" id="id_date_of_birth" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#42D1EB] focus:border-transparent" value="{{ request.user.date_of_birth }}">
+              <div class="error-message text-sm text-red-600 hidden"></div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="id_occupational_registration" class="block text-sm font-medium text-gray-700">Registro Ocupacional</label>
+              <input type="text" name="occupational_registration" id="id_occupational_registration" class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-[#42D1EB] focus:border-transparent" value="{{ request.user.occupational_registration }}">
+              <div class="error-message text-sm text-red-600 hidden"></div>
+            </div>
+
+            <div class="md:col-span-2 pt-2">
+              <button type="submit" class="w-full bg-black text-white py-3 rounded-lg font-semibold shadow hover:bg-gray-900 transition">
+                Confirmar alterações
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
