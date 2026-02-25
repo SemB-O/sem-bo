@@ -166,6 +166,7 @@ ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'sembooficial@gmail.com')
 
 #Midia
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #AWS CREDENTIALS
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
