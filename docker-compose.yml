@@ -1,7 +1,8 @@
 version: '3'
 
 services:
-  sem-bo-database: 
+  sem-bo-database:
+    platform: linux/amd64
     image: postgres:latest 
     container_name: sem-bo-database 
     ports:
@@ -15,6 +16,7 @@ services:
       - sem-bo-network
 
   web-project:
+    platform: linux/amd64
     hostname: "${HOSTNAME}"
     build:
       context: .

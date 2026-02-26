@@ -10,6 +10,74 @@ Sem B.O
 {% block head %}
 
     <link rel="stylesheet" href="{% static 'front/procedure_favorite_style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        /* ========== DROPDOWN MENU - ESTILO MODERNO ========== */
+        .menu-trigger {
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== MODAIS - ESTILO MODERNO ========== */
+        .modal {
+            animation: fadeIn 0.3s ease-out;
+            min-height: 100vh;
+            min-height: 100dvh; /* Para mobile */
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content, .modal-content-edit {
+            animation: slideUp 0.3s ease-out;
+            margin: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== TAG INDICATOR - PADRONIZADO ========== */
+        .more-tags-indicator {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            background-color: rgb(241 245 249);
+            color: rgb(71 85 105);
+            padding: 0.125rem 0.5rem;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
 
 {% endblock %}
 
@@ -65,8 +133,20 @@ Sem B.O
                         {% endif %}
                     </div>
                     <div class="options">
-                        <div class="edit" onclick="event.stopPropagation(); openEditModal('{{ folder.id }}', '{{ folder.name }}', '{{ folder.description }}')">
-                            <ion-icon name="create-outline"></ion-icon>
+                        <div class="menu-options relative">
+                            <button type="button" class="menu-trigger bg-gray-100 flex items-center justify-center rounded-full transition" style="width: 3rem; height: 3.2rem;" onclick="event.stopPropagation(); toggleMenu({{ folder.id }})">
+                                <ion-icon name="ellipsis-vertical" class="text-2xl text-gray-700"></ion-icon>
+                            </button>
+                            <div id="menu-{{ folder.id }}" class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                                <button type="button" onclick="event.stopPropagation(); openEditModal('{{ folder.id }}', '{{ folder.name }}', '{{ folder.description }}')" class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                    <ion-icon name="create-outline" class="text-lg text-blue-600"></ion-icon>
+                                    <span class="text-sm font-medium text-gray-700">Editar</span>
+                                </button>
+                                <button type="button" onclick="event.stopPropagation(); deleteFolder('{{ folder.id }}', '{{ folder.name }}')" class="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-3 transition-colors rounded-b-lg">
+                                    <ion-icon name="trash-outline" class="text-lg text-red-600"></ion-icon>
+                                    <span class="text-sm font-medium text-red-600">Deletar</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="expand">
                             <ion-icon name="caret-down-outline"></ion-icon>
@@ -124,65 +204,95 @@ Sem B.O
 
 {% include 'parciais/menu_inferior.html' %}
 
-<div class="content-principal">
-    <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 shadow-lg hidden">
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+<!-- Modal de Criar Pasta -->
+<div id="create-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm z-50">
+    <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-1/3 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-700">Nova Pasta de Favoritos</h2>
-            <span class="close text-2xl cursor-pointer" id="close-modal">&times;</span>
-        </div>
-    
-        <form id="favorite-folder-form" method="post" action="{% url 'procedure_favorite' %}">
-            {% csrf_token %}
-            <div class="mt-2">
-                <label for="id_name" class="text-gray-600">Nome</label>
-                <input type="text" id="id_name" name="name" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o nome">
+                <div></div>
+                <h2 class="text-2xl font-bold text-gray-800 text-center">
+                    <i class="fas fa-folder-plus mr-2" style="color: #42D1EB;"></i>
+                    Nova Pasta de Favoritos
+                </h2>
+                <button class="close text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" id="close-modal" aria-label="Fechar">
+                    &times;
+                </button>
             </div>
-
-            <div class="mt-2">
-                <label for="id_description" class="text-gray-600">Descrição</label>
-                <textarea id="id_description" name="description" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full"  placeholder="Digite sua descrição"></textarea>
-            </div>
+            
+            <p class="text-sm text-gray-600 mb-4 text-center">Organize seus procedimentos favoritos em pastas personalizadas</p>
         
-            <div class="mt-4">
-                <button type="submit" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Criar Pasta</button>
-            </div>
-        </form>
-    </div>
-    <div class="blur hidden"></div>
-</div>
+            <form id="favorite-folder-form" method="post" action="{% url 'procedure_favorite' %}">
+                {% csrf_token %}
+                <div class="mt-2">
+                    <label for="id_name" class="text-gray-700 font-semibold block mb-2">
+                        <i class="fas fa-tag mr-2 text-gray-500"></i>
+                        Nome da Pasta
+                    </label>
+                    <input type="text" id="id_name" name="name" required class="block rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent sm:text-sm px-4 py-3 bg-gray-50 w-full" placeholder="Digite o nome da pasta">
+                </div>
 
-<div class="content-principal">
-    <div class="modal-content-edit bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 shadow-lg hidden" id="edit-folder-modal">
-        <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-700">Editar Pasta de Favoritos</h2>
-            <span class="close text-2xl cursor-pointer text-gray-500 hover:text-gray-800 transition" id="close-modal" onclick="closeEditModal()">&times;</span>
-        </div>
-    
-        <form id="edit-folder-form" method="post" action="">
-            {% csrf_token %}
-            <input type="hidden" id="folder-id" name="folder_id">
-            <div class="mt-2">
-                <label for="id_name_edit" class="text-gray-600">Nome</label>
-                <input type="text" id="id_name_edit" name="name" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o nome" value="{{ folder.name }}">
-            </div>
-
-            <div class="mt-2">
-                <label for="id_description_edit" class="text-gray-600">Descrição</label>
-                <textarea id="id_description_edit" name="description" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite sua descrição">{{ folder.description }}</textarea>
-            </div>
-        
-            <div class="mt-4">
-                <button type="submit" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md hover:bg-black transition">Salvar Alterações</button>
-            </div>
-        </form>
-
-        <div class="mt-2">
-            <button id="delete-folder-button" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition">Deletar Pasta</button>
+                <div class="mt-4">
+                    <label for="id_description" class="text-gray-700 font-semibold block mb-2">
+                        <i class="fas fa-align-left mr-2 text-gray-500"></i>
+                        Descrição (opcional)
+                    </label>
+                    <textarea id="id_description" name="description" rows="3" class="block rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent sm:text-sm px-4 py-3 bg-gray-50 w-full resize-none" placeholder="Adicione uma descrição para esta pasta"></textarea>
+                </div>
+            
+                <div class="mt-6">
+                    <button type="submit" class="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-plus mr-2"></i>Criar Pasta
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="blur_edit hidden"></div>
-</div>
-</div>
+
+<!-- Modal de Editar Pasta -->
+<div id="edit-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm z-50">
+    <div class="modal-content-edit bg-white w-11/12 md:w-2/3 lg:w-1/3 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center">
+                <div></div>
+                <h2 class="text-2xl font-bold text-gray-800 text-center">
+                    <i class="fas fa-pen-to-square mr-2" style="color: #42D1EB;"></i>
+                    Editar Pasta de Favoritos
+                </h2>
+                <button class="close text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" onclick="closeEditModal()" aria-label="Fechar">
+                    &times;
+                </button>
+            </div>
+            
+            <p class="text-sm text-gray-600 mb-4 text-center">Atualize as informações da sua pasta de favoritos</p>
+        
+            <form id="edit-folder-form" method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" id="folder-id" name="folder_id">
+                <div class="mt-2">
+                    <label for="id_name_edit" class="text-gray-700 font-semibold block mb-2">
+                        <i class="fas fa-tag mr-2 text-gray-500"></i>
+                        Nome da Pasta
+                    </label>
+                    <input type="text" id="id_name_edit" name="name" required class="block rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent sm:text-sm px-4 py-3 bg-gray-50 w-full" placeholder="Digite o nome" value="{{ folder.name }}">
+                </div>
+
+                <div class="mt-4">
+                    <label for="id_description_edit" class="text-gray-700 font-semibold block mb-2">
+                        <i class="fas fa-align-left mr-2 text-gray-500"></i>
+                        Descrição (opcional)
+                    </label>
+                    <textarea id="id_description_edit" name="description" rows="3" class="block rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent sm:text-sm px-4 py-3 bg-gray-50 w-full resize-none" placeholder="Digite sua descrição">{{ folder.description }}</textarea>
+                </div>
+            
+                <div class="mt-6">
+                    <button type="submit" class="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -391,37 +501,99 @@ Sem B.O
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const modal = document.querySelector(".modal-content");
+        const modal = document.getElementById("create-modal");
         const filterButton = document.getElementById("filter");
         const closeModalButton = document.getElementById("close-modal");
-        const blurOverlay = document.querySelector(".blur");
 
         filterButton.addEventListener("click", function () {
-            modal.style.display = "block";
-            blurOverlay.style.display = "block"
+            modal.classList.remove("hidden");
         });
 
         closeModalButton.addEventListener("click", function () {
-            modal.style.display = "none";
-            blurOverlay.style.display = "none";
+            modal.classList.add("hidden");
         });
 
-        blurOverlay.addEventListener("click", function () {
-            modal.style.display = "none";
-            blurOverlay.style.display = "none";
+        // Fechar modal clicando fora
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                modal.classList.add('hidden');
+                document.getElementById('edit-modal').classList.add('hidden');
+            }
         });
     });
 </script>
 
 <script>
+    // ========== GERENCIAMENTO DO MENU DROPDOWN ==========
+    function toggleMenu(folderId) {
+        const menu = document.getElementById(`menu-${folderId}`);
+        
+        // Fechar todos os outros menus abertos
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if (m !== menu) {
+                m.classList.add('hidden');
+            }
+        });
+        
+        // Toggle do menu atual
+        menu.classList.toggle('hidden');
+    }
+
+    // Fechar menus ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.menu-options')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+
+    // ========== GERENCIAMENTO DO MODAL DE EDIÇÃO ==========
+    function openEditModal(folderId, folderName, folderDescription) {
+        const modal = document.getElementById('edit-modal');
+        const folderIdInput = document.getElementById('folder-id');
+        const nameInput = document.getElementById('id_name_edit');
+        const descriptionInput = document.getElementById('id_description_edit');
+        
+        folderIdInput.value = folderId;
+        nameInput.value = folderName;
+        descriptionInput.value = folderDescription;
+
+        modal.classList.remove('hidden');
+        
+        // Fechar o dropdown menu
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('edit-modal');
+        modal.classList.add('hidden');
+    }
+
+    // Fechar modal de edição clicando fora
+    document.getElementById('edit-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEditModal();
+        }
+    });
+
+    // ========== GERENCIAMENTO DA EXPANSÃO DE PASTAS ==========
     document.addEventListener("DOMContentLoaded", function() {
-        // Clique na div inteira da pasta para expandir/recolher
         const favoriteFolders = document.querySelectorAll(".favorite-folder");
 
         favoriteFolders.forEach(folder => {
             folder.addEventListener("click", function(e) {
-                // Não executa se clicar no botão de editar
-                if (e.target.closest('.edit')) {
+                // Não executa se clicar no menu de opções
+                if (e.target.closest('.menu-options')) {
                     return;
                 }
 
@@ -441,29 +613,6 @@ Sem B.O
     });
 </script>
 
-<script>
-    function openEditModal(folderId, folderName, folderDescription) {
-        const modal = document.querySelector('.modal-content-edit');
-        const folderIdInput = document.getElementById('folder-id');
-        const nameInput = document.getElementById('id_name_edit');
-        const descriptionInput = document.getElementById('id_description_edit');
-        const blurEditOverlay = document.querySelector(".blur_edit");
-        
-        folderIdInput.value = folderId;
-        nameInput.value = folderName;
-        descriptionInput.value = folderDescription;
-
-        modal.classList.remove('hidden');
-        blurEditOverlay.classList.remove('hidden');
-    }
-
-    function closeEditModal() {
-        const modal = document.querySelector('.modal-content-edit');
-        const blurEditOverlay = document.querySelector(".blur_edit");
-        modal.classList.add('hidden');
-        blurEditOverlay.style.display = "none";
-    }
-</script>
 
 <script>
     function editFolder() {
@@ -480,28 +629,40 @@ Sem B.O
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
             },
             success: function(data) {
-                location.reload();
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Pasta atualizada com sucesso.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#10b981'
+                }).then(() => {
+                    location.reload();
+                });
             },
             error: function(xhr, status, error) {
                 console.error('Erro ao editar a pasta de favoritos:', error);
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Não foi possível editar a pasta. Tente novamente.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     }
 
-    function deleteFolder() {
-        const folderId = document.getElementById('folder-id').value;
-        const folderName = document.getElementById('id_name_edit').value;
-
+    function deleteFolder(folderId, folderName) {
         // Confirmação antes de deletar
         Swal.fire({
             title: 'Tem certeza?',
-            text: `Deseja realmente deletar a pasta "${folderName}"? Esta ação não pode ser desfeita.`,
+            html: `Deseja realmente deletar a pasta <strong>"${folderName}"</strong>?<br><br>Esta ação não pode ser desfeita.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Sim, deletar!',
-            cancelButtonText: 'Cancelar'
+            confirmButtonText: '<i class="fas fa-trash mr-2"></i>Sim, deletar!',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancelar',
+            reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -515,7 +676,8 @@ Sem B.O
                             title: 'Deletado!',
                             text: 'A pasta foi deletada com sucesso.',
                             icon: 'success',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#10b981'
                         }).then(() => {
                             location.reload();
                         });
@@ -538,10 +700,6 @@ Sem B.O
         $('#edit-folder-form').submit(function(e) {
             e.preventDefault();
             editFolder();
-        });
-
-        $('#delete-folder-button').click(function() {
-            deleteFolder();
         });
     });
 

@@ -6,7 +6,7 @@
 <!-- Stats Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Total Users -->
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600">Total de Usuários</p>
@@ -19,7 +19,7 @@
     </div>
     
     <!-- Verified Users -->
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600">E-mails Verificados</p>
@@ -33,7 +33,7 @@
     </div>
     
     <!-- Active Users -->
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-cyan-500">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600">Usuários Ativos</p>
@@ -47,7 +47,7 @@
     </div>
     
     <!-- Users with Plan -->
-    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600">Com Plano Ativo</p>
@@ -62,7 +62,7 @@
 </div>
 
 <!-- Filters -->
-<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-slate-100">
     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
         <i class="fas fa-filter text-purple-500 mr-2"></i>
         Filtros
@@ -74,9 +74,9 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-search mr-1"></i> Pesquisar
             </label>
-            <input type="text" name="search" value="{{ search }}" 
-                   placeholder="Nome, e-mail, CPF ou telefone..." 
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+         <input type="text" name="search" value="{{ search }}" 
+             placeholder="Nome, e-mail, CPF ou telefone..." 
+             class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-700 placeholder:text-slate-400">
         </div>
         
         <!-- Plan Filter -->
@@ -84,7 +84,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-box mr-1"></i> Plano
             </label>
-            <select name="plan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <select name="plan" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-700">
                 <option value="">Todos</option>
                 {% for plan in plans %}
                     <option value="{{ plan.id }}" {% if plan_filter == plan.id|stringformat:"s" %}selected{% endif %}>
@@ -100,7 +100,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-envelope mr-1"></i> Status E-mail
             </label>
-            <select name="verified" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <select name="verified" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-700">
                 <option value="">Todos</option>
                 <option value="true" {% if verified_filter == "true" %}selected{% endif %}>Verificado</option>
                 <option value="false" {% if verified_filter == "false" %}selected{% endif %}>Não Verificado</option>
@@ -112,7 +112,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-toggle-on mr-1"></i> Status Conta
             </label>
-            <select name="active" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <select name="active" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-700">
                 <option value="">Todos</option>
                 <option value="true" {% if active_filter == "true" %}selected{% endif %}>Ativo</option>
                 <option value="false" {% if active_filter == "false" %}selected{% endif %}>Inativo</option>
@@ -120,12 +120,12 @@
         </div>
         
         <!-- Buttons -->
-        <div class="col-span-1 md:col-span-4 flex gap-3">
-            <button type="submit" class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition flex items-center gap-2">
+        <div class="col-span-1 md:col-span-4 flex flex-col sm:flex-row gap-3">
+            <button type="submit" class="w-full sm:w-auto bg-slate-900 text-white px-6 py-2 rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-sm">
                 <i class="fas fa-search"></i>
                 Filtrar
             </button>
-            <a href="{% url 'admin-user-list' %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition flex items-center gap-2">
+            <a href="{% url 'admin-user-list' %}" class="w-full sm:w-auto bg-white border border-slate-200 text-slate-700 px-6 py-2 rounded-lg hover:bg-slate-50 transition flex items-center justify-center gap-2">
                 <i class="fas fa-times"></i>
                 Limpar
             </a>
@@ -134,28 +134,116 @@
 </div>
 
 <!-- Users Table -->
-<div class="bg-white rounded-xl shadow-sm overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+<div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
+    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
             <i class="fas fa-users text-purple-500 mr-2"></i>
             Lista de Usuários
             <span class="ml-2 text-sm font-normal text-gray-500">({{ users|length }} resultado{{ users|length|pluralize }})</span>
         </h3>
     </div>
-    
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+
+    <div class="md:hidden space-y-4 p-4">
+        {% for user in users %}
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                        {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900">
+                            {{ user.get_full_name }}
+                            {% if user.is_superuser %}
+                                <i class="fas fa-crown text-yellow-500 ml-1" title="Administrador"></i>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-500">{{ user.email }}</div>
+                    </div>
+                </div>
+                {% if user.plan %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <i class="fas fa-box mr-1"></i>
+                    {{ user.plan.name }}
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    <i class="fas fa-minus-circle mr-1"></i>
+                    Sem plano
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                {% if user.is_active %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>Ativo
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full bg-red-100 text-red-800">
+                    <i class="fas fa-times-circle mr-1"></i>Inativo
+                </span>
+                {% endif %}
+
+                {% if user.email_verified %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                    <i class="fas fa-envelope-circle-check mr-1"></i>Verificado
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                    <i class="fas fa-envelope mr-1"></i>Não verificado
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 flex items-center justify-end gap-3">
+                <button data-user-detail data-user-id="{{ user.id }}" class="text-blue-600 hover:text-blue-800 transition" title="Ver detalhes">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <form method="post" action="{% url 'admin-user-toggle-active' user.id %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="{% if user.is_active %}text-yellow-600 hover:text-yellow-800{% else %}text-green-600 hover:text-green-800{% endif %} transition"
+                            title="{% if user.is_active %}Desativar{% else %}Ativar{% endif %}"
+                            onclick="return confirm('Tem certeza que deseja {% if user.is_active %}desativar{% else %}ativar{% endif %} este usuário?')">
+                        <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
+                    </button>
+                </form>
+                {% if not user.is_superuser %}
+                <form method="post" action="{% url 'admin-user-delete' user.id %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-red-600 hover:text-red-800 transition" title="Deletar"
+                            onclick="return confirm('Tem certeza que deseja DELETAR permanentemente este usuário? Esta ação não pode ser desfeita!')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-xl shadow-sm p-10 text-center">
+            <div class="flex flex-col items-center justify-center text-gray-400">
+                <i class="fas fa-users text-5xl mb-4"></i>
+                <p class="text-lg font-medium">Nenhum usuário encontrado</p>
+                <p class="text-sm">Tente ajustar os filtros de busca</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ocupação</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plano</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Usuário</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contato</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Ocupação</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Plano</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Ações</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-slate-100">
                 {% for user in users %}
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -250,9 +338,9 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <div class="flex items-center gap-2">
                             <!-- View Details -->
-                            <button onclick="viewUserDetails({{ user.id }})" 
-                                    class="text-blue-600 hover:text-blue-800 transition" 
-                                    title="Ver detalhes">
+                <button data-user-detail data-user-id="{{ user.id }}"
+                    class="text-blue-600 hover:text-blue-800 transition" 
+                    title="Ver detalhes">
                                 <i class="fas fa-eye"></i>
                             </button>
                             
@@ -497,6 +585,12 @@ function viewUserDetails(userId) {
             console.error('Error:', error);
         });
 }
+
+document.querySelectorAll('[data-user-detail]').forEach((button) => {
+    button.addEventListener('click', () => {
+        viewUserDetails(button.dataset.userId);
+    });
+});
 
 function closeModal() {
     document.getElementById('userDetailsModal').classList.add('hidden');

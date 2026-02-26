@@ -50,24 +50,38 @@ Sem B.O
 </section>
 
 <div class="content-principal folder-modal">
-    <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-        <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 max-h-[80vh] overflow-auto">
-            <div class="sup-folder flex justify-between items-center mb-4">
+    <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm z-50">
+        <div class="modal-content-folder bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto rounded-2xl p-6 max-h-[80vh] overflow-auto shadow-2xl">
+            <div class="sup-folder flex justify-between items-center mb-6">
                 <div></div>
-                <h2 class="text-xl text-center title-modal-folders">Adicione a uma <b>Pasta de Favoritos</b></h2>
-                <span class="close text-gray-600 cursor-pointer">&times;</span>
+                <h2 class="text-xl font-bold text-gray-800 text-center">
+                    <i class="fas fa-folder text-yellow-500 mr-2"></i>
+                    Pastas de Favoritos
+                </h2>
+                <button class="close text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" aria-label="Fechar">
+                    &times;
+                </button>
             </div>
-            <ul class="mb-4">
+            
+            <p class="text-sm text-gray-600 mb-4 text-center">Selecione as pastas onde deseja salvar este procedimento</p>
+            
+            <ul class="mb-6 space-y-2">
                 {% for folder in favorite_folders %}
-                    <li class="folder mb-2 shadow">
-                        <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders flex justify-between items-center">
-                            <span class="truncate max-w-[70%]">{{ folder.name }}</span>
-                            <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>
-                        </label>
-                    </li>
+                <li class="folder-item">
+                    <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders flex justify-between items-center bg-gray-50 hover:bg-gray-100 p-4 rounded-lg transition-colors border border-gray-200">
+                        <span class="truncate max-w-[70%] font-medium text-gray-700">
+                            <i class="fas fa-folder-open text-yellow-500 mr-2"></i>
+                            {{ folder.name }}
+                        </span>
+                        <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" {% if folder.name == 'Geral' %}checked{% endif %}>
+                    </label>
+                </li>
                 {% endfor %}
             </ul>
-            <button id="confirm-favorite" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Confirmar</button>
+            
+            <button id="confirm-favorite" class="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                <i class="fas fa-check mr-2"></i>Confirmar
+            </button>
         </div>
     </div>
     <div class="blur hidden"></div>
@@ -361,7 +375,7 @@ Sem B.O
                 
                 // Indicador de mais tags se houver
                 if (hiddenCount > 0) {
-                    records.append(`<span class="more-tags-indicator" title="Clique no procedimento para ver todos os detalhes">+${hiddenCount}</span>`);
+                    records.append(`<span class="more-tags-indicator inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-semibold" title="Clique no procedimento para ver todos os detalhes">+${hiddenCount}</span>`);
                 }
                 
                 nameLink.append(records);
@@ -374,13 +388,13 @@ Sem B.O
                 const icon = $(`
                     <ion-icon 
                         name="${favoriteIconName}" 
-                        class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer" 
+                        class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer text-slate-500 hover:text-cyan-600 transition-colors" 
                         data-procedure-id="${escapedCode}"
                     ></ion-icon>
                 `);
                 
                 const help = $(`
-                    <a class="help-icon w-[20%] md:w-10 md:mr-4" href="${detailUrl}">
+                    <a class="help-icon w-[20%] md:w-10 md:mr-4 text-slate-500 hover:text-cyan-600 transition-colors" href="${detailUrl}">
                         <div class="help">
                             <ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon>
                         </div>

@@ -19,7 +19,7 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from django.db.models import Q
 from ..forms.user import LoginAuthenticationForm, UserRegisterForm, PasswordResetEmailForm, SetPasswordForm
-from ..models import Plan, FavoriteProceduresFolder, User
+from ..models import Plan, User
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class RegisterView(View):
         if form.is_valid():
             try:
                 user = form.save()
-                self._create_default_folder(user)
+                # Pasta padrão "Geral" é criada automaticamente via signal
                 # self.activateEmail(request, user, form.cleaned_data.get('email'))
                 return redirect('login')
             except Exception as e:
@@ -84,13 +84,6 @@ class RegisterView(View):
             'form': form,
             'selected_plan': selected_plan,
         })
-
-    def _create_default_folder(self, user):
-        FavoriteProceduresFolder.objects.get_or_create(
-            user=user,
-            name="General",
-            description="My Favorites"
-        )
 
     def activateEmail(self, request, user, to_email):
         mail_subject = "Ativação da sua conta Sem B.O"

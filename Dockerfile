@@ -1,4 +1,4 @@
-FROM python:3.10.5
+FROM --platform=linux/amd64 python:3.10.5
 
 EXPOSE 8000
 WORKDIR /usr/src/app

@@ -100,12 +100,6 @@ Sem B.O
         .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
             color: #6b7280 !important;
         }
-        
-        /* Centralizar texto do helper */
-        .modal-content p.text-xs {
-            text-align: left;
-            margin-top: 0.5rem;
-        }
 
         /* ========== HOVERS E ANIMAÇÕES (PADRÃO HOME) ========== */
         
@@ -215,6 +209,35 @@ Sem B.O
         #load-more:active {
             transform: translateY(0);
         }
+
+        /* ========== MODAL - ESTILO MODERNO ========== */
+
+        /* Animação suave de entrada do modal */
+        .modal-content {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Checkbox customizado para consistência */
+        .checkbox-custom {
+            cursor: pointer;
+            accent-color: #1f2937;
+        }
+
+        /* Folder item hover effect */
+        .folder-item label:hover {
+            transform: translateX(2px);
+        }
     </style>
 {% endblock %}
 
@@ -227,14 +250,14 @@ Sem B.O
     {% csrf_token %}
     <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
         <div class="mr-2 w-full">
-            <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
+            <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-[0.85rem] bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
         </div>
         <div class="grid grid-cols-2 gap-2">
             <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
-                <ion-icon name="search-outline" class="w-5 h-5 md hydrated" role="img"></ion-icon>
+                <ion-icon name="search-outline" class="w-8 h-8 md:w-5 md:h-5 hydrated" role="img"></ion-icon>
             </button>
             <button type="button" id="filter" id="open-filter-modal" aria-label="filter" class="flex items-center justify-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
-                <ion-icon name="options-outline" class="w-6 h-6 md hydrated" role="img"></ion-icon>
+                <ion-icon name="options-outline" class="w-8 h-8 md:w-6 md:h-6 hydrated" role="img"></ion-icon>
             </button>
         </div>
     </div>
@@ -261,7 +284,7 @@ Sem B.O
                     {% endfor %}
                     
                     {% if total_tags > 2 %}
-                        <span class="more-tags-indicator" title="Clique no procedimento para ver todos os detalhes">+{{ total_tags|add:"-2" }}</span>
+                        <span class="more-tags-indicator inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-semibold" title="Clique no procedimento para ver todos os detalhes">+{{ total_tags|add:"-2" }}</span>
                     {% endif %}
                     
                     {% endwith %}
@@ -269,12 +292,12 @@ Sem B.O
             </div>
             <div class="right_info">
                 {% if procedure.procedure_code in favorite %}
-                    <ion-icon name="bookmark" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
+                    <ion-icon name="bookmark" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated text-slate-500 hover:text-cyan-600 transition-colors" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
                 {% else %}
-                    <ion-icon name="bookmark-outline" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
+                    <ion-icon name="bookmark-outline" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated text-slate-500 hover:text-cyan-600 transition-colors" data-procedure-id="{{ procedure.procedure_code }}" role="img"></ion-icon>
                 {% endif %}
                 <div class="procedure_code w-[70%] md:w-[8rem]">{{ procedure.procedure_code }}</div>
-                <a class="help-icon w-[20%] md:w-10 md:mr-4" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">
+                <a class="help-icon w-[20%] md:w-10 md:mr-4 text-slate-500 hover:text-cyan-600 transition-colors" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">
                     <div class="help">
                         <ion-icon name="help-circle-outline" role="img" class="md hydrated"></ion-icon>
                     </div>
@@ -286,57 +309,81 @@ Sem B.O
     <div class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: none;">Carregando...</div>
 </div>
 
-    <div class="content-principal">
-        <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6 shadow-lg hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">Filtro de Resultados</h2>
-                <span class="close text-2xl cursor-pointer text-gray-500 hover:text-gray-800 transition" id="close-modal">&times;</span>
+    <div class="content-principal flex items-center justify-center min-h-screen md:block">
+        <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-0 md:mt-10 rounded-2xl p-6 shadow-2xl hidden">
+            <div class="flex justify-between items-center mb-2">
+                <div></div>
+                <h2 class="text-2xl font-bold text-gray-800 text-center">
+                    <i class="fas fa-filter mr-2" style="color: #42D1EB;"></i>
+                    Filtro de Resultados
+                </h2>
+                <button class="close text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" id="close-modal" aria-label="Fechar">
+                    &times;
+                </button>
             </div>
+            
+            <p class="text-sm text-gray-600 mb-4 text-center">Refine sua busca selecionando os tipos de registro desejados</p>
         
             <div class="mt-2">
-                <label for="record-name-filter" class="text-gray-700 font-medium block mb-2">Tipos de Registro</label>
-                <select id="record-name-filter" class="block w-full px-4 py-2 border rounded-lg bg-white focus:outline-none filter-results" multiple="multiple">
+                <label for="record-name-filter" class="text-gray-700 font-semibold block mb-3">
+                    <i class="fas fa-list-check mr-2 text-gray-500"></i>
+                    Tipos de Registro
+                </label>
+                <select id="record-name-filter" class="block w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent filter-results" multiple="multiple">
                     {% for record in records %}
                         {% if record.name %}
                         <option value="{{ record.name }}">{{ record.name }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
-                <p class="text-xs text-gray-500 mt-2">💡 Selecione um ou mais tipos de registro</p>
             </div>
         
             <div class="mt-6 flex gap-3">
-                <button id="clear-filter" class="bg-gray-200 text-gray-700 font-medium flex-1 py-2.5 px-4 rounded-md hover:bg-gray-300 transition">
-                    Limpar
+                <button id="clear-filter" class="bg-gray-100 text-gray-700 font-semibold flex-1 py-3 px-4 rounded-lg hover:bg-gray-200 transition-all duration-300 border border-gray-200 shadow-sm hover:shadow">
+                    <i class="fas fa-times mr-2"></i>Limpar
                 </button>
-                <button id="apply-filter" class="bg-[#0F0F0F] text-white font-medium flex-1 py-2.5 px-4 rounded-md hover:bg-black transition shadow-sm">
-                    Aplicar Filtro
+                <button id="apply-filter" class="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white font-semibold flex-1 py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <i class="fas fa-check mr-2"></i>Aplicar Filtro
                 </button>
             </div>
         </div>
-        <div class="blur hidden"></div>
+        <div class="blur hidden fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm"></div>
     </div>
 </div>
 
 <div class="content-principal folder-modal">
-    <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-        <div class="modal-content-folder bg-gray-100 w-11/12 md:w-2/3 lg:w-1/3 mx-auto mt-10 rounded-lg p-6">
-            <div class="sup-folder">
+    <div id="favorite-modal" class="modal hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm z-50">
+        <div class="modal-content-folder bg-white w-11/12 md:w-2/3 lg:w-1/3 mx-auto rounded-2xl p-6 max-h-[80vh] overflow-auto shadow-2xl">
+            <div class="sup-folder flex justify-between items-center mb-6">
                 <div></div>
-                <h2 class="text-xl ml-2 mb-2 title-modal-folders">Adicione a uma <b>Pasta de Favoritos</b></h2>
-                <span class="close text-gray-600 cursor-pointer">&times;</span>
+                <h2 class="text-xl font-bold text-gray-800 text-center">
+                    <i class="fas fa-folder text-yellow-500 mr-2"></i>
+                    Pastas de Favoritos
+                </h2>
+                <button class="close text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" aria-label="Fechar">
+                    &times;
+                </button>
             </div>
-            <ul class="mb-4">
+            
+            <p class="text-sm text-gray-600 mb-4 text-center">Selecione as pastas onde deseja salvar este procedimento</p>
+            
+            <ul class="mb-6 space-y-2">
                 {% for folder in favorite_folders %}
-                <li class="folder mb-2 shadow">
-                    <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders">
-                        <label for="folder-{{ folder.id }}">{{ folder.name }}</label>
-                        <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom mr-2" {% if folder.name == 'Geral' %}checked{% endif %}>
+                <li class="folder-item">
+                    <label for="folder-{{ folder.id }}" class="label-folder cursor-pointer list-folders flex justify-between items-center bg-gray-50 hover:bg-gray-100 p-4 rounded-lg transition-colors border border-gray-200">
+                        <span class="truncate max-w-[70%] font-medium text-gray-700">
+                            <i class="fas fa-folder-open text-yellow-500 mr-2"></i>
+                            {{ folder.name }}
+                        </span>
+                        <input type="checkbox" id="folder-{{ folder.id }}" name="folders" value="{{ folder.id }}" class="checkbox-custom w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" {% if folder.name == 'Geral' %}checked{% endif %}>
                     </label>
                 </li>
                 {% endfor %}
             </ul>
-            <button id="confirm-favorite" class="bg-[#0F0F0F] text-white w-full py-2 px-4 rounded-md">Confirmar</button>
+            
+            <button id="confirm-favorite" class="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                <i class="fas fa-check mr-2"></i>Confirmar
+            </button>
         </div>
     </div>
     <div class="blur hidden"></div>
@@ -455,7 +502,7 @@ $(document).ready(function() {
             
             // Adiciona indicador de mais tags se houver
             if (hiddenCount > 0) {
-                tagsHTML += '<span class="more-tags-indicator" title="Clique no procedimento para ver todos os detalhes">+' + hiddenCount + '</span>';
+                tagsHTML += '<span class="more-tags-indicator inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-semibold" title="Clique no procedimento para ver todos os detalhes">+' + hiddenCount + '</span>';
             }
 
             return '<div class="procedure p-4 my-2 border rounded-lg">' +
@@ -464,9 +511,9 @@ $(document).ready(function() {
                 '<div class="records_tags mt-2 md:mt-0 flex">' + tagsHTML + '</div>' +
                 '</div>' +
                 '<div class="right_info">' +
-                '<ion-icon name="' + icon + '" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated" data-procedure-id="' + Utils.escapeHtml(procedure.code) + '"></ion-icon>' +
+                '<ion-icon name="' + icon + '" class="w-[10%] md:w-10 h-5 favorite-icon cursor-pointer md hydrated text-slate-500 hover:text-cyan-600 transition-colors" data-procedure-id="' + Utils.escapeHtml(procedure.code) + '"></ion-icon>' +
                 '<div class="procedure_code w-[70%] md:w-[8rem]">' + Utils.escapeHtml(procedure.code) + '</div>' +
-                '<a class="help-icon w-[20%] md:w-10 md:mr-4" href="' + url + '"><div class="help"><ion-icon name="help-circle-outline"></ion-icon></div></a>' +
+                '<a class="help-icon w-[20%] md:w-10 md:mr-4 text-slate-500 hover:text-cyan-600 transition-colors" href="' + url + '"><div class="help"><ion-icon name="help-circle-outline"></ion-icon></div></a>' +
                 '</div>' +
                 '</div>';
         }
@@ -569,9 +616,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const blur = document.querySelector(".blur");
 
     if (filterBtn && filterModal) {
+        // Abrir modal
         filterBtn.addEventListener("click", function() {
             filterModal.style.display = "block";
             blur.style.display = "block";
+            blur.classList.remove('hidden');
             
             // Inicializa Select2 com configuração de múltipla seleção
             $('#record-name-filter').select2({
@@ -587,17 +636,31 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
+        // Fechar modal com botão X
         closeBtn.addEventListener("click", function() {
             filterModal.style.display = "none";
             blur.style.display = "none";
+            blur.classList.add('hidden');
             $('#record-name-filter').select2('destroy');
         });
 
+        // Fechar modal clicando no blur
         blur.addEventListener("click", function() {
             filterModal.style.display = "none";
             blur.style.display = "none";
+            blur.classList.add('hidden');
             $('#favorite-modal').addClass('hidden');
             $('#record-name-filter').select2('destroy');
+        });
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && filterModal.style.display === 'block') {
+                filterModal.style.display = "none";
+                blur.style.display = "none";
+                blur.classList.add('hidden');
+                $('#record-name-filter').select2('destroy');
+            }
         });
 
         // Botão Limpar - reseta o filtro e recarrega
@@ -606,6 +669,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 $('#record-name-filter').val(null).trigger('change');
                 filterModal.style.display = "none";
                 blur.style.display = "none";
+                blur.classList.add('hidden');
                 $('#record-name-filter').select2('destroy');
                 window.location.href = '/procedures/';
             });
@@ -615,6 +679,7 @@ document.addEventListener("DOMContentLoaded", function() {
         applyBtn.addEventListener("click", function() {
             filterModal.style.display = "none";
             blur.style.display = "none";
+            blur.classList.add('hidden');
             
             const selected = $('#record-name-filter').val(); // Array
             $('#record-name-filter').select2('destroy');

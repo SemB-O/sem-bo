@@ -256,7 +256,6 @@ body {
 }
 
 .modal-content {
-    position: absolute;
     align-self: center;
     justify-self: center;
     z-index: 10;
@@ -264,7 +263,6 @@ body {
 }
 
 .modal-content-edit {
-    position: absolute;
     align-self: center;
     justify-self: center;
     z-index: 10;
