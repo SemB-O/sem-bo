@@ -300,32 +300,32 @@ Sem B.O
     {% csrf_token %}
     <div class="search flex items-center bg-transparent pt-2 pb-2 w-full">
         <div class="mr-2 w-full">
-            <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-[0.85rem] bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
+            <input type="text" name="q" class="block rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black text-sm px-3 py-2 bg-[#F2F2F7] w-full" placeholder="Digite o procedimento">
         </div>
         <div class="flex gap-2 shrink-0">
-            <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
-                <ion-icon name="search-outline" class="w-8 h-8 md:w-5 md:h-5 hydrated" role="img"></ion-icon>
+            <button type="submit" aria-label="search" class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black text-sm px-3 py-2 bg-[#F2F2F7] hover:bg-gray-200 transition">
+                <ion-icon name="search-outline" class="w-5 h-5 hydrated" role="img"></ion-icon>
             </button>
             <button type="button" id="filter" aria-label="Escolha o tipo de registro"
-                class="flex items-center gap-1 justify-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black text-xs sm:text-sm px-3 py-2.5 sm:py-2 hover:bg-gray-200 transition whitespace-nowrap
+                class="flex items-center gap-1 justify-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black text-xs px-3 py-2 hover:bg-gray-200 transition whitespace-nowrap
                 {% if record_name %}filter-active bg-[#0F0F0F] text-white border-[#0F0F0F]{% else %}bg-[#F2F2F7]{% endif %}">
                 {% if record_name %}
-                    {% if record_name == 'BPA (Consolidado)' %}
-                        <i class="fas fa-layer-group text-[#42D1EB]"></i>
-                        <span class="font-medium">BPA Consolidado</span>
-                    {% elif record_name == 'BPA (Individualizado)' %}
-                        <i class="fas fa-user-check text-[#42D1EB]"></i>
-                        <span class="font-medium">BPA Individualizado</span>
-                    {% elif 'AIH' in record_name %}
+                    {% if 'BPA' in record_name %}
+                        <i class="fas fa-stethoscope text-[#42D1EB]"></i>
+                        <span class="hidden md:inline font-medium">Ambulatorial - BPA</span>
+                    {% elif record_name == 'AIH (Proc. Principal)' %}
                         <i class="fas fa-hospital text-[#42D1EB]"></i>
-                        <span class="font-medium">AIH</span>
+                        <span class="hidden md:inline font-medium">Internar - AIH</span>
+                    {% elif 'AIH (Proc. Especial)' in record_name or 'AIH (Proc. Secundário)' in record_name %}
+                        <i class="fas fa-bed text-[#42D1EB]"></i>
+                        <span class="hidden md:inline font-medium">Já internados</span>
                     {% else %}
                         <i class="fas fa-filter text-[#42D1EB]"></i>
-                        <span class="font-medium text-[11px]">{{ record_name }}</span>
+                        <span class="hidden md:inline font-medium text-[11px]">{{ record_name }}</span>
                     {% endif %}
                 {% else %}
                     <ion-icon name="options-outline" class="w-5 h-5 hydrated" role="img"></ion-icon>
-                    <span>Escolha o tipo de registro</span>
+                    <span class="hidden md:inline">Escolha o tipo de registro</span>
                 {% endif %}
             </button>
         </div>
@@ -370,8 +370,8 @@ Sem B.O
     <div class="flex items-center rounded-md border border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-3 py-2.5 sm:py-2 bg-[#F2F2F7]" style="display: none;">Carregando...</div>
 </div>
 
-    <div class="content-principal flex items-center justify-center min-h-screen md:block">
-        <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-5/12 mx-auto mt-0 md:mt-10 rounded-2xl p-6 shadow-2xl hidden">
+    <div class="filter-overlay" style="display: none;">
+        <div class="modal-content bg-white w-11/12 md:w-2/3 lg:w-5/12 mx-auto md:mt-0 md:mt-10 rounded-2xl p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-2">
                 <div></div>
                 <h2 class="text-2xl font-bold text-gray-800 text-center">
@@ -388,35 +388,35 @@ Sem B.O
             <!-- Cards de tipo de registro -->
             <div class="grid grid-cols-2 gap-3 mt-2" id="registry-cards">
 
-                <!-- BPA Consolidado -->
-                <button class="registry-card {% if record_name == 'BPA (Consolidado)' %}active{% endif %}"
-                        data-record="BPA (Consolidado)"
-                        data-card="bpa-consolidado">
-                    <i class="fas fa-layer-group card-icon"></i>
-                    <div class="font-semibold text-sm">BPA Consolidado</div>
-                    <div class="card-subtitle text-xs text-gray-500 mt-0.5">Produção ambulatorial agrupada</div>
+                <!-- BPA (Consolidado + Individualizado) -->
+                <button class="registry-card {% if 'BPA' in record_name %}active{% endif %}"
+                        data-record="BPA (Consolidado),BPA (Individualizado)"
+                        data-card="bpa">
+                    <i class="fas fa-stethoscope card-icon"></i>
+                    <div class="font-semibold text-sm">Atendimentos Ambulatoriais</div>
+                    <div class="card-subtitle text-xs text-gray-500 mt-0.5">Usar quando estiver atendendo no Ambulatório</div>
                 </button>
 
-                <!-- BPA Individualizado -->
-                <button class="registry-card {% if record_name == 'BPA (Individualizado)' %}active{% endif %}"
-                        data-record="BPA (Individualizado)"
-                        data-card="bpa-individualizado">
-                    <i class="fas fa-user-check card-icon"></i>
-                    <div class="font-semibold text-sm">BPA Individualizado</div>
-                    <div class="card-subtitle text-xs text-gray-500 mt-0.5">Atendimento com identificação do paciente</div>
-                </button>
-
-                <!-- AIH -->
-                <button class="registry-card {% if 'AIH' in record_name %}active{% endif %}"
-                        data-record="AIH (Proc. Principal),AIH (Proc. Especial),AIH (Proc. Secundário)"
-                        data-card="aih">
+                <!-- AIH Proc. Principal -->
+                <button class="registry-card {% if record_name == 'AIH (Proc. Principal)' %}active{% endif %}"
+                        data-record="AIH (Proc. Principal)"
+                        data-card="aih-internar">
                     <i class="fas fa-hospital card-icon"></i>
-                    <div class="font-semibold text-sm">AIH</div>
-                    <div class="card-subtitle text-xs text-gray-500 mt-0.5">Autorização de Internação Hospitalar</div>
+                    <div class="font-semibold text-sm">Registros para Internar</div>
+                    <div class="card-subtitle text-xs text-gray-500 mt-0.5">Usar para preencher a Autorização de Internação Hospitalar</div>
+                </button>
+
+                <!-- AIH Especial + Secundário -->
+                <button class="registry-card {% if 'AIH (Proc. Especial)' in record_name or 'AIH (Proc. Secundário)' in record_name %}active{% endif %}"
+                        data-record="AIH (Proc. Especial),AIH (Proc. Secundário)"
+                        data-card="aih-internados">
+                    <i class="fas fa-bed card-icon"></i>
+                    <div class="font-semibold text-sm">Pacientes Já Internados</div>
+                    <div class="card-subtitle text-xs text-gray-500 mt-0.5">Usar nos Resumos de Alta e/ou nas evoluções dos pacientes</div>
                 </button>
 
                 <!-- Outros -->
-                <button class="registry-card {% if record_name and record_name != 'BPA (Consolidado)' and record_name != 'BPA (Individualizado)' and 'AIH' not in record_name %}active{% endif %}"
+                <button class="registry-card {% if record_name and 'BPA' not in record_name and record_name != 'AIH (Proc. Principal)' and 'AIH (Proc. Especial)' not in record_name and 'AIH (Proc. Secundário)' not in record_name %}active{% endif %}"
                         data-card="outros"
                         id="outros-card">
                     <i class="fas fa-ellipsis-h card-icon"></i>
@@ -426,7 +426,7 @@ Sem B.O
             </div>
 
             <!-- Dropdown Outros (visível quando card Outros está ativo) -->
-            <div id="outros-dropdown" class="mt-3 {% if not record_name or record_name == 'BPA (Consolidado)' or record_name == 'BPA (Individualizado)' or 'AIH' in record_name %}hidden{% endif %}">
+            <div id="outros-dropdown" class="mt-3 {% if not record_name or 'BPA' in record_name or 'AIH' in record_name %}hidden{% endif %}">
                 <select id="outros-select" class="block w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm">
                     <option value="">Selecione um tipo de registro...</option>
                     {% for record in records %}
@@ -705,14 +705,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const outrosDropdown = document.getElementById("outros-dropdown");
     const outrosSelect = document.getElementById("outros-select");
 
+    const filterContainer = document.querySelector('.filter-overlay');
+
     function openModal() {
-        filterModal.style.display = "block";
+        filterContainer.style.display = "flex";
         blur.style.display = "block";
         blur.classList.remove('hidden');
     }
 
     function closeModal() {
-        filterModal.style.display = "none";
+        filterContainer.style.display = "none";
         blur.style.display = "none";
         blur.classList.add('hidden');
     }
@@ -736,7 +738,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Fechar modal clicando no blur (apenas o blur do filtro, não do favorito)
         blur.addEventListener("click", function(e) {
-            if (filterModal.style.display === 'block') {
+            if (filterContainer.style.display === 'flex') {
                 closeModal();
             }
             $('#favorite-modal').addClass('hidden');
@@ -744,7 +746,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Fechar modal com tecla ESC
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && filterModal.style.display === 'block') {
+            if (e.key === 'Escape' && filterContainer.style.display === 'flex') {
                 closeModal();
             }
         });
