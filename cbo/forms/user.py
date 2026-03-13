@@ -1,18 +1,14 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.utils.translation import gettext as _
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from ..models import User, Occupation, Plan
 from collections.abc import Iterable
 from datetime import date
 import re
-from django.core.exceptions import ValidationError
 from django.db import transaction
-from django import forms
-from cbo.models import Occupation
 from cbo.forms.fields import CPFField, DateOfBirthField
 
 
@@ -140,7 +136,6 @@ class UserRegisterForm(UserCreationForm):
             'CPF', 
             'telephone', 
             'date_of_birth', 
-            'occupational_registration', 
             'occupations'
         ]
         widgets = {
@@ -168,10 +163,6 @@ class UserRegisterForm(UserCreationForm):
                 'class': 'requiredField ' + DEFAULT_CLASS,
                 'id': 'id_telephone',
                 'placeholder': 'Digite seu Celular',
-            }),
-            'occupational_registration': forms.TextInput(attrs={
-                'class': 'requiredField ' + DEFAULT_CLASS,
-                'placeholder': 'Digite seu Registro ocupacional',
             }),
         }
 

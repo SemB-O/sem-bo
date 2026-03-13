@@ -64,8 +64,6 @@ class RegisterView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, selected_plan, *args, **kwargs):
-        form = UserRegisterForm(request.POST, use_required_attribute=False)
-
         plan_obj = Plan.objects.filter(id=selected_plan).first() 
         form = UserRegisterForm(
             data=request.POST,
@@ -208,25 +206,11 @@ def activate(request, uidb64, token):
         user.email_verified = True
         user.save()
 
-        email = 'rafaelpinheirodesigner@gmail.com'
-        send_info_user_email(to_email=email)
-
         messages.success(request, 'Obrigado por confirmar seu email, sua conta está ativada!')
     else:
         messages.error(request, 'O link de ativação é inválido!')
 
     return redirect('login')
-
-
-def send_info_user_email(to_email):
-    mail_subject = "Novo usuário cadastrado!"
-    message = render_to_string('email/info_user_email.html', {
-        'count': User.objects.count(),
-    })
-
-    email = EmailMessage(mail_subject, message, to=[to_email])
-    email.content_subtype = 'html' 
-    email.send()
 
 
 class ResendVerificationEmailView(View):
