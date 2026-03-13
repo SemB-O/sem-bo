@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sem B.O — Escolha seu perfil{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'front/profile_style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen text-gray-800 pb-10 px-4 bg-gradient-to-b from-slate-50 to-white">
+
+  <!-- Header -->
+  <div class="w-full max-w-2xl text-center mb-8 mt-10">
+    <p class="text-xs uppercase tracking-[0.28em] text-gray-500 mb-2">Bem-vindo(a), {{ request.user.first_name.title }}</p>
+    <h1 class="text-3xl font-bold text-gray-900">Com qual perfil deseja entrar?</h1>
+    <p class="text-sm text-gray-500 mt-2">Escolha a ocupação para esta sessão. Você pode trocar a qualquer momento.</p>
+  </div>
+
+  <!-- Occupation cards -->
+  <div class="w-full max-w-2xl flex flex-col gap-4">
+    {% for occupation in occupations %}
+    <form method="post" action="{% url 'select_occupation' %}">
+      {% csrf_token %}
+      <input type="hidden" name="occupation_code" value="{{ occupation.occupation_code }}">
+      <button type="submit" class="w-full text-left bg-white/90 backdrop-blur rounded-2xl shadow-xl ring-1 ring-gray-100 p-6 hover:ring-[#42D1EB] hover:shadow-2xl transition-all duration-200 group">
+        <div class="flex items-center gap-4">
+          <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center shadow group-hover:bg-[#e8f9fc] transition-colors">
+            <i class="fas fa-user-md text-2xl text-gray-500 group-hover:text-[#42D1EB] transition-colors"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs uppercase tracking-[0.22em] text-gray-400 mb-0.5">Ocupação</p>
+            <h2 class="text-lg font-bold text-gray-900 leading-tight truncate">{{ occupation.name }}</h2>
+            <p class="text-xs text-gray-400 mt-0.5">CBO {{ occupation.occupation_code }}</p>
+          </div>
+          <div class="flex-shrink-0 text-gray-300 group-hover:text-[#42D1EB] transition-colors">
+            <i class="fas fa-chevron-right text-xl"></i>
+          </div>
+        </div>
+      </button>
+    </form>
+    {% endfor %}
+  </div>
+
+  <!-- Logout option -->
+  <div class="mt-8">
+    <form action="/logout/" method="post">
+      {% csrf_token %}
+      <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition">
+        <i class="fas fa-sign-out-alt"></i>
+        Sair da conta
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse
 from django.shortcuts import render
 from ..models import Procedure, FavoriteProceduresFolder, FavoriteProceduresFolderHasProcedure, Record
+from .occupation import get_active_occupation
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -43,7 +44,8 @@ class ListView(ListView):
     procedures_per_page = 30
 
     def get(self, request, *args, **kwargs):
-        user_occupations = request.user.occupations.all()
+        active_occupation = get_active_occupation(request)
+        occupation_filter = [active_occupation] if active_occupation else []
 
         query = request.GET.get('q', '')
 
@@ -51,7 +53,7 @@ class ListView(ListView):
 
         procedures_list = Procedure.objects.filter(
             (Q(name__icontains=query) | Q(procedure_code__icontains=query))
-            & Q(procedures_has_occupation__occupation__in=user_occupations)
+            & Q(procedures_has_occupation__occupation__in=occupation_filter)
         )
 
         # Suporte para múltiplos tipos de registro (separados por vírgula)
@@ -83,12 +85,6 @@ class ListView(ListView):
         for procedure in procedures:
             procedure.favorite = procedure.procedure_code in favorite_procedures_codes
 
-            if user.is_authenticated and user.occupations.exists():
-                related_occupations = procedure.procedures_has_occupation.filter(
-                    occupation__in=user.occupations.all()
-                )
-                procedure.related_occupations_names = [relation.occupation.name for relation in related_occupations]
-
         context = {
             'procedures': procedures,
             'has_next': procedures.has_next(),
@@ -106,15 +102,16 @@ class LoadMoreView(View):
     procedures_per_page = 30
 
     def get(self, request, *args, **kwargs):
-        user_occupations = request.user.occupations.all()
+        active_occupation = get_active_occupation(request)
+        occupation_filter = [active_occupation] if active_occupation else []
 
         query = request.GET.get('q')
-        record_name = request.GET.get('record_name', '')  
+        record_name = request.GET.get('record_name', '')
 
         if query:
             procedures_list = Procedure.objects.filter(
                 (Q(name__icontains=query) | Q(procedure_code__icontains=query))
-                & Q(procedures_has_occupation__occupation__in=user_occupations)
+                & Q(procedures_has_occupation__occupation__in=occupation_filter)
             ).order_by('name')
 
             # Suporte para múltiplos tipos de registro (separados por vírgula)
@@ -126,7 +123,7 @@ class LoadMoreView(View):
 
         else:
             procedures_list = Procedure.objects.filter(
-                Q(procedures_has_occupation__occupation__in=user_occupations)
+                Q(procedures_has_occupation__occupation__in=occupation_filter)
             ).prefetch_related('procedures_has_record__record').order_by('name')
 
             # Suporte para múltiplos tipos de registro (separados por vírgula)
@@ -152,19 +149,12 @@ class LoadMoreView(View):
         user = request.user
 
         for procedure in procedures:
-            if user.is_authenticated and user.occupations.exists():
-                related_occupations = procedure.procedures_has_occupation.filter(
-                    occupation__in=user.occupations.all()
-                )
-                procedure.related_occupations_names = [relation.occupation.name for relation in related_occupations]
-
             data.append({
                 'name': procedure.name,
                 'code': procedure.procedure_code,
                 'records_names': procedure.get_records_names(),
                 'has_more_results': has_more_results,
                 'favorite': procedure.is_favorite(self.request.user),
-                'occupations_of_users': procedure.related_occupations_names
             })
 
         return JsonResponse({'procedures': data})
@@ -174,11 +164,11 @@ class LoadMoreView(View):
 class ProcedureAutocomplete(View):
     def get(self, request):
         term = request.GET.get('term', '')
-        user = request.user
-        occupations = user.occupations.all()
+        active_occupation = get_active_occupation(request)
+        occupation_filter = [active_occupation] if active_occupation else []
 
         procedures = Procedure.objects.filter(
-            procedures_has_occupation__occupation__in=occupations,
+            procedures_has_occupation__occupation__in=occupation_filter,
             name__icontains=term
         )[:10]
 

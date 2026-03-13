@@ -19,9 +19,12 @@ Sem B.O
                 Olá, <b class="text-black-700">Sr(a) {{ user.first_name.title }}</b>
             </div>
             <div class="note text-gray-600 text-base text-left mt-1">
-                {% for occupation in user.occupations.all %}
-                    <b class="font-semibold">{{ occupation.name }}</b>
-                {% endfor %}
+                {% if active_occupation %}
+                    <b class="font-semibold">{{ active_occupation.name }}</b>
+                    {% if request.user.occupations.count > 1 %}
+                        <a href="{% url 'switch_occupation' %}" class="ml-2 text-xs text-gray-400 hover:text-gray-600 underline transition">Trocar perfil</a>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
 
@@ -351,14 +354,10 @@ Sem B.O
 
                 const records = $('<div class="records_tags mt-2 md:mt-0 flex"></div>');
                 
-                // Combina ocupações e registros
-                const allTags = [];
-                if (Array.isArray(procedure.occupations_names)) {
-                    allTags.push(...procedure.occupations_names.map(o => ({ text: o, isOccupation: true })));
-                }
-                if (Array.isArray(procedure.records_names)) {
-                    allTags.push(...procedure.records_names.map(r => ({ text: r, isOccupation: false })));
-                }
+                // Only show record type tags (occupation tags removed since occupation context is always active)
+                const allTags = Array.isArray(procedure.records_names)
+                    ? procedure.records_names.map(r => r)
+                    : [];
                 
                 // Renderiza tags com limite máximo de 2
                 const maxVisibleTags = 2;
@@ -366,11 +365,10 @@ Sem B.O
                 const hiddenCount = allTags.length - maxVisibleTags;
                 
                 // Tags visíveis (com truncamento)
-                visibleTags.forEach(tag => {
-                    const truncated = tag.text.length > 20 ? tag.text.substring(0, 20) + '...' : tag.text;
+                visibleTags.forEach(text => {
+                    const truncated = text.length > 20 ? text.substring(0, 20) + '...' : text;
                     const escapedText = Utils.escapeHtml(truncated);
-                    const className = tag.isOccupation ? 'procedure-occupation tag-item' : 'tag-item';
-                    records.append(`<a class="${className}">${escapedText}</a>`);
+                    records.append(`<a class="tag-item">${escapedText}</a>`);
                 });
                 
                 // Indicador de mais tags se houver
