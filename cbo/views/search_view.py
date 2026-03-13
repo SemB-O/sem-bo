@@ -5,6 +5,7 @@ from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from ..models import Procedure
+from .occupation import get_active_occupation
 
 
 @method_decorator(login_required(login_url='/login'), name='dispatch')
@@ -14,11 +15,12 @@ class SearchView(View):
         record_name = request.GET.get('record_name')
 
         if query:
-            user_occupations = request.user.occupations.all()
+            active_occupation = get_active_occupation(request)
+            occupation_filter = [active_occupation] if active_occupation else []
 
             procedures_list = Procedure.objects.filter(
                 (Q(name__icontains=query) | Q(procedure_code__icontains=query))
-                & Q(procedures_has_occupation__occupation__in=user_occupations)
+                & Q(procedures_has_occupation__occupation__in=occupation_filter)
             )
 
             if record_name and record_name != 'all':
@@ -38,22 +40,14 @@ class SearchView(View):
 
             data = []
             has_more_results = procedures.has_next()
-            user = request.user
 
             for procedure in procedures:
-                if user.is_authenticated and user.occupations.exists():
-                    related_occupations = procedure.procedures_has_occupation.filter(
-                        occupation__in=user.occupations.all()
-                    )
-                    procedure.related_occupations_names = [relation.occupation.name for relation in related_occupations]
-
                 data.append({
                     'code': procedure.procedure_code,
                     'name': procedure.name,
                     'records_names': procedure.get_records_names(),
                     'has_more_results': has_more_results,
                     'favorite': procedure.is_favorite(self.request.user),
-                    'occupations_names': procedure.related_occupations_names,
                 })
 
             return JsonResponse({'procedures': data})

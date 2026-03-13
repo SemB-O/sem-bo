@@ -22,7 +22,7 @@ class ValidateProfissionalInfoView(View):
 
         form = UserRegisterForm(data, plan=plan)
 
-        fields_to_keep = ['occupational_registration', 'occupations']
+        fields_to_keep = ['occupations']
         for field in list(form.fields):
             if field not in fields_to_keep:
                 form.fields.pop(field)

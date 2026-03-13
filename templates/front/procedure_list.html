@@ -338,24 +338,16 @@ Sem B.O
             <div class="title_tags">
                 <a class="font-bold opacity-80" style="font-size: 14px;" href="{% url 'procedure_detail' procedure_code=procedure.procedure_code %}">{{ procedure }}</a>
                 <div class="records_tags mt-2 md:mt-0 flex">
-                    {% with total_tags=procedure.related_occupations_names|length|add:procedure.get_records_names|length %}
-                    
-                    {% for occupation in procedure.related_occupations_names %}
-                        <a class="procedure-occupation tag-item" {% if forloop.counter > 2 %}style="display: none;"{% endif %}>
-                            {% if occupation|length > 20 %}{{ occupation|slice:":20" }}...{% else %}{{ occupation }}{% endif %}
-                        </a>
-                    {% endfor %}
-                    
                     {% for record in procedure.get_records_names %}
-                        <a class="tag-item" {% if procedure.related_occupations_names|length|add:forloop.counter > 2 %}style="display: none;"{% endif %}>
+                        <a class="tag-item" {% if forloop.counter > 2 %}style="display: none;"{% endif %}>
                             {% if record|length > 20 %}{{ record|slice:":20" }}...{% else %}{{ record }}{% endif %}
                         </a>
                     {% endfor %}
                     
-                    {% if total_tags > 2 %}
-                        <span class="more-tags-indicator inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-semibold" title="Clique no procedimento para ver todos os detalhes">+{{ total_tags|add:"-2" }}</span>
+                    {% with record_count=procedure.get_records_names|length %}
+                    {% if record_count > 2 %}
+                        <span class="more-tags-indicator inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-semibold" title="Clique no procedimento para ver todos os detalhes">+{{ record_count|add:"-2" }}</span>
                     {% endif %}
-                    
                     {% endwith %}
                 </div>
             </div>
@@ -579,19 +571,10 @@ $(document).ready(function() {
             const url = baseUrl.replace('__CODE__', procedure.code);
             const icon = procedure.favorite ? 'bookmark' : 'bookmark-outline';
             
-            // Combina ocupações e registros
+            // Only show record type tags (occupation tags removed since occupation context is always active)
             let allTags = [];
-            if (procedure.occupations_of_users) {
-                allTags = allTags.concat(procedure.occupations_of_users.map(o => ({
-                    text: o,
-                    isOccupation: true
-                })));
-            }
             if (procedure.records_names) {
-                allTags = allTags.concat(procedure.records_names.map(r => ({
-                    text: r,
-                    isOccupation: false
-                })));
+                allTags = procedure.records_names.slice();
             }
             
             // Renderiza tags com limite máximo de 2
@@ -600,10 +583,9 @@ $(document).ready(function() {
             const visibleTags = allTags.slice(0, maxVisibleTags);
             const hiddenCount = Math.max(0, allTags.length - maxVisibleTags);
             
-            visibleTags.forEach(tag => {
-                const truncated = this.truncateText(tag.text, 20);
-                const className = tag.isOccupation ? 'procedure-occupation' : '';
-                tagsHTML += '<a class="' + className + ' tag-item">' + Utils.escapeHtml(truncated) + '</a>';
+            visibleTags.forEach(text => {
+                const truncated = this.truncateText(text, 20);
+                tagsHTML += '<a class="tag-item">' + Utils.escapeHtml(truncated) + '</a>';
             });
             
             // Adiciona indicador de mais tags se houver

@@ -317,9 +317,6 @@ Sem B.O
                     </div>
                 </div>
             <div>
-               {{ form.occupational_registration.as_field_group }}
-            </div>
-            <div>
                {{ form.occupations.as_field_group }}
             </div>
             <div class="error-message text-sm text-red-600 hidden"></div>
@@ -703,7 +700,6 @@ Sem B.O
                    const value = OnboardingFormHandler.getPlanIdFromUrl();
                    return $('<input>').val(value); 
                },
-               occupational_registration: () => $('#id_occupational_registration'),
                occupations: () => $('#occupation-select'),
            },
            3: {
