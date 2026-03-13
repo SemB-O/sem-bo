@@ -33,10 +33,13 @@ class LoginView(FormView):
         user = form.cleaned_data.get('user')
         if user:
             login(self.request, user)
-            
+
             if user.is_superuser:
                 self.success_url = reverse_lazy('admin-dashboard')
-        
+            elif user.occupations.count() > 1:
+                # Send users with multiple occupations to the profile selection page
+                self.success_url = reverse_lazy('select_occupation')
+
         return super().form_valid(form)
 
     def form_invalid(self, form):

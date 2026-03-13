@@ -19,12 +19,31 @@ Sem B.O
                 Olá, <b class="text-black-700">Sr(a) {{ user.first_name.title }}</b>
             </div>
             <div class="note text-gray-600 text-base text-left mt-1">
-                {% for occupation in user.occupations.all %}
-                    <b class="font-semibold">{{ occupation.name }}</b>
-                {% endfor %}
+                {% if active_occupation %}
+                    <b class="font-semibold">{{ active_occupation.name }}</b>
+                    {% if request.user.occupations.count > 1 %}
+                        <a href="{% url 'switch_occupation' %}" class="ml-2 inline-flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 border border-gray-200 px-2.5 py-1 rounded-md font-medium transition-all duration-200">
+                            <i class="fas fa-right-left text-[9px]"></i>
+                            Trocar perfil
+                        </a>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
-
+        {% if active_occupation %}
+        <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 mb-3 md:hidden">
+            <div class="flex items-center gap-2 min-w-0">
+                <i class="fas fa-user-circle text-gray-400 text-sm shrink-0"></i>
+                <span class="text-sm font-medium text-gray-700 truncate">{{ active_occupation.name }}</span>
+            </div>
+            {% if request.user.occupations.count > 1 %}
+                <a href="{% url 'switch_occupation' %}" class="shrink-0 ml-3 inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                    <i class="fas fa-right-left text-[9px]"></i>
+                    Trocar
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
         <form id="search-form" class="form-search w-full" method="GET" action="{% url 'search' %}">
             {% csrf_token %}
             <div class="search flex flex-row items-center gap-2 bg-transparent w-full">
@@ -351,14 +370,10 @@ Sem B.O
 
                 const records = $('<div class="records_tags mt-2 md:mt-0 flex"></div>');
                 
-                // Combina ocupações e registros
-                const allTags = [];
-                if (Array.isArray(procedure.occupations_names)) {
-                    allTags.push(...procedure.occupations_names.map(o => ({ text: o, isOccupation: true })));
-                }
-                if (Array.isArray(procedure.records_names)) {
-                    allTags.push(...procedure.records_names.map(r => ({ text: r, isOccupation: false })));
-                }
+                // Only show record type tags (occupation tags removed since occupation context is always active)
+                const allTags = Array.isArray(procedure.records_names)
+                    ? procedure.records_names.map(r => r)
+                    : [];
                 
                 // Renderiza tags com limite máximo de 2
                 const maxVisibleTags = 2;
@@ -366,11 +381,10 @@ Sem B.O
                 const hiddenCount = allTags.length - maxVisibleTags;
                 
                 // Tags visíveis (com truncamento)
-                visibleTags.forEach(tag => {
-                    const truncated = tag.text.length > 20 ? tag.text.substring(0, 20) + '...' : tag.text;
+                visibleTags.forEach(text => {
+                    const truncated = text.length > 20 ? text.substring(0, 20) + '...' : text;
                     const escapedText = Utils.escapeHtml(truncated);
-                    const className = tag.isOccupation ? 'procedure-occupation tag-item' : 'tag-item';
-                    records.append(`<a class="${className}">${escapedText}</a>`);
+                    records.append(`<a class="tag-item">${escapedText}</a>`);
                 });
                 
                 // Indicador de mais tags se houver

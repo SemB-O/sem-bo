@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     home, search_view, upload_files, user, profile, chat, 
-    procedure, favorite, plan, medical_record, cid, admin_panel, sigtap_search
+    procedure, favorite, plan, medical_record, cid, admin_panel, sigtap_search,
+    occupation,
 )
 
 urlpatterns = [
@@ -30,6 +31,8 @@ urlpatterns = [
     
     path('upload_files/', upload_files.UploadFilesView.as_view(), name='upload_files'),
     path('', home.Home.as_view(), name='home'),
+    path('select-occupation/', occupation.SelectOccupationView.as_view(), name='select_occupation'),
+    path('switch-occupation/', occupation.SwitchOccupationView.as_view(), name='switch_occupation'),
     path('search/', search_view.SearchView.as_view(), name='search'),
     path('login/', user.LoginView.as_view(), name='login'),
     path('logout/', user.LogoutView.as_view(), name='logout'),
