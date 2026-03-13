@@ -22,12 +22,28 @@ Sem B.O
                 {% if active_occupation %}
                     <b class="font-semibold">{{ active_occupation.name }}</b>
                     {% if request.user.occupations.count > 1 %}
-                        <a href="{% url 'switch_occupation' %}" class="ml-2 text-xs text-gray-400 hover:text-gray-600 underline transition">Trocar perfil</a>
+                        <a href="{% url 'switch_occupation' %}" class="ml-2 inline-flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 border border-gray-200 px-2.5 py-1 rounded-md font-medium transition-all duration-200">
+                            <i class="fas fa-right-left text-[9px]"></i>
+                            Trocar perfil
+                        </a>
                     {% endif %}
                 {% endif %}
             </div>
         </div>
-
+        {% if active_occupation %}
+        <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 mb-3 md:hidden">
+            <div class="flex items-center gap-2 min-w-0">
+                <i class="fas fa-user-circle text-gray-400 text-sm shrink-0"></i>
+                <span class="text-sm font-medium text-gray-700 truncate">{{ active_occupation.name }}</span>
+            </div>
+            {% if request.user.occupations.count > 1 %}
+                <a href="{% url 'switch_occupation' %}" class="shrink-0 ml-3 inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                    <i class="fas fa-right-left text-[9px]"></i>
+                    Trocar
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
         <form id="search-form" class="form-search w-full" method="GET" action="{% url 'search' %}">
             {% csrf_token %}
             <div class="search flex flex-row items-center gap-2 bg-transparent w-full">

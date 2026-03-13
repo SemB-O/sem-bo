@@ -465,9 +465,7 @@ $(document).ready(function() {
             const url = baseUrl.replace('__CODE__', procedure.code);
             const icon = procedure.favorite ? 'bookmark' : 'bookmark-outline';
             
-            // Combina ocupações e registros
-            let allTags = [];
-                        // Only show record type tags (occupation tags removed since occupation context is always active)
+            // Only show record type tags (occupation tags removed since occupation context is always active)
             let allTags = [];
             if (procedure.records_names) {
                 allTags = procedure.records_names.slice();
