@@ -35,6 +35,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://app-producao-sembocombr-bzea.hospedagemelastica.com.br',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    f'https://{DOMAIN}',
 ]
 
 # Application definition
